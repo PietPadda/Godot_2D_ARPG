@@ -1,0 +1,14 @@
+# Godot 4+ specific ignores
+.godot/
+/android/
+
+# Any files imported from the editor, such as *.scn.import or *.png.import
+*.import
+
+# Translations, which are also generated automatically
+*.translation
+
+# Mono/C# specific ignores
+.mono/
+bin/
+obj/
