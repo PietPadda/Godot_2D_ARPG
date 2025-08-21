@@ -17,3 +17,7 @@ func process_input(event: InputEvent) -> void:
 		
 		# ...and then we tell the state machine to switch to the "Move" state.
 		state_machine.change_state("Move")
+		
+	# Check if the attack action was just pressed.
+	if event.is_action_pressed("attack"):
+		state_machine.change_state("Attack")

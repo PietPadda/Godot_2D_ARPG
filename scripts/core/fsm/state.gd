@@ -16,9 +16,9 @@ func exit() -> void:
 	pass
 
 # Virtual function. Called every frame. Use for non-physics logic.
-func process_input(event: InputEvent) -> void:
+func process_input(_event: InputEvent) -> void:
 	pass
 
 # Virtual function. Called every physics frame. Use for physics logic.
-func process_physics(delta: float) -> void:
+func process_physics(_delta: float) -> void:
 	pass

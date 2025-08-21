@@ -22,7 +22,7 @@ func process_input(event: InputEvent) -> void:
 		var target_position = player.get_global_mouse_position()
 		movement_component.set_movement_target(target_position)
 
-func process_physics(delta: float) -> void:
+func process_physics(_delta: float) -> void:
 	# In the physics update, we check if we've reached our destination.
 	var distance_to_target = player.global_position.distance_to(movement_component.target_position)
 	if distance_to_target < 5.0:
