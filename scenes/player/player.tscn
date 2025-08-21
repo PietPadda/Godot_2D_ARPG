@@ -1,8 +1,10 @@
-[gd_scene load_steps=5 format=3 uid="uid://c04jx6vcgex1j"]
+[gd_scene load_steps=7 format=3 uid="uid://c04jx6vcgex1j"]
 
 [ext_resource type="Texture2D" uid="uid://4d68lc3a6uwp" path="res://icon.svg" id="1_8afob"]
 [ext_resource type="Script" uid="uid://d0khsl1q2udiw" path="res://scenes/player/player.gd" id="1_dovo2"]
 [ext_resource type="Script" uid="uid://k3eidh3p84ti" path="res://scripts/components/movement_component.gd" id="2_gmlin"]
+[ext_resource type="Script" uid="uid://cndcfdfejnpon" path="res://scripts/components/stats_component.gd" id="3_lvxji"]
+[ext_resource type="Resource" uid="uid://cd88rd50ljhgk" path="res://data/stats/player_stats.tres" id="4_p47bc"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_dovo2"]
 radius = 63.0
@@ -13,6 +15,10 @@ script = ExtResource("1_dovo2")
 
 [node name="MovementComponent" type="Node" parent="."]
 script = ExtResource("2_gmlin")
+
+[node name="StatsComponent" type="Node" parent="."]
+script = ExtResource("3_lvxji")
+stats_data = ExtResource("4_p47bc")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 texture = ExtResource("1_8afob")

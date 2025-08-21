@@ -22,7 +22,7 @@ func _ready() -> void:
 	# Start by targeting the current position to prevent initial movement.
 	target_position = character_body.global_position
 
-func _physics_process(delta: float) -> void:
+func _physics_process(_delta: float) -> void:
 	# Calculate the distance to the target.
 	var distance_to_target = character_body.global_position.distance_to(target_position)
 
