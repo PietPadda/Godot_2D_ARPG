@@ -1,0 +1,22 @@
+[gd_scene load_steps=5 format=3 uid="uid://dg2sqch3jtd3h"]
+
+[ext_resource type="Texture2D" uid="uid://4d68lc3a6uwp" path="res://icon.svg" id="1_p728r"]
+[ext_resource type="Script" uid="uid://cndcfdfejnpon" path="res://scripts/components/stats_component.gd" id="2_xxwgs"]
+[ext_resource type="Resource" uid="uid://dmqim54pik8nk" path="res://data/stats/dummy_stats.tres" id="3_lj2r1"]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_3o7vv"]
+radius = 64.0
+height = 130.0
+
+[node name="TargetDummy" type="CharacterBody2D"]
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+modulate = Color(1, 0, 0, 1)
+texture = ExtResource("1_p728r")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CapsuleShape2D_3o7vv")
+
+[node name="StatsComponent" type="Node" parent="."]
+script = ExtResource("2_xxwgs")
+stats_data = ExtResource("3_lj2r1")
