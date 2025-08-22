@@ -13,10 +13,10 @@ func process_input(event: InputEvent) -> void:
 		var target = _get_target_under_mouse() # get object under mouse
 		if target: # if something is below the mouse
 			# If we found a target, we will attack it.
-			# We found a target! Pass it to the attack state.
-			var attack_state = state_machine.states["attack"]
-			attack_state.target = target # pass target to attack state
-			state_machine.change_state("Attack") # we now attack!
+			# We found a target! Pass it to the chase state.
+			var chase_state = state_machine.states["chase"]
+			chase_state.target = target # pass target to chase state
+			state_machine.change_state("Chase") # we now chase
 		else: # general movement
 			# We tell the MovementComponent where to go...
 			var target_position = player.get_global_mouse_position()

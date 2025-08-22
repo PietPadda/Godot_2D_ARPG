@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=3 uid="uid://c04jx6vcgex1j"]
+[gd_scene load_steps=14 format=3 uid="uid://c04jx6vcgex1j"]
 
 [ext_resource type="Texture2D" uid="uid://4d68lc3a6uwp" path="res://icon.svg" id="1_8afob"]
 [ext_resource type="Script" uid="uid://d0khsl1q2udiw" path="res://scripts/player/player.gd" id="1_dovo2"]
@@ -9,6 +9,7 @@
 [ext_resource type="Script" uid="uid://b6lamxdxaec0k" path="res://scripts/player/states/player_move_state.gd" id="4_h17s1"]
 [ext_resource type="Resource" uid="uid://cd88rd50ljhgk" path="res://data/stats/player_stats.tres" id="4_p47bc"]
 [ext_resource type="Script" uid="uid://dfuec360wxegi" path="res://scripts/player/states/player_attack_state.gd" id="5_5gtgg"]
+[ext_resource type="Script" uid="uid://cnpddeatw31gb" path="res://scripts/player/states/player_chase_state.gd" id="6_fm80t"]
 [ext_resource type="Script" uid="uid://bci6iykvj8w5a" path="res://scripts/components/attack_component.gd" id="10_je7p5"]
 [ext_resource type="Resource" uid="uid://t8iutpr512nx" path="res://data/stats/player_melee_attack.tres" id="11_fm80t"]
 
@@ -31,6 +32,9 @@ script = ExtResource("4_h17s1")
 
 [node name="Attack" type="Node" parent="StateMachine"]
 script = ExtResource("5_5gtgg")
+
+[node name="Chase" type="Node" parent="StateMachine"]
+script = ExtResource("6_fm80t")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 texture = ExtResource("1_8afob")

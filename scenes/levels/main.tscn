@@ -12,3 +12,6 @@ position = Vector2(148, 142)
 
 [node name="TargetDummy" parent="." instance=ExtResource("2_2vj2h")]
 position = Vector2(507, 335)
+
+[node name="TargetDummy2" parent="." instance=ExtResource("2_2vj2h")]
+position = Vector2(187, 503)
