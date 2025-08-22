@@ -3,16 +3,20 @@
 class_name MovementComponent
 extends Node
 
-# The speed at which the character moves.
-@export var move_speed: float = 200.0
-
 # A reference to the parent node, which must be a CharacterBody2D.
 @onready var character_body: CharacterBody2D = get_parent()
+@onready var stats_component: StatsComponent = get_parent().get_node("StatsComponent")
 
 # The target position for the character to move towards.
 var target_position: Vector2
 
 func _ready() -> void:
+	# Add an error check to ensure the StatsComponent exists.
+	if not stats_component:
+		push_error("MovementComponent requires a sibling StatsComponent.")
+		queue_free() # The component disables itself if not setup correctly.
+		return
+	
 	# Ensure the parent is a CharacterBody2D. If not, this component can't work.
 	if not character_body is CharacterBody2D:
 		push_error("MovementComponent must be a child of a CharacterBody2D.")
@@ -33,7 +37,7 @@ func _physics_process(_delta: float) -> void:
 
 	# Calculate the direction and set velocity.
 	var direction = character_body.global_position.direction_to(target_position)
-	character_body.velocity = direction * move_speed
+	character_body.velocity = direction * stats_component.stats_data.move_speed
 	
 	character_body.move_and_slide()
 

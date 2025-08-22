@@ -11,4 +11,4 @@ func _unhandled_input(event: InputEvent) -> void:
 			var dummy_stats = dummy.get_node("StatsComponent")
 			if dummy_stats: # only if statscomponent exists
 				dummy_stats.take_damage(10) # apply dmg
-	
+		

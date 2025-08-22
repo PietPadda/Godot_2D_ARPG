@@ -6,3 +6,4 @@ extends Resource
 @export var max_health: int = 100
 @export var max_mana: int = 50
 @export var strength: int = 10
+@export var move_speed: float = 200.0
