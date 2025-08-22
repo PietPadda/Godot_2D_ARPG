@@ -7,5 +7,5 @@ script = ExtResource("1_u3coo")
 max_health = 120
 max_mana = 50
 strength = 10
-move_speed = 250.0
+move_speed = 500.0
 metadata/_custom_type_script = "uid://4qewreibgpa"

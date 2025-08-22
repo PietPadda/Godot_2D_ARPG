@@ -20,12 +20,24 @@ func _ready() -> void:
 	add_child(duration_timer)
 
 # The main public function to start the attack.
-func execute() -> void:
+func execute(target: Node2D) -> void:
 	if not attack_data:
 		push_error("AttackComponent has no AttackData.")
+		emit_signal("attack_finished") # Fail safely
+		return
+		
+	if not is_instance_valid(target):
+		print("Invalid target.")
+		emit_signal("attack_finished") # Fail safely
 		return
 
-	print("Attacking for %d damage!" % attack_data.damage)
+	print("Attacking %s for %d damage!" % [target.name, attack_data.damage])
+	
+	 # Find the target's StatsComponent and deal damage.
+	var target_stats: StatsComponent = target.get_node("StatsComponent")
+	if target_stats:
+		target_stats.take_damage(attack_data.damage)
+	
 	duration_timer.start(attack_data.duration)
 
 func on_timer_timeout() -> void:
