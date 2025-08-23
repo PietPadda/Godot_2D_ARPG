@@ -8,6 +8,7 @@ var target: Node2D
 @onready var player: CharacterBody2D = get_owner()
 @onready var movement_component: MovementComponent = player.get_node("MovementComponent")
 @onready var attack_component: AttackComponent = player.get_node("AttackComponent")
+@onready var animation_component: AnimationComponent = player.get_node("AnimationComponent")
 
 func enter() -> void:
 	print("Entering Chase State")
@@ -18,6 +19,7 @@ func enter() -> void:
 		return # early exit
 	
 	movement_component.set_movement_target(target.global_position) # update target position
+	animation_component.play_animation("Move") # play Move Anim
 
 func process_physics(delta: float) -> void:
 	# First, check if our target still exists.

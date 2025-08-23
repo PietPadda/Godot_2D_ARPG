@@ -5,11 +5,12 @@ extends State
 
 @onready var player: CharacterBody2D = get_owner()
 @onready var movement_component: MovementComponent = player.get_node("MovementComponent")
-
+@onready var animation_component: AnimationComponent = player.get_node("AnimationComponent")
 
 func enter() -> void:
 	# For debugging, let's see when we enter this state.
 	print("Entering Move State")
+	animation_component.play_animation("Move") # play Move anim
 
 func exit() -> void:
 	# For debugging, let's see when we exit.
