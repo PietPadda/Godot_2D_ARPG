@@ -1,4 +1,4 @@
-[gd_scene load_steps=19 format=3 uid="uid://c04jx6vcgex1j"]
+[gd_scene load_steps=21 format=3 uid="uid://c04jx6vcgex1j"]
 
 [ext_resource type="Texture2D" uid="uid://4d68lc3a6uwp" path="res://icon.svg" id="1_8afob"]
 [ext_resource type="Script" uid="uid://d0khsl1q2udiw" path="res://scripts/player/player.gd" id="1_dovo2"]
@@ -10,6 +10,7 @@
 [ext_resource type="Resource" uid="uid://cd88rd50ljhgk" path="res://data/stats/player_stats.tres" id="4_p47bc"]
 [ext_resource type="Script" uid="uid://dfuec360wxegi" path="res://scripts/player/states/player_attack_state.gd" id="5_5gtgg"]
 [ext_resource type="Script" uid="uid://cnpddeatw31gb" path="res://scripts/player/states/player_chase_state.gd" id="6_fm80t"]
+[ext_resource type="Script" uid="uid://dxe6f52ev5gap" path="res://scripts/player/states/player_dead_state.gd" id="8_ugbui"]
 [ext_resource type="Script" uid="uid://bci6iykvj8w5a" path="res://scripts/components/attack_component.gd" id="10_je7p5"]
 [ext_resource type="Resource" uid="uid://t8iutpr512nx" path="res://data/stats/player_melee_attack.tres" id="11_fm80t"]
 [ext_resource type="Script" uid="uid://cnaea40kdh1f3" path="res://scripts/components/animation_component.gd" id="13_gx1jg"]
@@ -77,10 +78,38 @@ tracks/0/keys = {
 "update": 0,
 "values": [Vector2(1, 1)]
 }
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Sprite2D:modulate")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 1)]
+}
+
+[sub_resource type="Animation" id="Animation_myrg7"]
+resource_name = "Dead"
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Sprite2D:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 1),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 1), Color(1, 1, 1, 0)]
+}
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_ugbui"]
 _data = {
 &"Attack": SubResource("Animation_fcs02"),
+&"Dead": SubResource("Animation_myrg7"),
 &"Idle": SubResource("Animation_fm80t"),
 &"Move": SubResource("Animation_ugbui"),
 &"RESET": SubResource("Animation_gx1jg")
@@ -114,6 +143,9 @@ script = ExtResource("5_5gtgg")
 
 [node name="Chase" type="Node" parent="StateMachine"]
 script = ExtResource("6_fm80t")
+
+[node name="Dead" type="Node" parent="StateMachine"]
+script = ExtResource("8_ugbui")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 texture = ExtResource("1_8afob")
