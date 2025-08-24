@@ -42,7 +42,9 @@ func execute(target: Node2D) -> void:
 		push_error("Animation '%s' not found in AttackComponent." % attack_data.animation_name)
 		emit_signal("attack_finished")
 		return
-		
+	
+	animation_component.play_animation(attack_data.animation_name)
+	
 	# Get the animation's length and start the timer with it.
 	var anim_duration = anim.length
 	duration_timer.start(anim_duration)

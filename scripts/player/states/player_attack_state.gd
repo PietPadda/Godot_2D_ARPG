@@ -15,7 +15,7 @@ func enter() -> void:
 		# If we enter this state without a valid target, exit immediately.
 		state_machine.change_state("Idle")
 		return
-	animation_component.play_animation("Attack") # play Attack anim
+	
 	# Tell the component to do its job.
 	attack_component.execute(target)
 	# Listen for the component to tell us when it's done.
