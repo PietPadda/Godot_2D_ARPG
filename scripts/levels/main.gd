@@ -2,7 +2,7 @@
 extends Node2D
 
 # A reference to the TargetDummy node in the scene.
-@onready var dummy = $TargetDummy
+@onready var dummy = $Skeleton
 
 func _unhandled_input(event: InputEvent) -> void:
 	# Temporary test: Press 'Tab' to deal 10 damage to the dummy.
