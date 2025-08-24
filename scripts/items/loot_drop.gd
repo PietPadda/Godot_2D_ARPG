@@ -15,14 +15,11 @@ func initialize(data: ItemData) -> void:
 
 
 func _on_body_entered(body: Node2D) -> void:
-	# Check if the body that entered is the player.
-	if body.is_in_group("player"):
-		# Get the player's inventory component.
-		var inventory_component: InventoryComponent = body.get_node("InventoryComponent")
+	var inventory_component: InventoryComponent = body.get_node("InventoryComponent")
 
-		# Try to add our item to their inventory.
-		var picked_up = inventory_component.add_item(item_data)
+	# Try to add our item to their inventory.
+	var picked_up = inventory_component.add_item(item_data)
 
-		# If the item was successfully picked up, destroy the loot drop.
-		if picked_up:
-			queue_free()
+	# If the item was successfully picked up, destroy the loot drop.
+	if picked_up:
+		queue_free()
