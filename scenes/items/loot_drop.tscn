@@ -1,0 +1,15 @@
+[gd_scene load_steps=3 format=3 uid="uid://boxuys3wl2v3p"]
+
+[ext_resource type="Script" uid="uid://w15b1362vpsm" path="res://scripts/items/loot_drop.gd" id="1_8qepv"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_s7r7u"]
+radius = 17.1172
+
+[node name="LootDrop" type="Area2D"]
+script = ExtResource("1_8qepv")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_s7r7u")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+scale = Vector2(0.5, 0.5)

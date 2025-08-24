@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=3 format=3 uid="uid://b5mcomwyg7q84"]
+
+[ext_resource type="Script" uid="uid://dsidci2l4yr4r" path="res://data/items/item_data.gd" id="1_tqhf0"]
+[ext_resource type="Texture2D" uid="uid://4d68lc3a6uwp" path="res://assets/icon.svg" id="2_6rgyv"]
+
+[resource]
+script = ExtResource("1_tqhf0")
+item_name = "Gold Coin"
+texture = ExtResource("2_6rgyv")
+metadata/_custom_type_script = "uid://dsidci2l4yr4r"
