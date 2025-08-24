@@ -1,13 +1,54 @@
-[gd_scene load_steps=11 format=3 uid="uid://dg2sqch3jtd3h"]
+[gd_scene load_steps=18 format=3 uid="uid://dg2sqch3jtd3h"]
 
 [ext_resource type="Script" uid="uid://ccfvg0731wml7" path="res://scripts/core/fsm/state_machine.gd" id="1_038oa"]
 [ext_resource type="Texture2D" uid="uid://4d68lc3a6uwp" path="res://icon.svg" id="1_p728r"]
 [ext_resource type="Script" uid="uid://sagekmxdwjpe" path="res://scripts/enemies/skeleton.gd" id="1_s0h66"]
 [ext_resource type="Script" uid="uid://bvecx6fek77np" path="res://scripts/enemies/states/enemy_idle_state.gd" id="2_3mw36"]
+[ext_resource type="Script" uid="uid://cnaea40kdh1f3" path="res://scripts/components/animation_component.gd" id="2_pxfki"]
 [ext_resource type="Script" uid="uid://cndcfdfejnpon" path="res://scripts/components/stats_component.gd" id="2_xxwgs"]
 [ext_resource type="Resource" uid="uid://dmqim54pik8nk" path="res://data/stats/dummy_stats.tres" id="3_lj2r1"]
 [ext_resource type="Script" uid="uid://cq7nayflwwt05" path="res://scripts/enemies/states/enemy_chase_state.gd" id="4_vncds"]
+[ext_resource type="Script" uid="uid://dbt2oyeqhc5bu" path="res://scripts/enemies/states/enemy_attack_state.gd" id="6_quxur"]
 [ext_resource type="Script" uid="uid://k3eidh3p84ti" path="res://scripts/components/movement_component.gd" id="7_6ucyf"]
+[ext_resource type="Script" uid="uid://bci6iykvj8w5a" path="res://scripts/components/attack_component.gd" id="10_quxur"]
+[ext_resource type="Resource" uid="uid://b27y5ph3w53qj" path="res://data/attacks/skeleton_claw.tres" id="11_xro8k"]
+
+[sub_resource type="Animation" id="Animation_pxfki"]
+resource_name = "Attack"
+length = 0.8
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Sprite2D:scale")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.2, 0.8),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [Vector2(1, 1), Vector2(1.5, 1.5), Vector2(1, 1)]
+}
+
+[sub_resource type="Animation" id="Animation_quxur"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Sprite2D:scale")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(1, 1)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_xro8k"]
+_data = {
+&"Attack": SubResource("Animation_pxfki"),
+&"RESET": SubResource("Animation_quxur")
+}
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_3o7vv"]
 radius = 64.0
@@ -21,6 +62,14 @@ collision_layer = 2
 collision_mask = 4
 script = ExtResource("1_s0h66")
 
+[node name="AnimationComponent" type="Node" parent="."]
+script = ExtResource("2_pxfki")
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+libraries = {
+&"": SubResource("AnimationLibrary_xro8k")
+}
+
 [node name="StateMachine" type="Node" parent="." node_paths=PackedStringArray("initial_state")]
 script = ExtResource("1_038oa")
 initial_state = NodePath("Idle")
@@ -31,16 +80,15 @@ script = ExtResource("2_3mw36")
 [node name="Chase" type="Node" parent="StateMachine"]
 script = ExtResource("4_vncds")
 
+[node name="Attack" type="Node" parent="StateMachine"]
+script = ExtResource("6_quxur")
+
 [node name="Sprite2D" type="Sprite2D" parent="."]
 modulate = Color(1, 0, 0, 1)
 texture = ExtResource("1_p728r")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("CapsuleShape2D_3o7vv")
-
-[node name="StatsComponent" type="Node" parent="."]
-script = ExtResource("2_xxwgs")
-stats_data = ExtResource("3_lj2r1")
 
 [node name="AggroRadius" type="Area2D" parent="."]
 collision_layer = 0
@@ -49,7 +97,15 @@ collision_mask = 4
 [node name="CollisionShape2D" type="CollisionShape2D" parent="AggroRadius"]
 shape = SubResource("CircleShape2D_s0h66")
 
+[node name="StatsComponent" type="Node" parent="."]
+script = ExtResource("2_xxwgs")
+stats_data = ExtResource("3_lj2r1")
+
 [node name="MovementComponent" type="Node" parent="."]
 script = ExtResource("7_6ucyf")
+
+[node name="AttackComponent" type="Node" parent="."]
+script = ExtResource("10_quxur")
+attack_data = ExtResource("11_xro8k")
 
 [connection signal="body_entered" from="AggroRadius" to="." method="_on_aggro_radius_body_entered"]
