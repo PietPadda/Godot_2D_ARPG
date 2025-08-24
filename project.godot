@@ -14,7 +14,7 @@ config/name="2D_ARPG"
 config/tags=PackedStringArray("game")
 run/main_scene="uid://cys1ord7jy672"
 config/features=PackedStringArray("4.4", "Mobile")
-config/icon="res://icon.svg"
+config/icon="res://assets/icon.svg"
 
 [input]
 

@@ -1,7 +1,7 @@
 [gd_scene load_steps=18 format=3 uid="uid://dg2sqch3jtd3h"]
 
 [ext_resource type="Script" uid="uid://ccfvg0731wml7" path="res://scripts/core/fsm/state_machine.gd" id="1_038oa"]
-[ext_resource type="Texture2D" uid="uid://4d68lc3a6uwp" path="res://icon.svg" id="1_p728r"]
+[ext_resource type="Texture2D" uid="uid://4d68lc3a6uwp" path="res://assets/icon.svg" id="1_p728r"]
 [ext_resource type="Script" uid="uid://sagekmxdwjpe" path="res://scripts/enemies/skeleton.gd" id="1_s0h66"]
 [ext_resource type="Script" uid="uid://bvecx6fek77np" path="res://scripts/enemies/states/enemy_idle_state.gd" id="2_3mw36"]
 [ext_resource type="Script" uid="uid://cnaea40kdh1f3" path="res://scripts/components/animation_component.gd" id="2_pxfki"]

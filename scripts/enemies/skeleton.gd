@@ -1,6 +1,10 @@
 # skeleton.gd
 extends CharacterBody2D
 
+# Preload the scenes and resources we need to spawn.
+const LootDropScene = preload("res://scenes/items/loot_drop.tscn")
+const GoldCoinData = preload("res://data/items/gold_coin.tres")
+
 @onready var state_machine: StateMachine = $StateMachine
 @onready var stats_component: StatsComponent = $StatsComponent
 @onready var health_bar = $HealthBar
@@ -25,5 +29,16 @@ func _on_aggro_radius_body_entered(body: Node2D) -> void:
 	
 # This function is called when our own StatsComponent emits the "died" signal.
 func _on_death() -> void:
+	# Create an instance of the loot drop.
+	var loot_instance = LootDropScene.instantiate()
+	# Position it where the enemy died.
+	loot_instance.global_position = global_position
+	# Add it to the main scene, not to the enemy.
+	get_tree().current_scene.add_child(loot_instance)
+	
+	# ONLY NOW SAFE TO CALL INIT
+	# Initialize it with our gold coin data.
+	loot_instance.initialize(GoldCoinData)
+	
 	# When this enemy dies, it should remove itself from the game.
 	queue_free()
