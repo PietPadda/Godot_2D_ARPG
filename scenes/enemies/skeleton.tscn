@@ -1,4 +1,4 @@
-[gd_scene load_steps=18 format=3 uid="uid://dg2sqch3jtd3h"]
+[gd_scene load_steps=17 format=3 uid="uid://dg2sqch3jtd3h"]
 
 [ext_resource type="Script" uid="uid://ccfvg0731wml7" path="res://scripts/core/fsm/state_machine.gd" id="1_038oa"]
 [ext_resource type="Texture2D" uid="uid://4d68lc3a6uwp" path="res://icon.svg" id="1_p728r"]
@@ -50,16 +50,12 @@ _data = {
 &"RESET": SubResource("Animation_quxur")
 }
 
-[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_3o7vv"]
-radius = 64.0
-height = 130.0
-
 [sub_resource type="CircleShape2D" id="CircleShape2D_s0h66"]
-radius = 196.125
+radius = 406.769
 
 [node name="Skeleton" type="CharacterBody2D"]
 collision_layer = 2
-collision_mask = 4
+collision_mask = 6
 script = ExtResource("1_s0h66")
 
 [node name="AnimationComponent" type="Node" parent="."]
@@ -87,14 +83,15 @@ script = ExtResource("6_quxur")
 modulate = Color(1, 0, 0, 1)
 texture = ExtResource("1_p728r")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-shape = SubResource("CapsuleShape2D_3o7vv")
+[node name="CollisionShape2D" type="CollisionPolygon2D" parent="."]
+polygon = PackedVector2Array(-64, -51, -60, -60, -50, -64, 53, -64, 60, -59, 64, -51, 64, 52, 60, 59, 52, 64, -53, 64, -60, 59, -64, 51)
 
 [node name="AggroRadius" type="Area2D" parent="."]
 collision_layer = 0
 collision_mask = 4
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="AggroRadius"]
+position = Vector2(-2, 0)
 shape = SubResource("CircleShape2D_s0h66")
 
 [node name="StatsComponent" type="Node" parent="."]
