@@ -1,4 +1,4 @@
-[gd_scene load_steps=21 format=3 uid="uid://c04jx6vcgex1j"]
+[gd_scene load_steps=23 format=3 uid="uid://c04jx6vcgex1j"]
 
 [ext_resource type="Texture2D" uid="uid://4d68lc3a6uwp" path="res://assets/icon.svg" id="1_8afob"]
 [ext_resource type="Script" uid="uid://d0khsl1q2udiw" path="res://scripts/player/player.gd" id="1_dovo2"]
@@ -14,6 +14,8 @@
 [ext_resource type="Script" uid="uid://bci6iykvj8w5a" path="res://scripts/components/attack_component.gd" id="10_je7p5"]
 [ext_resource type="Resource" uid="uid://t8iutpr512nx" path="res://data/stats/player_melee_attack.tres" id="11_fm80t"]
 [ext_resource type="Script" uid="uid://cnaea40kdh1f3" path="res://scripts/components/animation_component.gd" id="13_gx1jg"]
+[ext_resource type="Script" uid="uid://b0gmo25sa2eae" path="res://scripts/components/inventory_component.gd" id="15_myrg7"]
+[ext_resource type="Resource" uid="uid://pfmek7nj2qbc" path="res://data/inventory/player_inventory.tres" id="16_kvlxm"]
 
 [sub_resource type="Animation" id="Animation_fcs02"]
 resource_name = "Attack"
@@ -165,3 +167,7 @@ stats_data = ExtResource("4_p47bc")
 [node name="AttackComponent" type="Node" parent="."]
 script = ExtResource("10_je7p5")
 attack_data = ExtResource("11_fm80t")
+
+[node name="InventoryComponent" type="Node" parent="."]
+script = ExtResource("15_myrg7")
+inventory_data = ExtResource("16_kvlxm")

@@ -6,6 +6,8 @@
 radius = 17.1172
 
 [node name="LootDrop" type="Area2D"]
+collision_layer = 8
+collision_mask = 4
 script = ExtResource("1_8qepv")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
@@ -13,3 +15,5 @@ shape = SubResource("CircleShape2D_s7r7u")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 scale = Vector2(0.5, 0.5)
+
+[connection signal="body_entered" from="." to="." method="_on_body_entered"]
