@@ -1,0 +1,15 @@
+[gd_scene load_steps=2 format=3 uid="uid://mhkp0k8x04dx"]
+
+[ext_resource type="Script" uid="uid://dhvhugt6bxkun" path="res://scripts/ui/hud.gd" id="1_kw0id"]
+
+[node name="HUD" type="CanvasLayer"]
+script = ExtResource("1_kw0id")
+
+[node name="PlayerHealthBar" type="ProgressBar" parent="."]
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_top = -40.0
+offset_right = 300.0
+grow_vertical = 0
+step = 1.0

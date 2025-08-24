@@ -1,4 +1,4 @@
-[gd_scene load_steps=17 format=3 uid="uid://dg2sqch3jtd3h"]
+[gd_scene load_steps=18 format=3 uid="uid://dg2sqch3jtd3h"]
 
 [ext_resource type="Script" uid="uid://ccfvg0731wml7" path="res://scripts/core/fsm/state_machine.gd" id="1_038oa"]
 [ext_resource type="Texture2D" uid="uid://4d68lc3a6uwp" path="res://icon.svg" id="1_p728r"]
@@ -12,6 +12,10 @@
 [ext_resource type="Script" uid="uid://k3eidh3p84ti" path="res://scripts/components/movement_component.gd" id="7_6ucyf"]
 [ext_resource type="Script" uid="uid://bci6iykvj8w5a" path="res://scripts/components/attack_component.gd" id="10_quxur"]
 [ext_resource type="Resource" uid="uid://b27y5ph3w53qj" path="res://data/attacks/skeleton_claw.tres" id="11_xro8k"]
+[ext_resource type="PackedScene" uid="uid://c4bbgluq74ake" path="res://scenes/ui/HealthBar.tscn" id="13_xro8k"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_s0h66"]
+radius = 406.769
 
 [sub_resource type="Animation" id="Animation_pxfki"]
 resource_name = "Attack"
@@ -50,9 +54,6 @@ _data = {
 &"RESET": SubResource("Animation_quxur")
 }
 
-[sub_resource type="CircleShape2D" id="CircleShape2D_s0h66"]
-radius = 406.769
-
 [node name="Skeleton" type="CharacterBody2D"]
 collision_layer = 2
 collision_mask = 6
@@ -60,6 +61,17 @@ script = ExtResource("1_s0h66")
 
 [node name="AnimationComponent" type="Node" parent="."]
 script = ExtResource("2_pxfki")
+
+[node name="AggroRadius" type="Area2D" parent="."]
+collision_layer = 0
+collision_mask = 4
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="AggroRadius"]
+position = Vector2(-2, 0)
+shape = SubResource("CircleShape2D_s0h66")
+
+[node name="CollisionShape2D" type="CollisionPolygon2D" parent="."]
+polygon = PackedVector2Array(-64, -51, -60, -60, -50, -64, 53, -64, 60, -59, 64, -51, 64, 52, 60, 59, 52, 64, -53, 64, -60, 59, -64, 51)
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
 libraries = {
@@ -83,16 +95,9 @@ script = ExtResource("6_quxur")
 modulate = Color(1, 0, 0, 1)
 texture = ExtResource("1_p728r")
 
-[node name="CollisionShape2D" type="CollisionPolygon2D" parent="."]
-polygon = PackedVector2Array(-64, -51, -60, -60, -50, -64, 53, -64, 60, -59, 64, -51, 64, 52, 60, 59, 52, 64, -53, 64, -60, 59, -64, 51)
-
-[node name="AggroRadius" type="Area2D" parent="."]
-collision_layer = 0
-collision_mask = 4
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="AggroRadius"]
-position = Vector2(-2, 0)
-shape = SubResource("CircleShape2D_s0h66")
+[node name="HealthBar" parent="." instance=ExtResource("13_xro8k")]
+offset_top = -85.0
+offset_bottom = -55.0
 
 [node name="StatsComponent" type="Node" parent="."]
 script = ExtResource("2_xxwgs")

@@ -115,7 +115,7 @@ _data = {
 &"RESET": SubResource("Animation_gx1jg")
 }
 
-[node name="Player" type="CharacterBody2D"]
+[node name="Player" type="CharacterBody2D" groups=["player"]]
 collision_layer = 4
 collision_mask = 2
 script = ExtResource("1_dovo2")

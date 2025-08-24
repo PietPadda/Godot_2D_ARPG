@@ -5,6 +5,7 @@ extends Node
 
 # signals
 signal died
+signal health_changed(current_health, max_health)
 
 # Link to the resource file that holds the base stats.
 @export var stats_data: CharacterStats
@@ -20,7 +21,8 @@ func _ready() -> void:
 	
 	# Initialize the current stats from the base stats data.
 	current_health = stats_data.max_health
-	
+	# Emit the signal on ready to set the initial health bar value.
+	emit_signal("health_changed", current_health, stats_data.max_health)
 	# For testing: print the initialized health.
 	print("%s initialized with %d HP." % [get_parent().name, current_health])
 
@@ -32,6 +34,8 @@ func take_damage(damage_amount: int) -> void:
 		return # early exit
 
 	current_health -= damage_amount # decr life
+	# Emit the signal every time damage is taken.
+	emit_signal("health_changed", current_health, stats_data.max_health)
 	print("%s took %d damage, %d HP remaining." % [get_parent().name, damage_amount, current_health])
 
 	if current_health <= 0: # if dead

@@ -2,6 +2,12 @@
 extends CharacterBody2D
 
 @onready var state_machine: StateMachine = $StateMachine
+@onready var stats_component: StatsComponent = $StatsComponent
+@onready var health_bar = $HealthBar
+
+func _ready() -> void:
+	# Connect the stats signal to the health bar's update function
+	stats_component.health_changed.connect(health_bar.update_health)
 
 func _on_aggro_radius_body_entered(body: Node2D) -> void:
 	# Don't re-aggro if we're already chasing or attacking.
