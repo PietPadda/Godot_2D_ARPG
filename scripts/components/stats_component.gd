@@ -43,6 +43,3 @@ func take_damage(damage_amount: int) -> void:
 		print("%s has been defeated!" % get_parent().name)
 		# Instead of queue_free(), we now emit a signal.
 		emit_signal("died")
-		# And we remove the queue_free() call from the enemy's logic.
-		if get_parent().is_in_group("enemies"): # A simple way to check
-			get_parent().queue_free()
