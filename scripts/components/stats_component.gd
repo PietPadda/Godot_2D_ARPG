@@ -12,6 +12,7 @@ signal health_changed(current_health, max_health)
 
 # The entity's current, in-game stats.
 var current_health: int
+var is_dead: bool = false
 
 func _ready() -> void:
 	# Ensure a stats resource has been assigned in the editor.
@@ -26,9 +27,13 @@ func _ready() -> void:
 	# For testing: print the initialized health.
 	print("%s initialized with %d HP." % [get_parent().name, current_health])
 
-
 # Public function to apply damage to this entity.
 func take_damage(damage_amount: int) -> void:
+	# This is a "guard clause". If the entity is already dead,
+	# we stop the function immediately.
+	if is_dead:
+		return
+		
 	# We need to make sure we have stats data before proceeding.
 	if not stats_data:
 		return # early exit
@@ -39,6 +44,7 @@ func take_damage(damage_amount: int) -> void:
 	print("%s took %d damage, %d HP remaining." % [get_parent().name, damage_amount, current_health])
 
 	if current_health <= 0: # if dead
+		is_dead = true # flag entity as dead
 		current_health = 0 # set dead
 		print("%s has been defeated!" % get_parent().name)
 		# Instead of queue_free(), we now emit a signal.
