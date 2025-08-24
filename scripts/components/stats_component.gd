@@ -3,6 +3,9 @@
 class_name StatsComponent
 extends Node
 
+# signals
+signal died
+
 # Link to the resource file that holds the base stats.
 @export var stats_data: CharacterStats
 
@@ -34,5 +37,8 @@ func take_damage(damage_amount: int) -> void:
 	if current_health <= 0: # if dead
 		current_health = 0 # set dead
 		print("%s has been defeated!" % get_parent().name)
-		# Later, we will emit a "died" signal here. For now, we'll make the enemy disappear.
-		get_parent().queue_free() # delete the "parent" ie Entity
+		# Instead of queue_free(), we now emit a signal.
+		emit_signal("died")
+		# And we remove the queue_free() call from the enemy's logic.
+		if get_parent().is_in_group("enemies"): # A simple way to check
+			get_parent().queue_free()
