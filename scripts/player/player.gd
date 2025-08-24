@@ -1,6 +1,9 @@
 # player.gd
 extends CharacterBody2D
 
+# preload scenes to instance
+const GameOverScreen = preload("res://scenes/ui/game_over_screen.tscn")
+
 # get components
 @onready var stats_component: StatsComponent = $StatsComponent
 @onready var state_machine: StateMachine = $StateMachine
@@ -13,3 +16,8 @@ func _ready() -> void:
 func _on_death() -> void:
 	# We tell our state machine to switch to the DeadState.
 	state_machine.change_state("Dead")
+	
+	# Create an instance of our Game Over screen.
+	var game_over_instance = GameOverScreen.instantiate()
+	# Add it to the scene tree.
+	add_child(game_over_instance)
