@@ -9,10 +9,15 @@ signal attack_finished
 # The data defining the attack's properties.
 @export var attack_data: AttackData
 
-# A timer used internally to manage the attack's duration.
-@onready var duration_timer: Timer = Timer.new()
+@onready var animation_component: AnimationComponent = get_owner().get_node("AnimationComponent")
+@onready var duration_timer: Timer = Timer.new() # A timer used internally to manage the attack's duration.
 
 func _ready() -> void:
+	if not animation_component:
+		push_error("AttackComponent requires a sibling AnimationComponent.")
+		queue_free() # remove it
+		return # early exit
+		
 	# We create the timer in code and add it as a child.
 	# This keeps the component self-contained.
 	duration_timer.one_shot = true
@@ -24,12 +29,23 @@ func execute(target: Node2D) -> void:
 	if not attack_data:
 		push_error("AttackComponent has no AttackData.")
 		emit_signal("attack_finished") # Fail safely
-		return
+		return # early exit
 		
 	if not is_instance_valid(target):
 		print("Invalid target.")
 		emit_signal("attack_finished") # Fail safely
 		return
+		
+	# Get the animation from the AnimationPlayer
+	var anim = animation_component.animation_player.get_animation(attack_data.animation_name)
+	if not anim:
+		push_error("Animation '%s' not found in AttackComponent." % attack_data.animation_name)
+		emit_signal("attack_finished")
+		return
+		
+	# Get the animation's length and start the timer with it.
+	var anim_duration = anim.length
+	duration_timer.start(anim_duration)
 
 	print("Attacking %s for %d damage!" % [target.name, attack_data.damage])
 	
@@ -37,8 +53,6 @@ func execute(target: Node2D) -> void:
 	var target_stats: StatsComponent = target.get_node("StatsComponent")
 	if target_stats:
 		target_stats.take_damage(attack_data.damage)
-	
-	duration_timer.start(attack_data.duration)
 
 func on_timer_timeout() -> void:
 	# When the timer finishes, we emit the signal.
