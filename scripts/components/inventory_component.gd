@@ -2,14 +2,18 @@
 class_name InventoryComponent
 extends Node
 
+# signals
+signal inventory_changed(inventory_data)
+
+# scene nodes
 @export var inventory_data: InventoryData
 
 # Tries to add an item to the inventory. Returns true on success.
+## add an item to the inventory
 func add_item(item_data: ItemData) -> bool:
 	if inventory_data.items.size() < inventory_data.capacity:
 		inventory_data.items.append(item_data)
-		print("Item added: ", item_data.item_name)
-		print("Inventory now contains: ", inventory_data.items)
+		emit_signal("inventory_changed", inventory_data)
 		return true
 	else:
 		print("Inventory is full!")
