@@ -1,7 +1,13 @@
-[gd_scene load_steps=3 format=3 uid="uid://mhkp0k8x04dx"]
+[gd_scene load_steps=5 format=3 uid="uid://mhkp0k8x04dx"]
 
 [ext_resource type="Script" uid="uid://dhvhugt6bxkun" path="res://scripts/ui/hud.gd" id="1_kw0id"]
 [ext_resource type="PackedScene" uid="uid://i8r3dhcqw1wa" path="res://scenes/ui/inventory_panel.tscn" id="2_atyv1"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_atyv1"]
+bg_color = Color(0, 0, 0, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_6ll6g"]
+bg_color = Color(0.817316, 2.62313e-06, 1.05888e-06, 1)
 
 [node name="HUD" type="CanvasLayer"]
 script = ExtResource("1_kw0id")
@@ -13,7 +19,22 @@ anchor_bottom = 1.0
 offset_top = -40.0
 offset_right = 300.0
 grow_vertical = 0
+theme_override_styles/background = SubResource("StyleBoxFlat_atyv1")
+theme_override_styles/fill = SubResource("StyleBoxFlat_6ll6g")
 step = 1.0
+value = 100.0
+show_percentage = false
+
+[node name="HealthLabel" type="Label" parent="PlayerHealthBar"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "label test value"
+horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="InventoryPanel" parent="." instance=ExtResource("2_atyv1")]
 visible = false
