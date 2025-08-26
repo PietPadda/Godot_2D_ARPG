@@ -1,12 +1,12 @@
-# movement_component.gd
+# player_movement_component.gd
 # A component that moves its parent CharacterBody2D towards a target position.
-class_name MovementComponent
+class_name PlayerMovementComponent
 extends Node
 
 # Export vars
 @export var stopping_distance: float = 5.0
 
-# A reference to the parent node, which must be a CharacterBody2D.
+# Scene nodes
 @onready var character_body: CharacterBody2D = get_parent()
 @onready var stats_component: StatsComponent = get_parent().get_node("StatsComponent")
 
