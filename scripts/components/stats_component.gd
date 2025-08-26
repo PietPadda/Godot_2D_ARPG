@@ -90,5 +90,9 @@ func _level_up() -> void:
 	current_mana = stats_data.max_mana # Restore to full on level up.
 
 	# Announce the stats changes so the UI updates.
+	refresh_stats()
+
+## Helper to Announce to UI stats update
+func refresh_stats() -> void:
 	emit_signal("health_changed", current_health, stats_data.max_health)
 	emit_signal("mana_changed", current_mana, stats_data.max_mana)

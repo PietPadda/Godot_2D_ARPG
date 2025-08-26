@@ -32,6 +32,14 @@ func _unhandled_input(event: InputEvent) -> void:
 	# Toggle the inventory panel's visibility.
 	if Input.is_action_just_pressed("toggle_inventory"):
 		inventory_panel.visible = not inventory_panel.visible
+	
+	# F5 to quick save
+	if Input.is_action_just_pressed("save_game"):
+		GameManager.save_game()
+	
+	# F6 to quick load
+	if Input.is_action_just_pressed("load_game"):
+		GameManager.load_game()
 
 ## handle hp updates
 func on_player_health_changed(current_health: int, max_health: int) -> void:
