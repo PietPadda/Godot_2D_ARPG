@@ -8,6 +8,7 @@ extends State
 @onready var movement_component: PlayerMovementComponent = player.get_node("PlayerMovementComponent")
 @onready var animation_component: AnimationComponent = player.get_node("AnimationComponent")
 @onready var targeting_component: PlayerTargetingComponent = player.get_node("PlayerTargetingComponent")
+@onready var skill_component: SkillCasterComponent = player.get_node("SkillCasterComponent")
 
 func enter() -> void:
 	# Play Idle Anim on Entering
@@ -31,12 +32,16 @@ func process_input(event: InputEvent) -> void:
 			# ...and then we tell the state machine to switch to the "Move" state.
 			state_machine.change_state("Move")
 			
-	# Add this to process_input in both IdleState and MoveState
+	# Cast a skill on right click
 	if event.is_action_pressed("cast_skill"):
-		var cast_state: PlayerCastState = state_machine.states["cast"]
-		# We need to load our fireball data. In a real game, this would
-		# come from a skill bar, but for now we'll load it directly.
-		cast_state.skill_to_cast = load("res://data/skills/fireball_skill.tres")
-		cast_state.cast_target_position = player.get_global_mouse_position()
+		# Ask it which skill is equipped for this action.
+		var skill_to_cast = skill_component.secondary_attack_skill
 
-		state_machine.change_state("Cast")
+		# Only proceed if a skill is actually equipped.
+		if skill_to_cast:
+			var cast_state: PlayerCastState = state_machine.states["cast"]
+			cast_state.skill_to_cast = skill_to_cast
+			cast_state.cast_target_position = player.get_global_mouse_position()
+			state_machine.change_state("Cast")
+		else:
+			print("No secondary attack equipped")
