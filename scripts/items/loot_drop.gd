@@ -17,6 +17,10 @@ func initialize(data: ItemData) -> void:
 func _on_body_entered(body: Node2D) -> void:
 	var inventory_component: InventoryComponent = body.get_node("InventoryComponent")
 
+	# Check for the component with a guard clause.
+	if not inventory_component:
+		return # else say enemies may crash if attempt to pick up
+
 	# Try to add our item to their inventory.
 	var picked_up = inventory_component.add_item(item_data)
 

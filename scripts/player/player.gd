@@ -21,8 +21,8 @@ func _on_death() -> void:
 	
 	# Create an instance of our Game Over screen.
 	var game_over_instance = GameOverScreen.instantiate()
-	# Add it to the scene tree.
-	add_child(game_over_instance)
+	# Add it to the parent (level) scene tree.
+	get_tree().current_scene.add_child(game_over_instance)
 
 ## Enemy died function for Player
 func _on_enemy_died(enemy_stats_data: CharacterStats) -> void:
