@@ -15,7 +15,7 @@ func enter() -> void:
 		return
 
 	# Stop moving before attacking.
-	var movement_component = owner_node.get_node("MovementComponent")
+	var movement_component = owner_node.get_node("AIMovementComponent")
 	movement_component.set_movement_target(owner_node.global_position)
 
 	# Exceute attacking

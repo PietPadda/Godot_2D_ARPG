@@ -164,7 +164,7 @@ stats_data = ExtResource("4_p47bc")
 script = ExtResource("15_myrg7")
 inventory_data = ExtResource("16_kvlxm")
 
-[node name="PlayerMovementComponent" type="Node" parent="."]
+[node name="MovementComponent" type="Node" parent="."]
 script = ExtResource("2_gmlin")
 
 [node name="AttackComponent" type="Node" parent="."]

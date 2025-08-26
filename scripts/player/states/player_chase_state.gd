@@ -6,7 +6,7 @@ extends State
 var target: Node2D
 
 @onready var player: CharacterBody2D = get_owner()
-@onready var movement_component: MovementComponent = player.get_node("MovementComponent")
+@onready var movement_component: PlayerMovementComponent = player.get_node("PlayerMovementComponent")
 @onready var attack_component: AttackComponent = player.get_node("AttackComponent")
 @onready var animation_component: AnimationComponent = player.get_node("AnimationComponent")
 

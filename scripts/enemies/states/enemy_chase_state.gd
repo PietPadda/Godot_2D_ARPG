@@ -5,7 +5,7 @@ extends State
 var target: Node2D
 
 @onready var owner_node: CharacterBody2D = get_owner()
-@onready var movement_component: MovementComponent = owner_node.get_node("MovementComponent")
+@onready var movement_component: AIMovementComponent = owner_node.get_node("AIMovementComponent")
 @onready var attack_component: AttackComponent = owner_node.get_node("AttackComponent")
 
 func enter() -> void:
