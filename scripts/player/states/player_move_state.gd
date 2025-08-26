@@ -6,6 +6,7 @@ extends State
 @onready var player: CharacterBody2D = get_owner()
 @onready var movement_component: MovementComponent = player.get_node("MovementComponent")
 @onready var animation_component: AnimationComponent = player.get_node("AnimationComponent")
+@onready var targeting_component: PlayerTargetingComponent = player.get_node("PlayerTargetingComponent")
 
 func enter() -> void:
 	# For debugging, let's see when we enter this state.
@@ -22,7 +23,7 @@ func process_input(event: InputEvent) -> void:
 	if event.is_action_pressed("move_click"):
 		# If the player clicks, we first check if they clicked on an enemy.
 		if event.is_action_pressed("move_click"):
-			var target = _get_target_under_mouse()
+			var target = targeting_component.get_target_under_mouse()
 			
 			if target:
 				# If a target was found, interrupt the current move and start chasing.
@@ -39,7 +40,7 @@ func process_input(event: InputEvent) -> void:
 func process_physics(_delta: float) -> void:
 	# In the physics update, we check if we've reached our destination.
 	var distance_to_target = player.global_position.distance_to(movement_component.target_position)
-	if distance_to_target < 5.0:
+	if distance_to_target < movement_component.stopping_distance:
 		# If we have, we transition back to the "Idle" state.
 		state_machine.change_state("Idle")
 		

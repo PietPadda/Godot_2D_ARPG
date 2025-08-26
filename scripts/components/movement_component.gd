@@ -3,6 +3,9 @@
 class_name MovementComponent
 extends Node
 
+# Export vars
+@export var stopping_distance: float = 5.0
+
 # A reference to the parent node, which must be a CharacterBody2D.
 @onready var character_body: CharacterBody2D = get_parent()
 @onready var stats_component: StatsComponent = get_parent().get_node("StatsComponent")
@@ -31,7 +34,7 @@ func _physics_process(_delta: float) -> void:
 	var distance_to_target = character_body.global_position.distance_to(target_position)
 
 	# Stop moving if we are close enough to the target.
-	if distance_to_target < 5.0:
+	if distance_to_target < stopping_distance:
 		character_body.velocity = Vector2.ZERO
 		return
 

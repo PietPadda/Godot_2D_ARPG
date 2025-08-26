@@ -17,7 +17,7 @@ step = 1.0
 
 [node name="InventoryPanel" parent="." instance=ExtResource("2_atyv1")]
 visible = false
-offset_left = 335.0
-offset_top = -167.0
-offset_right = 351.0
-offset_bottom = -151.0
+offset_left = 424.0
+offset_top = -215.0
+offset_right = 440.0
+offset_bottom = -199.0
