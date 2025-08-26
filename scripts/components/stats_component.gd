@@ -31,10 +31,6 @@ func _ready() -> void:
 	# Emit the signals on ready to initliase current stats
 	emit_signal("health_changed", current_health, stats_data.max_health)
 	emit_signal("mana_changed", current_mana, stats_data.max_mana)
-	
-	# For testing: print the initialized health.
-	print("%s initialized with %d HP." % [get_parent().name, current_health])
-	print("%s initialized with %d MANA." % [get_parent().name, current_mana])
 
 # Public function to apply damage to this entity.
 ## Lose life function
@@ -51,12 +47,10 @@ func take_damage(damage_amount: int) -> void:
 	current_health -= damage_amount # decr life
 	# Emit the signal every time damage is taken.
 	emit_signal("health_changed", current_health, stats_data.max_health)
-	print("%s took %d damage, %d HP remaining." % [get_parent().name, damage_amount, current_health])
 
 	if current_health <= 0: # if dead
 		is_dead = true # flag entity as dead
 		current_health = 0 # set dead
-		print("%s has been defeated!" % get_parent().name)
 		# Instead of queue_free(), we now emit a signal.
 		emit_signal("died")
 
@@ -75,7 +69,6 @@ func add_xp(amount: int) -> void:
 	if not stats_data: return # return if enemy doesn't have stats
 
 	stats_data.current_xp += amount # add xp
-	print("Gained %d XP. Total: %d / %d" % [amount, stats_data.current_xp, stats_data.xp_to_next_level])
 
 	# Check if we have enough XP to level up.
 	while stats_data.current_xp >= stats_data.xp_to_next_level:
@@ -96,7 +89,6 @@ func _level_up() -> void:
 	current_health = stats_data.max_health # Heal to full on level up.
 	current_mana = stats_data.max_mana # Restore to full on level up.
 
-	print("LEVEL UP! Reached level %d." % stats_data.level)
 	# Announce the stats changes so the UI updates.
 	emit_signal("health_changed", current_health, stats_data.max_health)
 	emit_signal("mana_changed", current_mana, stats_data.max_mana)

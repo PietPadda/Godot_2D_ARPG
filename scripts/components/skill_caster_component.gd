@@ -2,6 +2,9 @@
 class_name SkillCasterComponent
 extends Node
 
+# This creates a dedicated slot in the Inspector for our skill.
+@export var secondary_attack_skill: SkillData
+
 # scene nodes
 @onready var stats_component: StatsComponent = get_owner().get_node("StatsComponent") # sibling
 
