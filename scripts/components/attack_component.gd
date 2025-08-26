@@ -49,12 +49,15 @@ func execute(target: Node2D) -> void:
 	var anim_duration = anim.length
 	duration_timer.start(anim_duration)
 
-	print("Attacking %s for %d damage!" % [target.name, attack_data.damage])
+	# Get the character's total damage from the StatCalculator.
+	var total_damage = get_owner().get_node("StatsComponent").get_total_stat("Damage")
+
+	print("Attacking %s for %d damage!" % [target.name, total_damage])
 	
 	 # Find the target's StatsComponent and deal damage.
 	var target_stats: StatsComponent = target.get_node("StatsComponent")
 	if target_stats:
-		target_stats.take_damage(attack_data.damage)
+		target_stats.take_damage(total_damage) # apply total dmg
 
 func on_timer_timeout() -> void:
 	# When the timer finishes, we emit the signal.
