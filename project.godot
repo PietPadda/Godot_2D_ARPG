@@ -16,6 +16,10 @@ run/main_scene="uid://cys1ord7jy672"
 config/features=PackedStringArray("4.4", "Mobile")
 config/icon="res://assets/icon.svg"
 
+[autoload]
+
+EventBus="*res://scripts/core/event_bus.gd"
+
 [input]
 
 move_click={

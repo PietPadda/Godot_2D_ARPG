@@ -29,6 +29,9 @@ func _on_aggro_radius_body_entered(body: Node2D) -> void:
 	
 # This function is called when our own StatsComponent emits the "died" signal.
 func _on_death() -> void:
+	# Announce the death and pass along our stats data.
+	EventBus.emit_signal("enemy_died", stats_component.stats_data)
+	
 	# Create an instance of the loot drop.
 	var loot_instance = LootDropScene.instantiate()
 	# Position it where the enemy died.

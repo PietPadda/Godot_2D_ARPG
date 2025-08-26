@@ -49,3 +49,31 @@ func take_damage(damage_amount: int) -> void:
 		print("%s has been defeated!" % get_parent().name)
 		# Instead of queue_free(), we now emit a signal.
 		emit_signal("died")
+
+## add xp to players
+func add_xp(amount: int) -> void:
+	if not stats_data: return # return if enemy doesn't have stats
+
+	stats_data.current_xp += amount # add xp
+	print("Gained %d XP. Total: %d / %d" % [amount, stats_data.current_xp, stats_data.xp_to_next_level])
+
+	# Check if we have enough XP to level up.
+	while stats_data.current_xp >= stats_data.xp_to_next_level:
+		_level_up() # level up ONLY if more than req
+
+## level up on sufficient xp
+func _level_up() -> void:
+	# Use up the XP for the level up.
+	stats_data.current_xp -= stats_data.xp_to_next_level
+	stats_data.level += 1 # incr level
+	
+	# Increase the XP requirement for the next level (e.g., by 50%).
+	stats_data.xp_to_next_level = int(stats_data.xp_to_next_level * 1.5)
+
+	# Apply stat gains.
+	stats_data.max_health += 20 # hp increase
+	current_health = stats_data.max_health # Heal to full on level up.
+
+	print("LEVEL UP! Reached level %d." % stats_data.level)
+	# Announce the health change so the UI updates.
+	emit_signal("health_changed", current_health, stats_data.max_health)
