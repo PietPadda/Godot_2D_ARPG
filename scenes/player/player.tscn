@@ -174,3 +174,5 @@ attack_data = ExtResource("11_fm80t")
 [node name="PlayerTargetingComponent" type="Node" parent="."]
 script = ExtResource("17_kvlxm")
 target_layer_mask = 2
+
+[node name="Camera2D" type="Camera2D" parent="."]
