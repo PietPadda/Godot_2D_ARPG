@@ -16,6 +16,10 @@ run/main_scene="uid://cys1ord7jy672"
 config/features=PackedStringArray("4.4", "Mobile")
 config/icon="res://assets/icon.svg"
 
+[autoload]
+
+EventBus="*res://scripts/core/event_bus.gd"
+
 [input]
 
 move_click={
@@ -40,6 +44,7 @@ toggle_inventory={
 
 [layer_names]
 
+2d_physics/layer_1="world"
 2d_physics/layer_2="enemies"
 2d_physics/layer_3="player"
 2d_physics/layer_4="loot"

@@ -7,9 +7,9 @@
 [ext_resource type="TileSet" uid="uid://c02d7kxsulago" path="res://assets/tilesets/dungeon_tileset.tres" id="5_u81e1"]
 
 [sub_resource type="NavigationPolygon" id="NavigationPolygon_u81e1"]
-vertices = PackedVector2Array(717, 589.242, 1212.92, 695.047, 72.9297, 700.938, 574.789, 585.898, 373.969, 387.141, 69.0625, 68.0391, 375.078, 245, 1208.07, 72.9531, 516.156, 245, 717, 446.867)
+vertices = PackedVector2Array(719, 587.852, 1212.92, 695.047, 72.9297, 700.938, 575.969, 590.063, 370.063, 387.25, 69.0625, 68.0391, 367.852, 240, 1208.07, 72.9531, 513.156, 240, 719, 446.867)
 polygons = Array[PackedInt32Array]([PackedInt32Array(0, 1, 2, 3), PackedInt32Array(4, 3, 2), PackedInt32Array(4, 2, 5, 6), PackedInt32Array(6, 5, 7, 8), PackedInt32Array(9, 8, 7, 1), PackedInt32Array(9, 1, 0)])
-outlines = Array[PackedVector2Array]([PackedVector2Array(59, 58, 1218, 63, 1223, 705, 63, 711), PackedVector2Array(384, 383, 579, 576, 707, 579, 707, 451, 512, 255, 385, 255)])
+outlines = Array[PackedVector2Array]([PackedVector2Array(59, 58, 1218, 63, 1223, 705, 63, 711), PackedVector2Array(380, 383, 580, 580, 709, 578, 709, 451, 509, 250, 378, 250)])
 
 [node name="Main" type="Node2D"]
 y_sort_enabled = true

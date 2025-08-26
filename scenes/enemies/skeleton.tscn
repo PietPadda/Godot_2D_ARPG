@@ -6,7 +6,7 @@
 [ext_resource type="Script" uid="uid://bvecx6fek77np" path="res://scripts/enemies/states/enemy_idle_state.gd" id="2_3mw36"]
 [ext_resource type="Script" uid="uid://cnaea40kdh1f3" path="res://scripts/components/animation_component.gd" id="2_pxfki"]
 [ext_resource type="Script" uid="uid://cndcfdfejnpon" path="res://scripts/components/stats_component.gd" id="2_xxwgs"]
-[ext_resource type="Resource" uid="uid://dmqim54pik8nk" path="res://data/stats/dummy_stats.tres" id="3_lj2r1"]
+[ext_resource type="Resource" uid="uid://dmqim54pik8nk" path="res://data/stats/skeleton_stats.tres" id="3_lj2r1"]
 [ext_resource type="Script" uid="uid://cq7nayflwwt05" path="res://scripts/enemies/states/enemy_chase_state.gd" id="4_vncds"]
 [ext_resource type="Script" uid="uid://dbt2oyeqhc5bu" path="res://scripts/enemies/states/enemy_attack_state.gd" id="6_quxur"]
 [ext_resource type="Script" uid="uid://bci6iykvj8w5a" path="res://scripts/components/attack_component.gd" id="10_quxur"]
@@ -56,7 +56,7 @@ _data = {
 
 [node name="Skeleton" type="CharacterBody2D" groups=["enemies"]]
 collision_layer = 2
-collision_mask = 6
+collision_mask = 7
 script = ExtResource("1_s0h66")
 
 [node name="AnimationComponent" type="Node" parent="."]

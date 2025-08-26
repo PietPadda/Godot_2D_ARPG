@@ -10,9 +10,11 @@ const GameOverScreen = preload("res://scenes/ui/game_over_screen.tscn")
 
 func _ready() -> void:
 	# Connect our component's signal to a function in this script.
-	stats_component.died.connect(_on_death)
+	stats_component.died.connect(_on_death) # player died
+	EventBus.enemy_died.connect(_on_enemy_died) # enemy died
 
 # This function is called when the StatsComponent emits the "died" signal.
+## Player death function for Player
 func _on_death() -> void:
 	# We tell our state machine to switch to the DeadState.
 	state_machine.change_state("Dead")
@@ -21,3 +23,8 @@ func _on_death() -> void:
 	var game_over_instance = GameOverScreen.instantiate()
 	# Add it to the scene tree.
 	add_child(game_over_instance)
+
+## Enemy died function for Player
+func _on_enemy_died(enemy_stats_data: CharacterStats) -> void:
+	# When an enemy dies, add its XP reward to our stats.
+	stats_component.add_xp(enemy_stats_data.xp_reward)
