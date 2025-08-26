@@ -36,6 +36,16 @@ func process_input(event: InputEvent) -> void:
 				# Update the destination and stay in the MoveState.
 				var target_position = player.get_global_mouse_position()
 				movement_component.set_movement_target(target_position)
+				
+	# Add this to process_input in both IdleState and MoveState
+	if event.is_action_pressed("cast_skill"):
+		var cast_state: PlayerCastState = state_machine.states["cast"]
+		# We need to load our fireball data. In a real game, this would
+		# come from a skill bar, but for now we'll load it directly.
+		cast_state.skill_to_cast = load("res://data/skills/fireball.tres")
+		cast_state.cast_target_position = player.get_global_mouse_position()
+
+		state_machine.change_state("Cast")
 
 func process_physics(_delta: float) -> void:
 	# In the physics update, we check if we've reached our destination.

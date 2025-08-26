@@ -1,4 +1,4 @@
-[gd_scene load_steps=24 format=3 uid="uid://c04jx6vcgex1j"]
+[gd_scene load_steps=26 format=3 uid="uid://c04jx6vcgex1j"]
 
 [ext_resource type="Texture2D" uid="uid://4d68lc3a6uwp" path="res://assets/icon.svg" id="1_8afob"]
 [ext_resource type="Script" uid="uid://d0khsl1q2udiw" path="res://scripts/player/player.gd" id="1_dovo2"]
@@ -11,12 +11,14 @@
 [ext_resource type="Script" uid="uid://dfuec360wxegi" path="res://scripts/player/states/player_attack_state.gd" id="5_5gtgg"]
 [ext_resource type="Script" uid="uid://cnpddeatw31gb" path="res://scripts/player/states/player_chase_state.gd" id="6_fm80t"]
 [ext_resource type="Script" uid="uid://dxe6f52ev5gap" path="res://scripts/player/states/player_dead_state.gd" id="8_ugbui"]
+[ext_resource type="Script" uid="uid://b4yijrma5vfhf" path="res://scripts/player/states/player_cast_state.gd" id="9_lgqa7"]
 [ext_resource type="Script" uid="uid://bci6iykvj8w5a" path="res://scripts/components/attack_component.gd" id="10_je7p5"]
 [ext_resource type="Resource" uid="uid://t8iutpr512nx" path="res://data/stats/player_melee_attack.tres" id="11_fm80t"]
 [ext_resource type="Script" uid="uid://cnaea40kdh1f3" path="res://scripts/components/animation_component.gd" id="13_gx1jg"]
 [ext_resource type="Script" uid="uid://b0gmo25sa2eae" path="res://scripts/components/inventory_component.gd" id="15_myrg7"]
 [ext_resource type="Resource" uid="uid://pfmek7nj2qbc" path="res://data/inventory/player_inventory.tres" id="16_kvlxm"]
 [ext_resource type="Script" uid="uid://b3kxcsphggh56" path="res://scripts/components/player_targeting_component.gd" id="17_kvlxm"]
+[ext_resource type="Script" uid="uid://cfvlrb6dmesqd" path="res://scripts/components/skill_caster_component.gd" id="18_uf5tr"]
 
 [sub_resource type="Animation" id="Animation_fcs02"]
 resource_name = "Attack"
@@ -150,6 +152,9 @@ script = ExtResource("6_fm80t")
 [node name="Dead" type="Node" parent="StateMachine"]
 script = ExtResource("8_ugbui")
 
+[node name="Cast" type="Node" parent="StateMachine"]
+script = ExtResource("9_lgqa7")
+
 [node name="Sprite2D" type="Sprite2D" parent="."]
 texture = ExtResource("1_8afob")
 
@@ -174,5 +179,8 @@ attack_data = ExtResource("11_fm80t")
 [node name="PlayerTargetingComponent" type="Node" parent="."]
 script = ExtResource("17_kvlxm")
 target_layer_mask = 2
+
+[node name="SkillCasterComponent" type="Node" parent="."]
+script = ExtResource("18_uf5tr")
 
 [node name="Camera2D" type="Camera2D" parent="."]
