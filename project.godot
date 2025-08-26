@@ -40,6 +40,7 @@ toggle_inventory={
 
 [layer_names]
 
+2d_physics/layer_1="world"
 2d_physics/layer_2="enemies"
 2d_physics/layer_3="player"
 2d_physics/layer_4="loot"
