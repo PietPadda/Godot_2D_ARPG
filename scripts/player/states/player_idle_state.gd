@@ -30,7 +30,13 @@ func process_input(event: InputEvent) -> void:
 			
 			# ...and then we tell the state machine to switch to the "Move" state.
 			state_machine.change_state("Move")
-		
-	# Temporary attack trigger (we'll remove this soon).
-	if event.is_action_pressed("attack"):
-		state_machine.change_state("Attack")
+			
+	# Add this to process_input in both IdleState and MoveState
+	if event.is_action_pressed("cast_skill"):
+		var cast_state: PlayerCastState = state_machine.states["cast"]
+		# We need to load our fireball data. In a real game, this would
+		# come from a skill bar, but for now we'll load it directly.
+		cast_state.skill_to_cast = load("res://data/skills/fireball_skill.tres")
+		cast_state.cast_target_position = player.get_global_mouse_position()
+
+		state_machine.change_state("Cast")
