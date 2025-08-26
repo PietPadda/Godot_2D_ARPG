@@ -20,7 +20,7 @@ func enter() -> void:
 
 	# After a short casting animation, return to Idle.
 	# We can use a SceneTreeTimer for a simple, one-off delay.
-	await get_tree().create_timer(0.5).timeout
+	await get_tree().create_timer(skill_to_cast.cast_time).timeout
 
 	# Check if the state is still active before changing.
 	if state_machine.current_state == self:
