@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="SkillData" load_steps=4 format=3 uid="uid://buvyst3ml008j"]
+
+[ext_resource type="Resource" uid="uid://ny16ndio63km" path="res://data/skills/fireball_projectile_data.tres" id="1_fd0oi"]
+[ext_resource type="PackedScene" uid="uid://dfce8t7pklgpr" path="res://scenes/skills/fireball_projectile.tscn" id="2_3ht3f"]
+[ext_resource type="Script" uid="uid://cmob1afavc4dc" path="res://data/skills/skill_data.gd" id="3_lcxmc"]
+
+[resource]
+script = ExtResource("3_lcxmc")
+skill_name = "Fireball"
+mana_cost = 10
+damage = 50
+projectile_scene = ExtResource("2_3ht3f")
+projectile_data = ExtResource("1_fd0oi")
+metadata/_custom_type_script = "uid://cmob1afavc4dc"
