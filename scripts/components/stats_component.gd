@@ -4,8 +4,11 @@ class_name StatsComponent
 extends Node
 
 # signals
+## entity death signal
 signal died # death notification
+## health update signal
 signal health_changed(current_health, max_health) # hp update
+## mana update signal
 signal mana_changed(current_mana, max_mana) # mana update
 
 # Link to the resource file that holds the base stats.
@@ -89,8 +92,11 @@ func _level_up() -> void:
 
 	# Apply stat gains.
 	stats_data.max_health += 20 # hp increase
+	stats_data.max_mana += 10 # mana increase
 	current_health = stats_data.max_health # Heal to full on level up.
+	current_mana = stats_data.max_mana # Restore to full on level up.
 
 	print("LEVEL UP! Reached level %d." % stats_data.level)
-	# Announce the health change so the UI updates.
+	# Announce the stats changes so the UI updates.
 	emit_signal("health_changed", current_health, stats_data.max_health)
+	emit_signal("mana_changed", current_mana, stats_data.max_mana)

@@ -43,24 +43,3 @@ func process_physics(_delta: float) -> void:
 	if distance_to_target < movement_component.stopping_distance:
 		# If we have, we transition back to the "Idle" state.
 		state_machine.change_state("Idle")
-		
-# Helper function to check for colliders under the mouse.
-func _get_target_under_mouse() -> Node2D:
-	var world_space = player.get_world_2d().direct_space_state
-	var mouse_pos = player.get_global_mouse_position()
-	
-	# Set up the query.
-	var query = PhysicsPointQueryParameters2D.new()
-	query.position = mouse_pos
-	# This is where we specify which layer we are looking for.
-	# 2 is the number for our "enemies" layer.
-	query.collision_mask = 2
-	
-	# Perform the query.
-	var results = world_space.intersect_point(query)
-	
-	# Return the first valid collider found.
-	if not results.is_empty():
-		return results[0].collider
-	
-	return null
