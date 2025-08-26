@@ -4,15 +4,17 @@ class_name StatsComponent
 extends Node
 
 # signals
-signal died
-signal health_changed(current_health, max_health)
+signal died # death notification
+signal health_changed(current_health, max_health) # hp update
+signal mana_changed(current_mana, max_mana) # mana update
 
 # Link to the resource file that holds the base stats.
 @export var stats_data: CharacterStats
 
 # The entity's current, in-game stats.
-var current_health: int
-var is_dead: bool = false
+var current_health: int # entity hp tracker
+var current_mana: int # mana tracker
+var is_dead: bool = false # death tracker
 
 func _ready() -> void:
 	# Ensure a stats resource has been assigned in the editor.
@@ -22,12 +24,17 @@ func _ready() -> void:
 	
 	# Initialize the current stats from the base stats data.
 	current_health = stats_data.max_health
-	# Emit the signal on ready to set the initial health bar value.
+	current_mana = stats_data.max_mana
+	# Emit the signals on ready to initliase current stats
 	emit_signal("health_changed", current_health, stats_data.max_health)
+	emit_signal("mana_changed", current_mana, stats_data.max_mana)
+	
 	# For testing: print the initialized health.
 	print("%s initialized with %d HP." % [get_parent().name, current_health])
+	print("%s initialized with %d MANA." % [get_parent().name, current_mana])
 
 # Public function to apply damage to this entity.
+## Lose life function
 func take_damage(damage_amount: int) -> void:
 	# This is a "guard clause". If the entity is already dead,
 	# we stop the function immediately.
@@ -50,6 +57,16 @@ func take_damage(damage_amount: int) -> void:
 		# Instead of queue_free(), we now emit a signal.
 		emit_signal("died")
 
+# Public function to attempt to use mana. Returns true on success.
+## Consume Mana function
+func use_mana(amount: int) -> bool:
+	if current_mana >= amount: # if sufficient
+		current_mana -= amount # decr
+		emit_signal("mana_changed", current_mana, stats_data.max_mana) # update
+		return true # mana use
+	else:
+		return false # no mana used!
+
 ## add xp to players
 func add_xp(amount: int) -> void:
 	if not stats_data: return # return if enemy doesn't have stats
@@ -61,7 +78,7 @@ func add_xp(amount: int) -> void:
 	while stats_data.current_xp >= stats_data.xp_to_next_level:
 		_level_up() # level up ONLY if more than req
 
-## level up on sufficient xp
+## level up player on sufficient xp
 func _level_up() -> void:
 	# Use up the XP for the level up.
 	stats_data.current_xp -= stats_data.xp_to_next_level
