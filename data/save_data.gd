@@ -1,0 +1,9 @@
+# save_data.gd
+class_name SaveData
+extends Resource
+
+# Description
+## A data container for all save game properties.
+
+@export var player_stats_data: CharacterStats
+@export var player_inventory_data: InventoryData
