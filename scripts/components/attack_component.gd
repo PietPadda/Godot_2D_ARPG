@@ -50,7 +50,7 @@ func execute(target: Node2D) -> void:
 	duration_timer.start(anim_duration)
 
 	# Get the character's total damage from the StatCalculator.
-	var total_damage = get_owner().get_node("StatsComponent").get_total_stat("Damage")
+	var total_damage = get_owner().get_node("StatsComponent").get_total_stat("damage")
 
 	print("Attacking %s for %d damage!" % [target.name, total_damage])
 	

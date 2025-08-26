@@ -7,6 +7,6 @@ script = ExtResource("1_bwt3i")
 item_name = "Crude Sword"
 equipment_slot = 1
 stat_modifiers = {
-"Damage": 15.0
+"damage": 15.0
 }
 metadata/_custom_type_script = "uid://dsidci2l4yr4r"

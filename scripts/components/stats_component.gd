@@ -16,6 +16,7 @@ signal mana_changed(current_mana, max_mana) # mana update
 
 # get sibling components
 @onready var equipment_component: EquipmentComponent = get_parent().get_node_or_null("EquipmentComponent")
+@onready var attack_component: AttackComponent = get_parent().get_node_or_null("AttackComponent")
 
 # The entity's current, in-game stats.
 var current_health: int # entity hp tracker
@@ -104,8 +105,11 @@ func refresh_stats() -> void:
 func get_total_stat(stat_name: String) -> float:
 	var total_value: float = 0.0 # init 0
 
+	# If we're calculating "damage", get the base value from the AttackComponent.
+	if stat_name == "damage" and attack_component and attack_component.attack_data:
+		total_value = attack_component.attack_data.damage
 	# Start with the base value from the CharacterStats resource, if it exists.
-	if stat_name in stats_data:
+	elif stat_name in stats_data:
 		total_value = stats_data.get(stat_name)
 
 	# Add modifiers from equipped items.
