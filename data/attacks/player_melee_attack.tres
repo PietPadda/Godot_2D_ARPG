@@ -4,7 +4,7 @@
 
 [resource]
 script = ExtResource("1_fj2jl")
-damage = 25
+damage = 25.0
 range = 150.0
 animation_name = "Attack"
 metadata/_custom_type_script = "uid://dqoublaf4dqmb"

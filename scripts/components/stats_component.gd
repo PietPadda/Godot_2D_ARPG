@@ -14,6 +14,9 @@ signal mana_changed(current_mana, max_mana) # mana update
 # Link to the resource file that holds the base stats.
 @export var stats_data: CharacterStats
 
+# get sibling components
+@onready var equipment_component: EquipmentComponent = get_parent().get_node_or_null("EquipmentComponent")
+
 # The entity's current, in-game stats.
 var current_health: int # entity hp tracker
 var current_mana: int # mana tracker
@@ -96,3 +99,19 @@ func _level_up() -> void:
 func refresh_stats() -> void:
 	emit_signal("health_changed", current_health, stats_data.max_health)
 	emit_signal("mana_changed", current_mana, stats_data.max_mana)
+
+## Calculates a final stat value by combining base stats with equipment modifiers.
+func get_total_stat(stat_name: String) -> float:
+	var total_value: float = 0.0 # init 0
+
+	# Start with the base value from the CharacterStats resource, if it exists.
+	if stat_name in stats_data:
+		total_value = stats_data.get(stat_name)
+
+	# Add modifiers from equipped items.
+	if equipment_component: # if something equipped
+		for item in equipment_component.equipment_data.equipped_items.values(): # loop each
+			if item and item.stat_modifiers.has(stat_name): # if has same stat
+				total_value += item.stat_modifiers[stat_name] # add to our total value
+
+	return total_value # calculaed value

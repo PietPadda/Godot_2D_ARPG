@@ -30,6 +30,9 @@ func _ready() -> void:
 	# Connect our component's signal to a function in this script.
 	stats_component.died.connect(_on_death) # player died
 	EventBus.enemy_died.connect(_on_enemy_died) # enemy died
+	
+	# TEMPORARY: Equip a sword at the start of the game for testing.
+	get_node("EquipmentComponent").equip_item(load("res://data/items/crude_sword.tres"))
 
 # This function is called when the StatsComponent emits the "died" signal.
 ## Player death function for Player
