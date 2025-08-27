@@ -7,6 +7,7 @@ extends CanvasLayer
 @onready var mana_bar: ProgressBar = $PlayerManaBar
 @onready var mana_label: Label = $PlayerManaBar/ManaLabel # child of manabar
 @onready var inventory_panel = $InventoryPanel
+@onready var character_sheet = $CharacterSheet
 
 func _ready() -> void:
 	# We need a reference to the player to connect to their signals.
@@ -27,11 +28,23 @@ func _ready() -> void:
 		player_inventory.inventory_changed.connect(inventory_panel.redraw)
 		# Call the new initialize function ONCE.
 		inventory_panel.initialize_inventory(player_inventory.inventory_data)
+		
+		var player_equipment: EquipmentComponent = player.get_node("EquipmentComponent")
+		# Pass the component references to the character sheet controller.
+		character_sheet.inventory_component = player_inventory
+		character_sheet.equipment_component = player_equipment
 
 func _unhandled_input(event: InputEvent) -> void:
 	# Toggle the inventory panel's visibility.
 	if Input.is_action_just_pressed("toggle_inventory"):
 		inventory_panel.visible = not inventory_panel.visible
+	
+	# Toggle the character sheet panel's visibility
+	if Input.is_action_just_pressed("toggle_character_sheet"): # "C"
+		character_sheet.visible = not character_sheet.visible
+		# Redraw the sheet every time it's opened to ensure it's up to date.
+		if character_sheet.visible:
+			character_sheet.redraw()
 	
 	# F5 to quick save
 	if Input.is_action_just_pressed("save_game"):
