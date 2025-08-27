@@ -21,5 +21,5 @@ func unequip_item_by_slot(slot: ItemData.EquipmentSlot) -> void:
 		var item = equipment_data.equipped_items[slot]
 		if item:
 			equipment_data.equipped_items[slot] = null
-			emit_signal("equipment_changed")
+			emit_signal("equipment_changed") # Announce the change
 			print("Unequipped: ", item.item_name)

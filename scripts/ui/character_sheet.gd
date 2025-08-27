@@ -20,6 +20,8 @@ var inventory_component: InventoryComponent:
 var equipment_component: EquipmentComponent:
 	set(value):
 		equipment_component = value
+		# Listen for equipment changes to trigger a redraw.
+		equipment_component.equipment_changed.connect(redraw)
 
 func _ready() -> void:
 	# Connect signals from the UI slots to our controller logic.
@@ -59,7 +61,8 @@ func _unequip_item(slot_type: ItemData.EquipmentSlot, item_data: ItemData) -> vo
 	# The add_item function returns true if it succeeds.
 	# Check if inventory has space before unequipping.
 	if inventory_component.add_item(item_data):
-		equipment_component.equipment_data.equipped_items[slot_type] = null
+		# Call the component's method instead of modifying its data directly.
+		equipment_component.unequip_item_by_slot(slot_type)
 	# Redraw will also happen automatically here.
 
 # A central function to update all UI elements.
