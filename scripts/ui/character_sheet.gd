@@ -6,33 +6,32 @@ extends PanelContainer
 @onready var weapon_slot: PanelContainer = $HBoxContainer/VBoxContainer/WeaponSlot
 @onready var armor_slot: PanelContainer = $HBoxContainer/VBoxContainer/ArmorSlot
 
-# These setters will run automatically when the HUD assigns the components.
-# inventory setter
-var inventory_component: InventoryComponent:
-	set(value):
-		inventory_component = value
-		# Connect to the signal that announces data changes.
-		inventory_component.inventory_changed.connect(redraw) # redraw on any inv changes!
-		# Initialize the UI with the inventory data ONE time.
-		inventory_panel.initialize_inventory(inventory_component.inventory_data)
+# Remove the setter functions. These are now just regular variables.
+var inventory_component: InventoryComponent
+var equipment_component: EquipmentComponent
 
-# equipment setter
-var equipment_component: EquipmentComponent:
-	set(value):
-		equipment_component = value
-		# Listen for equipment changes to trigger a redraw.
-		equipment_component.equipment_changed.connect(redraw)
+# This is our new, explicit setup function.
+func initialize(inv_comp: InventoryComponent, equip_comp: EquipmentComponent):
+	self.inventory_component = inv_comp
+	self.equipment_component = equip_comp
+
+	# Connect to the data component signals
+	inventory_component.inventory_changed.connect(redraw)
+	equipment_component.equipment_changed.connect(redraw)
+
+	# Initialize the UI
+	inventory_panel.initialize_inventory(inventory_component.inventory_data)
+	# Connect to the UI slots now that they've been created
+	for slot in inventory_panel.grid_container.get_children():
+		slot.slot_clicked.connect(_on_inventory_slot_clicked)
+	
+	# Manually draw once on init to show initial state
+	redraw()
 
 func _ready() -> void:
 	# Connect signals from the UI slots to our controller logic.
 	weapon_slot.slot_clicked.connect(_on_equipment_slot_clicked)
 	armor_slot.slot_clicked.connect(_on_equipment_slot_clicked)
-	
-	# We must wait for the inventory_panel to create its slots before connecting to them.
-	await inventory_panel.ready
-	# We need to connect to every slot in the inventory.
-	for slot in inventory_panel.grid_container.get_children():
-		slot.slot_clicked.connect(_on_inventory_slot_clicked)
 
 # When an inventory item is clicked, try to equip it.
 func _on_inventory_slot_clicked(item_data: ItemData) -> void:
