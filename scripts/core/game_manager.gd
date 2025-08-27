@@ -17,14 +17,16 @@ func save_game() -> void:
 	# get player's components
 	var stats_component: StatsComponent = player.get_node("StatsComponent")
 	var inventory_component: InventoryComponent = player.get_node("InventoryComponent")
-
+	var equipment_component: EquipmentComponent = player.get_node("EquipmentComponent")
+	
 	var save_data = SaveData.new() # define save data
 	
 	# By duplicating the resources, we create a unique snapshot of the player's
 	# data, forcing Godot to save the actual values, not just a link.
 	save_data.player_stats_data = stats_component.stats_data.duplicate() # update with player stats
 	save_data.player_inventory_data = inventory_component.inventory_data.duplicate() # update with player items
-
+	save_data.player_equipment_data = equipment_component.equipment_data.duplicate() # update with player eq
+	
 	var error = ResourceSaver.save(save_data, SAVE_PATH) # error check
 	if error == OK: # will not print if save failed or error occured
 		print("Game saved successfully!")
