@@ -3,8 +3,7 @@ extends CharacterBody2D
 
 # Preload the scenes and resources we need to spawn.
 const LootDropScene = preload("res://scenes/items/loot_drop.tscn")
-const GoldCoinData = preload("res://data/items/gold_coin.tres")
-const CrudeSwordData = preload("res://data/items/crude_sword.tres")
+const DroppedItemData  = preload("res://data/items/crude_sword.tres")
 
 @onready var state_machine: StateMachine = $StateMachine
 @onready var stats_component: StatsComponent = $StatsComponent
@@ -41,8 +40,8 @@ func _on_death() -> void:
 	get_tree().current_scene.add_child(loot_instance)
 	
 	# ONLY NOW SAFE TO CALL INIT
-	# Initialize it with our crude sword data.
-	loot_instance.initialize(CrudeSwordData)
+	# Initialize it with preset loot
+	loot_instance.initialize(DroppedItemData)
 	
 	# When this enemy dies, it should remove itself from the game.
 	queue_free()
