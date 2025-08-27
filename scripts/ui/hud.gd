@@ -6,7 +6,6 @@ extends CanvasLayer
 @onready var health_label: Label = $PlayerHealthBar/HealthLabel # child of healthbar
 @onready var mana_bar: ProgressBar = $PlayerManaBar
 @onready var mana_label: Label = $PlayerManaBar/ManaLabel # child of manabar
-@onready var inventory_panel = $InventoryPanel
 @onready var character_sheet = $CharacterSheet
 
 func _ready() -> void:
@@ -23,31 +22,20 @@ func _ready() -> void:
 		on_player_health_changed(player_stats.current_health, player_stats.stats_data.max_health)
 		on_player_mana_changed(player_stats.current_mana, player_stats.stats_data.max_mana)
 		
-		# Connect to the new inventory signal.
+		# We only need to pass the components to the character sheet now.
 		var player_inventory = player.get_node("InventoryComponent")
-		player_inventory.inventory_changed.connect(inventory_panel.redraw)
-		# Call the new initialize function ONCE.
-		inventory_panel.initialize_inventory(player_inventory.inventory_data)
-		
-		connect_inventory_slots() # Connect the slots after they are created.
-		player_inventory.inventory_changed.connect(connect_inventory_slots) # Reconnect when inventory redraws.
-
 		var player_equipment: EquipmentComponent = player.get_node("EquipmentComponent")
-		# Pass the component references to the character sheet controller.
-		character_sheet.inventory_component = player_inventory
-		character_sheet.equipment_component = player_equipment
+		character_sheet.inventory_component = player_inventory # add inv to char sheet
+		character_sheet.equipment_component = player_equipment # add eq to char sheet
+	
 
 func _unhandled_input(event: InputEvent) -> void:
-	# Toggle the inventory panel's visibility.
-	if Input.is_action_just_pressed("toggle_inventory"):
-		inventory_panel.visible = not inventory_panel.visible
-	
 	# Toggle the character sheet panel's visibility
 	if Input.is_action_just_pressed("toggle_character_sheet"): # "C"
 		character_sheet.visible = not character_sheet.visible
 		# Redraw the sheet every time it's opened to ensure it's up to date.
 		if character_sheet.visible:
-			character_sheet.redraw()
+			character_sheet.redraw() # redraw it
 	
 	# F5 to quick save
 	if Input.is_action_just_pressed("save_game"):
@@ -69,15 +57,3 @@ func on_player_mana_changed(current_mana: int, max_mana: int) -> void:
 	mana_bar.max_value = max_mana
 	mana_bar.value = current_mana
 	mana_label.text = "%d / %d" % [current_mana, max_mana]
-
-# This function runs when an inventory slot's "clicked" signal is emitted.
-# For now, it will just print a message.
-func _on_inventory_slot_clicked(item_data: ItemData) -> void:
-	print("Clicked on item in inventory: ", item_data.item_name)
-
-# We need a central place to connect all the slot signals.
-func connect_inventory_slots() -> void:
-	for slot in inventory_panel.grid_container.get_children():
-		# Check if it's not already connected to prevent duplicates.
-		if not slot.slot_clicked.is_connected(_on_inventory_slot_clicked):
-			slot.slot_clicked.connect(_on_inventory_slot_clicked)

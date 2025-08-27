@@ -4,5 +4,5 @@
 
 [resource]
 script = ExtResource("1_d2mav")
-capacity = 20
+capacity = 30
 metadata/_custom_type_script = "uid://ccw2kksbss84s"
