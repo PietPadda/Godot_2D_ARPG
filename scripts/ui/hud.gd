@@ -29,6 +29,9 @@ func _ready() -> void:
 		# Call the new initialize function ONCE.
 		inventory_panel.initialize_inventory(player_inventory.inventory_data)
 		
+		connect_inventory_slots() # Connect the slots after they are created.
+		player_inventory.inventory_changed.connect(connect_inventory_slots) # Reconnect when inventory redraws.
+
 		var player_equipment: EquipmentComponent = player.get_node("EquipmentComponent")
 		# Pass the component references to the character sheet controller.
 		character_sheet.inventory_component = player_inventory
@@ -66,3 +69,15 @@ func on_player_mana_changed(current_mana: int, max_mana: int) -> void:
 	mana_bar.max_value = max_mana
 	mana_bar.value = current_mana
 	mana_label.text = "%d / %d" % [current_mana, max_mana]
+
+# This function runs when an inventory slot's "clicked" signal is emitted.
+# For now, it will just print a message.
+func _on_inventory_slot_clicked(item_data: ItemData) -> void:
+	print("Clicked on item in inventory: ", item_data.item_name)
+
+# We need a central place to connect all the slot signals.
+func connect_inventory_slots() -> void:
+	for slot in inventory_panel.grid_container.get_children():
+		# Check if it's not already connected to prevent duplicates.
+		if not slot.slot_clicked.is_connected(_on_inventory_slot_clicked):
+			slot.slot_clicked.connect(_on_inventory_slot_clicked)

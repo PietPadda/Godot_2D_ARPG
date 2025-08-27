@@ -41,8 +41,8 @@ func _on_death() -> void:
 	get_tree().current_scene.add_child(loot_instance)
 	
 	# ONLY NOW SAFE TO CALL INIT
-	# Initialize it with our gold coin data.
-	loot_instance.initialize(GoldCoinData)
+	# Initialize it with our crude sword data.
+	loot_instance.initialize(CrudeSwordData)
 	
 	# When this enemy dies, it should remove itself from the game.
 	queue_free()
