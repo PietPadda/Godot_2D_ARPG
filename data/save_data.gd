@@ -7,3 +7,4 @@ extends Resource
 
 @export var player_stats_data: CharacterStats
 @export var player_inventory_data: InventoryData
+@export var player_equipment_data: EquipmentData

@@ -14,6 +14,7 @@ func add_item(item_data: ItemData) -> bool:
 	if inventory_data.items.size() < inventory_data.capacity:
 		inventory_data.items.append(item_data)
 		emit_signal("inventory_changed", inventory_data)
+		print("InventoryComponent: inventory_changed signal emitted.")
 		return true
 	else:
 		print("Inventory is full!")
@@ -25,3 +26,4 @@ func remove_item(item_to_remove: ItemData) -> void:
 	if item_index != -1:
 		inventory_data.items.remove_at(item_index)
 		emit_signal("inventory_changed", inventory_data)
+		print("InventoryComponent: inventory_changed signal emitted.")
