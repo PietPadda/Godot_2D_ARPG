@@ -20,7 +20,7 @@ func initialize_inventory(inventory_data: InventoryData) -> void:
 # Redraws all slots based on the inventory data.
 ## inventory redraw
 func redraw(inventory_data: InventoryData) -> void:
-	# get all the slots
+	# get all the slotsz
 	var slots = grid_container.get_children()
 	
 	# Loop through all existing slots.
