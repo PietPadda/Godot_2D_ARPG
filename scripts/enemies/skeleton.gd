@@ -4,6 +4,7 @@ extends CharacterBody2D
 # Preload the scenes and resources we need to spawn.
 const LootDropScene = preload("res://scenes/items/loot_drop.tscn")
 const GoldCoinData = preload("res://data/items/gold_coin.tres")
+const CrudeSwordData = preload("res://data/items/crude_sword.tres")
 
 @onready var state_machine: StateMachine = $StateMachine
 @onready var stats_component: StatsComponent = $StatsComponent
