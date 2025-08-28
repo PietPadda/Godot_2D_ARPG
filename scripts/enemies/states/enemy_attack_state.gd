@@ -1,12 +1,10 @@
 # enemy_attack_state.gd
 class_name EnemyAttackState
-extends State
+extends EnemyState # Corrected from State
 
 var target: Node2D
 
-@onready var owner_node: CharacterBody2D = get_owner()
-@onready var attack_component: AttackComponent = owner_node.get_node("AttackComponent")
-@onready var animation_component: AnimationComponent = owner_node.get_node("AnimationComponent")
+# Component references are now inherited.
 
 func enter() -> void:
 	print(owner_node.name + " is now Attacking.")
@@ -15,7 +13,6 @@ func enter() -> void:
 		return
 
 	# Stop moving before attacking.
-	var movement_component = owner_node.get_node("AIMovementComponent")
 	movement_component.set_movement_target(owner_node.global_position)
 
 	# Exceute attacking
