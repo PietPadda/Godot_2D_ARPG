@@ -4,10 +4,8 @@ class_name PlayerMoveState
 extends PlayerState # Changed from 'State'
 
 # References to the player's nodes we need to interact with.
-@onready var movement_component: PlayerMovementComponent = player.get_node("PlayerMovementComponent")
 @onready var animation_component: AnimationComponent = player.get_node("AnimationComponent")
 @onready var targeting_component: PlayerTargetingComponent = player.get_node("PlayerTargetingComponent")
-@onready var stats_component: StatsComponent = player.get_node("StatsComponent")
 
 func enter() -> void:
 	# For debugging, let's see when we enter this state.
@@ -48,10 +46,7 @@ func process_physics(_delta: float) -> void:
 	if distance_to_target < movement_component.stopping_distance:
 		# If we have, we transition back to the "Idle" state.
 		state_machine.change_state(States.PLAYER_STATE_NAMES[States.PLAYER.IDLE])
+		return # Stop processing
 		
-	# If not, perform the movement.
-	var direction = player.global_position.direction_to(movement_component.target_position)
-	var move_speed = stats_component.get_total_stat("move_speed")
-	
-	player.velocity = direction * move_speed
-	player.move_and_slide()
+	# If not, use the shared movement logic from the base class.
+	perform_movement()
