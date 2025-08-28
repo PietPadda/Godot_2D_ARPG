@@ -39,17 +39,21 @@ func _on_inventory_slot_clicked(item_data: ItemData) -> void:
 	if item_data.equipment_slot == ItemData.EquipmentSlot.NONE:
 		return
 		
-	# Check if an item is already in that slot, and unequip it first.
-	var slot_type = item_data.equipment_slot
-	var current_item = equipment_component.equipment_data.equipped_items[slot_type]
+	var item_to_equip = item_data # item in inv
+	var slot_to_fill = item_to_equip.equipment_slot # applicable slot
+	# get current item from the same slot as equipped
+	var currently_equipped_item = equipment_component.equipment_data.equipped_items[slot_to_fill]
 	
-	# If a different item is already in that slot, unequip it first.
-	if current_item:
-		_unequip_item(slot_type, current_item)
-
-	equipment_component.equip_item(item_data) # add item to eq
-	inventory_component.remove_item(item_data) # then remove from inv
-	# The redraw will happen automatically via the inventory_changed signal.
+	# equipping/swapping logic
+	if currently_equipped_item == null: # if no item is equipped
+		# Equipping to an EMPTY slot
+		equipment_component.equip_item(item_to_equip) # equip item in inv
+		inventory_component.remove_item(item_to_equip) # remove same item from inv
+	else: # if an item in slot already equipped
+		#  SWAPPING with an equipped item
+		inventory_component.remove_item(item_to_equip) # renove item to equip from inv
+		inventory_component.add_item(currently_equipped_item) # move prev item back to inv
+		equipment_component.equip_item(item_to_equip) # equip item in inv
 
 # When an equipped item is clicked, unequip it.
 func _on_equipment_slot_clicked(slot_type: ItemData.EquipmentSlot, item_data: ItemData) -> void:
