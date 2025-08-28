@@ -66,7 +66,6 @@ func _unequip_item(slot_type: ItemData.EquipmentSlot, item_data: ItemData) -> vo
 
 # A central function to update all UI elements.
 func redraw() -> void:
-	print("CharacterSheet: Redraw requested.") # Add this line for debugging
 	# Check if the components are ready before redrawing.
 	if not is_instance_valid(inventory_component) or not is_instance_valid(equipment_component):
 		return

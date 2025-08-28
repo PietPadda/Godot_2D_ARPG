@@ -6,4 +6,4 @@ extends Resource
 ## A data container for all inventory properties.
 
 @export var capacity: int = 20
-var items: Array[ItemData] = []
+@export var items: Array[ItemData] = []
