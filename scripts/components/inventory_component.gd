@@ -3,7 +3,7 @@ class_name InventoryComponent
 extends Node
 
 # signals
-signal inventory_changed(inventory_data)
+signal inventory_changed # just a signal, no stale data pass
 
 # scene nodes
 @export var inventory_data: InventoryData
@@ -13,8 +13,7 @@ signal inventory_changed(inventory_data)
 func add_item(item_data: ItemData) -> bool:
 	if inventory_data.items.size() < inventory_data.capacity:
 		inventory_data.items.append(item_data)
-		emit_signal("inventory_changed", inventory_data)
-		print("InventoryComponent: inventory_changed signal emitted.")
+		emit_signal("inventory_changed") # Emit without data
 		return true
 	else:
 		print("Inventory is full!")
@@ -25,5 +24,4 @@ func remove_item(item_to_remove: ItemData) -> void:
 	var item_index = inventory_data.items.find(item_to_remove)
 	if item_index != -1:
 		inventory_data.items.remove_at(item_index)
-		emit_signal("inventory_changed", inventory_data)
-		print("InventoryComponent: inventory_changed signal emitted.")
+		emit_signal("inventory_changed") # Emit without data
