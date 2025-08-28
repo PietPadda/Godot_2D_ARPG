@@ -9,8 +9,6 @@ var speed: float
 @onready var timer: Timer = $Timer
 
 func _ready() -> void:
-	# Connect the body_entered signal to our hit logic.
-	body_entered.connect(_on_body_entered)
 	# Connect the timer to self-destruct after a few seconds.
 	timer.timeout.connect(queue_free)
 
