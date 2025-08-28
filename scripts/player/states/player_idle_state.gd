@@ -4,7 +4,6 @@ class_name PlayerIdleState
 extends PlayerState # Changed from 'State'
 
 # References to the player's nodes we need to interact with.
-@onready var movement_component: PlayerMovementComponent = player.get_node("PlayerMovementComponent")
 @onready var animation_component: AnimationComponent = player.get_node("AnimationComponent")
 @onready var targeting_component: PlayerTargetingComponent = player.get_node("PlayerTargetingComponent")
 
