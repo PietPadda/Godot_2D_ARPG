@@ -20,7 +20,7 @@ func process_physics(delta: float) -> void:
 
 	# Check if we are in range to attack.
 	var distance_to_target = owner_node.global_position.distance_to(target.global_position)
-	var attack_range = attack_component.get_total_stat("range") # use the total calc, not the base stat!
+	var attack_range = stats_component.get_total_stat("range") # use the total calc, not the base stat!
 
 	if distance_to_target <= attack_range:
 				# Pass the target to the AttackState and transition.

@@ -106,8 +106,9 @@ func get_total_stat(stat_name: String) -> float:
 	var total_value: float = 0.0 # init 0
 
 	# If we're calculating "damage", get the base value from the AttackComponent.
-	if stat_name == "damage" and attack_component and attack_component.attack_data:
-		total_value = attack_component.attack_data.damage
+	if (stat_name == "damage" or stat_name == "range") and attack_component and attack_component.attack_data:
+		# Base damage and range come from the equipped attack.
+		total_value = attack_component.attack_data.get(stat_name)
 	# Start with the base value from the CharacterStats resource, if it exists.
 	elif stat_name in stats_data:
 		total_value = stats_data.get(stat_name)
