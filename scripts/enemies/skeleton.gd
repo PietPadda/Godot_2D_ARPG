@@ -32,6 +32,11 @@ func _on_death() -> void:
 	# Announce the death and pass along our stats data.
 	EventBus.emit_signal("enemy_died", stats_component.stats_data)
 	
+	# Tell the engine to call our new function, but only after the physics step is complete.
+	call_deferred("_spawn_loot_and_die")
+
+# This new function contains the logic that modifies the scene tree.
+func _spawn_loot_and_die():
 	# Create an instance of the loot drop.
 	var loot_instance = LootDropScene.instantiate()
 	# Position it where the enemy died.

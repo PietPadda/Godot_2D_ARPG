@@ -1,20 +1,22 @@
 # player_idle_state.gd
 # The state for when the player is standing still.
 class_name PlayerIdleState
-extends State
+extends PlayerState # Changed from 'State'
 
 # References to the player's nodes we need to interact with.
-@onready var player: CharacterBody2D = get_owner()
 @onready var movement_component: PlayerMovementComponent = player.get_node("PlayerMovementComponent")
 @onready var animation_component: AnimationComponent = player.get_node("AnimationComponent")
 @onready var targeting_component: PlayerTargetingComponent = player.get_node("PlayerTargetingComponent")
-@onready var skill_component: SkillCasterComponent = player.get_node("SkillCasterComponent")
 
 func enter() -> void:
 	# Play Idle Anim on Entering
 	animation_component.play_animation("Idle")
 
 func process_input(event: InputEvent) -> void:
+	# Call the shared logic from our new base class first.
+	if handle_skill_cast(event):
+		return # If a skill was cast, we don't need to do anything else.
+		
 	# When the move action is pressed, we want to start moving.
 	if event.is_action_pressed("move_click"):
 		var target = targeting_component.get_target_under_mouse() # get object under mouse
@@ -31,17 +33,3 @@ func process_input(event: InputEvent) -> void:
 			
 			# ...and then we tell the state machine to switch to the "Move" state.
 			state_machine.change_state("Move")
-			
-	# Cast a skill on right click
-	if event.is_action_pressed("cast_skill"):
-		# Ask it which skill is equipped for this action.
-		var skill_to_cast = skill_component.secondary_attack_skill
-
-		# Only proceed if a skill is actually equipped.
-		if skill_to_cast:
-			var cast_state: PlayerCastState = state_machine.states["cast"]
-			cast_state.skill_to_cast = skill_to_cast
-			cast_state.cast_target_position = player.get_global_mouse_position()
-			state_machine.change_state("Cast")
-		else:
-			print("No secondary attack equipped")
