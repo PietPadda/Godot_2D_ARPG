@@ -9,6 +9,8 @@ extends PlayerState # Changed from 'State'
 @onready var targeting_component: PlayerTargetingComponent = player.get_node("PlayerTargetingComponent")
 
 func enter() -> void:
+	# Explicitly stop all movement when entering the Idle state.
+	player.velocity = Vector2.ZERO
 	# Play Idle Anim on Entering
 	animation_component.play_animation("Idle")
 
