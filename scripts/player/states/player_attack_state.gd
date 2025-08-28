@@ -13,7 +13,7 @@ func enter() -> void:
 	print("Entering Attack State")
 	if not is_instance_valid(target):
 		# If we enter this state without a valid target, exit immediately.
-		state_machine.change_state("Idle")
+		state_machine.change_state(States.PLAYER_STATE_NAMES[States.PLAYER.IDLE])
 		return
 	
 	# Tell the component to do its job.
@@ -24,5 +24,5 @@ func enter() -> void:
 func on_attack_finished() -> void:
 	print("Exiting Attack State")
 	# Once the attack is finished, go back to being idle.
-	state_machine.change_state("Idle")
+	state_machine.change_state(States.PLAYER_STATE_NAMES[States.PLAYER.IDLE])
  

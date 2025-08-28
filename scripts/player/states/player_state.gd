@@ -14,6 +14,6 @@ func handle_skill_cast(event: InputEvent) -> bool:
 			var cast_state: PlayerCastState = state_machine.states["cast"] # store cast state
 			cast_state.skill_to_cast = skill_to_cast # set the skill to cast
 			cast_state.cast_target_position = player.get_global_mouse_position() # set target
-			state_machine.change_state("Cast") # change the state with skill and target
+			state_machine.change_state(States.PLAYER_STATE_NAMES[States.PLAYER.CAST]) # change the state with skill and target
 			return true # Input was handled
 	return false # Input was not handled

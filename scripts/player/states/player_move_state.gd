@@ -32,7 +32,7 @@ func process_input(event: InputEvent) -> void:
 				print("New target selected while moving. Switching to Chase.")
 				var chase_state = state_machine.states["chase"]
 				chase_state.target = target
-				state_machine.change_state("Chase")
+				state_machine.change_state(States.PLAYER_STATE_NAMES[States.PLAYER.CHASE])
 			else:
 				# If no target was found, it's just a regular move command.
 				# Update the destination and stay in the MoveState.
@@ -44,4 +44,4 @@ func process_physics(_delta: float) -> void:
 	var distance_to_target = player.global_position.distance_to(movement_component.target_position)
 	if distance_to_target < movement_component.stopping_distance:
 		# If we have, we transition back to the "Idle" state.
-		state_machine.change_state("Idle")
+		state_machine.change_state(States.PLAYER_STATE_NAMES[States.PLAYER.IDLE])

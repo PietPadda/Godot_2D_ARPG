@@ -25,11 +25,11 @@ func process_input(event: InputEvent) -> void:
 			# We found a target! Pass it to the chase state.
 			var chase_state = state_machine.states["chase"]
 			chase_state.target = target # pass target to chase state
-			state_machine.change_state("Chase") # we now chase
+			state_machine.change_state(States.PLAYER_STATE_NAMES[States.PLAYER.CHASE]) # we now chase
 		else: # general movement
 			# We tell the MovementComponent where to go...
 			var target_position = player.get_global_mouse_position()
 			movement_component.set_movement_target(target_position)
 			
 			# ...and then we tell the state machine to switch to the "Move" state.
-			state_machine.change_state("Move")
+			state_machine.change_state(States.PLAYER_STATE_NAMES[States.PLAYER.MOVE])

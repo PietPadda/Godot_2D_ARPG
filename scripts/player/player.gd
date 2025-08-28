@@ -44,7 +44,7 @@ func _ready() -> void:
 ## Player death function for Player
 func _on_death() -> void:
 	# We tell our state machine to switch to the DeadState.
-	state_machine.change_state("Dead")
+	state_machine.change_state(States.PLAYER_STATE_NAMES[States.PLAYER.DEAD])
 	
 	# Create an instance of our Game Over screen.
 	var game_over_instance = GameOverScreen.instantiate()
