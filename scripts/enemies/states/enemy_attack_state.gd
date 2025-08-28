@@ -11,7 +11,7 @@ var target: Node2D
 func enter() -> void:
 	print(owner_node.name + " is now Attacking.")
 	if not is_instance_valid(target):
-		state_machine.change_state("Idle")
+		state_machine.change_state(States.ENEMY_STATE_NAMES[States.ENEMY.IDLE]) # change state
 		return
 
 	# Stop moving before attacking.
@@ -24,4 +24,4 @@ func enter() -> void:
 
 func on_attack_finished() -> void:
 	# After attacking, go back to chasing the player.
-	state_machine.change_state("Chase")
+	state_machine.change_state(States.ENEMY_STATE_NAMES[States.ENEMY.CHASE]) # change state

@@ -25,7 +25,7 @@ func _on_aggro_radius_body_entered(body: Node2D) -> void:
 	# Get the Chase state, give it the player as a target, and change state.
 	var chase_state = state_machine.states["chase"] # set state var
 	chase_state.target = body # set state target
-	state_machine.change_state("Chase") # update state
+	state_machine.change_state(States.ENEMY_STATE_NAMES[States.ENEMY.CHASE]) # update state
 	
 # This function is called when our own StatsComponent emits the "died" signal.
 func _on_death() -> void:

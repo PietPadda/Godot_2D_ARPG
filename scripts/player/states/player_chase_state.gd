@@ -15,7 +15,7 @@ func enter() -> void:
 	# On entering, immediately start moving towards the target.
 	if not is_instance_valid(target):
 		print("Exiting Chase State")
-		state_machine.change_state("Idle") # just idle if invalid target
+		state_machine.change_state(States.PLAYER_STATE_NAMES[States.PLAYER.IDLE]) # just idle if invalid target
 		return # early exit
 	
 	movement_component.set_movement_target(target.global_position) # update target position
@@ -25,7 +25,7 @@ func process_physics(delta: float) -> void:
 	# First, check if our target still exists.
 	if not is_instance_valid(target):
 		print("Exiting Chase State")
-		state_machine.change_state("Idle") # just idle if invalid target
+		state_machine.change_state(States.PLAYER_STATE_NAMES[States.PLAYER.IDLE]) # just idle if invalid target
 		return # early exit
 
 	# Continuously update the movement target in case the target moves.
@@ -43,4 +43,4 @@ func process_physics(delta: float) -> void:
 		var attack_state = state_machine.states["attack"] # attackstate
 		attack_state.target = target # pass the target to attack
 		print("Exiting Chase State")
-		state_machine.change_state("Attack") # and attack
+		state_machine.change_state(States.PLAYER_STATE_NAMES[States.PLAYER.ATTACK]) # and attack

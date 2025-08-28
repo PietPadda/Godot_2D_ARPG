@@ -14,7 +14,7 @@ func enter() -> void:
 func process_physics(delta: float) -> void:
 	# First, check if our target is still valid (hasn't been defeated, etc.).
 	if not is_instance_valid(target):
-		state_machine.change_state("Idle")
+		state_machine.change_state(States.ENEMY_STATE_NAMES[States.ENEMY.IDLE]) # change state
 		return
 
 	# Continuously update our movement goal to the target's current position.
@@ -27,4 +27,4 @@ func process_physics(delta: float) -> void:
 	if distance_to_target <= attack_range:
 		var attack_state = state_machine.states["attack"]
 		attack_state.target = target # Pass the target to the attack state
-		state_machine.change_state("Attack")
+		state_machine.change_state(States.ENEMY_STATE_NAMES[States.ENEMY.ATTACK]) # change state
