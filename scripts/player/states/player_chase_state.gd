@@ -16,7 +16,6 @@ func enter() -> void:
 		state_machine.change_state(States.PLAYER_STATE_NAMES[States.PLAYER.IDLE]) # just idle if invalid target
 		return # early exit
 	
-	movement_component.set_movement_target(target.global_position) # update target position
 	animation_component.play_animation("Move") # play Move Anim
 
 func process_physics(delta: float) -> void:
@@ -24,9 +23,6 @@ func process_physics(delta: float) -> void:
 	if not is_instance_valid(target):
 		state_machine.change_state(States.PLAYER_STATE_NAMES[States.PLAYER.IDLE]) # just idle if invalid target
 		return # early exit
-
-	# Continuously update the movement target in case the target moves.
-	movement_component.set_movement_target(target.global_position)
 
 	# Check distance using our new, correct stat calculator.
 	var distance_to_target = player.global_position.distance_to(target.global_position) 
@@ -42,4 +38,4 @@ func process_physics(delta: float) -> void:
 		state_machine.change_state(States.PLAYER_STATE_NAMES[States.PLAYER.ATTACK]) # and attack
 	else:
 		# If we're not in range, we need to move! This was the missing piece.
-		perform_movement()
+		pass

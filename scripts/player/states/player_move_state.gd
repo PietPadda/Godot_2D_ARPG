@@ -7,46 +7,46 @@ extends PlayerState # Changed from 'State'
 @onready var animation_component: AnimationComponent = player.get_node("AnimationComponent")
 @onready var targeting_component: PlayerTargetingComponent = player.get_node("PlayerTargetingComponent")
 
+# This will hold the array of world positions we need to walk through.
+var move_path: PackedVector2Array = []
+
 func enter() -> void:
-	# For debugging, let's see when we enter this state.
+	# When we enter this state, start listening for the movement component to finish a step.
+	grid_movement_component.move_finished.connect(_on_move_finished)
+	# Immediately try to move to the first tile in our path.
+	_move_to_next_tile()
+	# Play the move animation.
 	animation_component.play_animation("Move") # play Move anim
 
 func exit() -> void:
-	pass
+	# IMPORTANT: When we exit this state, stop listening to the signal to prevent bugs.
+	grid_movement_component.move_finished.disconnect(_on_move_finished)
 
-func process_input(event: InputEvent) -> void:
-	# Call the shared logic from our new base class first.
-	if handle_skill_cast(event):
-		return # If a skill was cast, stop processing.
-	
-	# If the player clicks a new destination while already moving,
-	# we update the target without changing state.
-	if event.is_action_pressed("move_click"):
-		# If the player clicks, we first check if they clicked on an enemy.
-		if event.is_action_pressed("move_click"):
-			var target = targeting_component.get_target_under_mouse()
-			
-			if target:
-				# If a target was found, interrupt the current move and start chasing.
-				print("New target selected while moving. Switching to Chase.")
-				var chase_state = state_machine.states["chase"]
-				chase_state.target = target
-				state_machine.change_state(States.PLAYER_STATE_NAMES[States.PLAYER.CHASE])
-			else:
-				# If no target was found, it's just a regular move command.
-				# Update the destination and stay in the MoveState.
-				var target_position = player.get_global_mouse_position()
-				movement_component.set_movement_target(target_position)
-
-func process_physics(_delta: float) -> void:
-	# In the physics update, we check if we've reached our destination.
-	var distance_to_target = player.global_position.distance_to(movement_component.target_position)
-	
-	# Check if we've arrived.
-	if distance_to_target < movement_component.stopping_distance:
-		# If we have, we transition back to the "Idle" state.
+# This function is the heart of our path-following loop.
+func _move_to_next_tile():
+	# If the path is empty, our journey is over.
+	if move_path.is_empty():
+		# Transition back to the Idle state.
 		state_machine.change_state(States.PLAYER_STATE_NAMES[States.PLAYER.IDLE])
-		return # Stop processing
-		
-	# If not, use the shared movement logic from the base class.
-	perform_movement()
+		return
+
+	# Use the methods for a PackedVector2Array.
+	# Get the next waypoint from the front of the array.
+	var next_position = move_path[0]
+	# Remove that waypoint from the array so we don't process it again.
+	move_path.remove_at(0)
+	# Tell our "motor" component to move there.
+	grid_movement_component.move_to(next_position)
+
+# This function is called automatically every time the GridMovementComponent finishes a single tile move.
+func _on_move_finished():
+	# When we arrive at a tile, simply try to move to the next one.
+	_move_to_next_tile()
+
+# We'll add logic here later to handle interrupting a move with a new one.
+func process_input(event: InputEvent) -> void:
+	# First, check if a skill was cast, which should interrupt the movement.
+	if handle_skill_cast(event):
+		# Clear the path so we don't resume moving after the cast.
+		move_path.clear()
+		return
