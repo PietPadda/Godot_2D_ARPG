@@ -20,6 +20,13 @@ func process_input(event: InputEvent) -> void:
 		
 	# When the move action is pressed, we want to start moving.
 	if event.is_action_pressed("move_click"):
+		# --- TEMPORARY TEST CODE ---
+		var mouse_pos = player.get_global_mouse_position()
+		var map_pos = Grid.world_to_map(mouse_pos)
+		
+		print("Clicked world position: ", mouse_pos)
+		print("Calculated map coordinate: ", map_pos)
+		
 		var target = targeting_component.get_target_under_mouse() # get object under mouse
 		if target: # if something is below the mouse
 			# If we found a target, we will attack it.
