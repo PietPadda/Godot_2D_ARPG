@@ -5,7 +5,7 @@ extends State
 # We can put references needed by ALL player states here.
 @onready var player: CharacterBody2D = get_owner()
 @onready var skill_caster_component: SkillCasterComponent = player.get_node("SkillCasterComponent")
-@onready var movement_component: PlayerMovementComponent = player.get_node("PlayerMovementComponent")
+@onready var grid_movement_component: GridMovementComponent = player.get_node("GridMovementComponent")
 @onready var stats_component: StatsComponent = player.get_node("StatsComponent")
 
 # This is our shared input logic.
@@ -20,11 +20,5 @@ func handle_skill_cast(event: InputEvent) -> bool:
 			return true # Input was handled
 	return false # Input was not handled
 
-# This is our shared movement function.
-func perform_movement():
-	# get direction and move pseed from stats
-	var direction = player.global_position.direction_to(movement_component.target_position)
-	var move_speed = stats_component.get_total_stat("move_speed")
-	
-	player.velocity = direction * move_speed # apply movement
-	player.move_and_slide()
+# The perform_movement function is no longer needed here, as the new component handles it.
+# We can delete the perform_movement() function.

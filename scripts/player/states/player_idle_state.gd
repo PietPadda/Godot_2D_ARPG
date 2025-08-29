@@ -6,7 +6,6 @@ extends PlayerState # Changed from 'State'
 # References to the player's nodes we need to interact with.
 @onready var animation_component: AnimationComponent = player.get_node("AnimationComponent")
 @onready var targeting_component: PlayerTargetingComponent = player.get_node("PlayerTargetingComponent")
-@onready var grid_movement_component: GridMovementComponent = player.get_node("GridMovementComponent")
 
 func enter() -> void:
 	# Explicitly stop all movement when entering the Idle state.
@@ -21,32 +20,24 @@ func process_input(event: InputEvent) -> void:
 		
 	# When the move action is pressed, we want to start moving.
 	if event.is_action_pressed("move_click"):
-		# --- TEMPORARY TEST CODE ---
-		# We'll use this to test moving to a SINGLE tile.
-		
-		# Get the map coordinate of the click.
-		var map_pos = Grid.world_to_map(player.get_global_mouse_position())
-		
-		# Convert that grid coordinate back to a world position (the center of the tile).
-		var target_world_pos = Grid.map_to_world(map_pos)
-		
-		# Tell our new component to move there.
-		grid_movement_component.move_to(target_world_pos)
-		# We are NOT changing state yet. This is just to test the component.
-		
-		'''
 		var target = targeting_component.get_target_under_mouse() # get object under mouse
 		if target: # if something is below the mouse
-			# If we found a target, we will attack it.
-			# We found a target! Pass it to the chase state.
-			var chase_state = state_machine.states["chase"]
-			chase_state.target = target # pass target to chase state
-			state_machine.change_state(States.PLAYER_STATE_NAMES[States.PLAYER.CHASE]) # we now chase
+			# Chase logic will be refactored for the grid system later.
+			# For now, we focus on pathfinding to a point.
+			print("Chase logic for grid movement is not implemented yet.")
 		else: # general movement
-			# We tell the MovementComponent where to go...
-			var target_position = player.get_global_mouse_position()
-			movement_component.set_movement_target(target_position)
+			# This is the new pathfinding logic.
+			var start_pos = Grid.world_to_map(player.global_position)
+			var end_pos = Grid.world_to_map(player.get_global_mouse_position())
 			
-			# ...and then we tell the state machine to switch to the "Move" state.
-			state_machine.change_state(States.PLAYER_STATE_NAMES[States.PLAYER.MOVE])
-			'''
+			# Ask the GridManager for a path.
+			var path = Grid.find_path(start_pos, end_pos)
+			
+			# Only transition to the Move state if a valid path was found.
+			if not path.is_empty():
+				# Get a reference to the Move state from the FSM.
+				var move_state: PlayerMoveState = state_machine.states["move"]
+				# Give the path to the Move state.
+				move_state.move_path = path
+				# Change the state to start moving.
+				state_machine.change_state(States.PLAYER_STATE_NAMES[States.PLAYER.MOVE])
