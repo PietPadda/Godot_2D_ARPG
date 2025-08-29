@@ -8,6 +8,8 @@ var tile_map_layer: TileMapLayer
 # Pathfinding
 # The AStar2D object that will handle path calculations.
 var astar_graph := AStar2D.new()
+
+# These are our "address books" to translate between tile coordinates and A* IDs.
 # A dictionary to quickly look up a tile's unique ID for the A* graph.
 var map_coords_to_id: Dictionary = {}
 # An array to convert a point ID from the A* graph back to a tile coordinate.
@@ -30,52 +32,67 @@ func build_level_graph():
 	var query_params = PhysicsPointQueryParameters2D.new()
 	query_params.collision_mask = 1 # Physics Layer 1 is our "world" layer for walls.
 
-	# checks every tile within the map's bounds.
+	# We get the bounding box of all painted tiles, so we know the area we need to search.
 	var map_rect = tile_map_layer.get_used_rect()
 	var walkable_cells: Array[Vector2i] = []
 
-	# Iterate over every cell within the map's boundaries.
+	# We visit every single tile within that boundary, one by one.
 	for x in range(map_rect.position.x, map_rect.end.x): # loop x cells
 		for y in range(map_rect.position.y, map_rect.end.y): # loop y cells
 			var cell = Vector2i(x, y) # cell at x:y
-			# Set the query's position to the center of the current tile.
+			 # We get the world position of the tile's center.
 			query_params.position = map_to_world(cell)
-			# Perform the physics query.
+			# We ask the physics engine: "Is there a wall here?"
 			var result = space_state.intersect_point(query_params)
-			# If the result is empty, it means no colliders were found. The tile is walkable!
+			# If the result is empty, there's no wall. It's a "road"!
 			if result.is_empty():
 				walkable_cells.append(cell)
-				
+	
+	# We go through our list of walkable roads...
 	# First pass: Add all walkable tiles as points to the graph.
 	for cell in walkable_cells:
+		 # Create a new, unique ID (0, then 1, then 2, etc.)
 		var point_id = id_to_map_coords.size() # get tilemap coords
-		id_to_map_coords.append(cell) # add to cell
-		map_coords_to_id[cell] = point_id # A* dict for quick lookup
+		
+		# Update our address books.
+		id_to_map_coords.append(cell) # add to cell, ID 50 -> (8, 6)
+		map_coords_to_id[cell] = point_id # A* dict for quick lookup, (8, 6) -> ID 50
+		
+		# Add the "intersection" to the A* graph's map.
 		astar_graph.add_point(point_id, cell) # add A* point to graph
 	
+	# We visit every walkable tile again.
 	# Second pass: Connect adjacent points.
 	for cell in walkable_cells:
 		var current_point_id = map_coords_to_id[cell]
-		# Check all 8 neighbors (including diagonals)
+		
+		# We check all 8 of its immediate neighbors (including diagonals)
 		for x in range(-1, 2):
 			for y in range(-1, 2):
-				if x == 0 and y == 0:
+				if x == 0 and y == 0: # Skip the center tile itself
 					continue # Don't check against self
 				
 				var neighbor = cell + Vector2i(x, y)
+				# We ask: "Is this neighbor a valid, walkable intersection we've already mapped?"
 				if map_coords_to_id.has(neighbor):
 					var neighbor_point_id = map_coords_to_id[neighbor]
+					# If yes, we tell the A* graph: "You can travel between these two points."
 					# Connect the points so the graph knows they are neighbors.
 					astar_graph.connect_points(current_point_id, neighbor_point_id)
 
 # Finds the shortest path between two points on the grid.
 func find_path(start_coord: Vector2i, end_coord: Vector2i) -> PackedVector2Array:
+	# First, a safety check: are the start and end points valid locations on our map?
 	if not map_coords_to_id.has(start_coord) or not map_coords_to_id.has(end_coord):
+		# If not, return an empty path.
 		return [] # Return empty path if start/end is not a valid walkable tile
 
+	# Use our "address book" to look up the simple IDs for our start and end tiles.
 	var start_id = map_coords_to_id[start_coord]
 	var end_id = map_coords_to_id[end_coord]
 	
+	# Hand these two simple IDs to the powerful A* algorithm.
+	# It does all the heavy lifting and returns the best path.
 	# This returns an array of world positions, which is what we need for movement.
 	return astar_graph.get_point_path(start_id, end_id)
 
