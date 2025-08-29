@@ -21,11 +21,13 @@ func process_input(event: InputEvent) -> void:
 	# When the move action is pressed, we want to start moving.
 	if event.is_action_pressed("move_click"):
 		# --- TEMPORARY TEST CODE ---
-		var mouse_pos = player.get_global_mouse_position()
-		var map_pos = Grid.world_to_map(mouse_pos)
+		var start_tile = Grid.world_to_map(player.global_position) # conv player position to tile
+		var end_tile = Grid.world_to_map(player.get_global_mouse_position()) # convert click to tile
 		
-		print("Clicked world position: ", mouse_pos)
-		print("Calculated map coordinate: ", map_pos)
+		var path = Grid.find_path(start_tile, end_tile) # A* path generate store to path
+		
+		print("Attempting to find path from ", start_tile, " to ", end_tile) # print A* attempt
+		print("Calculated path: ", path) # then actual result
 		
 		var target = targeting_component.get_target_under_mouse() # get object under mouse
 		if target: # if something is below the mouse
