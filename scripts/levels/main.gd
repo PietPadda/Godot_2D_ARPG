@@ -7,3 +7,5 @@ extends Node2D
 func _unhandled_input(event: InputEvent) -> void:
 	# Give the GridManager a direct reference to our level's TileMapLayer.
 	Grid.tile_map_layer = tile_map_layer
+	# Now, tell it to build the pathfinding graph for the current level.
+	Grid.build_level_graph()
