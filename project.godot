@@ -21,6 +21,7 @@ config/icon="res://assets/icon.svg"
 EventBus="*res://scripts/core/event_bus.gd"
 GameManager="*res://scripts/core/game_manager.gd"
 States="*res://scripts/core/state_manager.gd"
+Grid="*res://scripts/core/grid_manager.gd"
 
 [input]
 
