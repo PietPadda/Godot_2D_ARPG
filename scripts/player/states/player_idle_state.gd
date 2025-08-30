@@ -21,12 +21,14 @@ func process_input(event: InputEvent) -> void:
 	# When the move action is pressed, we want to start moving.
 	if event.is_action_pressed("move_click"):
 		var target = targeting_component.get_target_under_mouse() # get object under mouse
+		
 		if target: # if something is below the mouse
-			# Chase logic will be refactored for the grid system later.
-			# For now, we focus on pathfinding to a point.
-			print("Chase logic for grid movement is not implemented yet.")
+			# A target was clicked! Pass it to the Chase state and transition.
+			var chase_state: PlayerChaseState = state_machine.states["chase"]
+			chase_state.target = target
+			state_machine.change_state(States.PLAYER_STATE_NAMES[States.PLAYER.CHASE])
 		else: # general movement
-			# This is the new pathfinding logic.
+			# This is the pathfinding logic for simple movement.
 			var start_pos = Grid.world_to_map(player.global_position)
 			var end_pos = Grid.world_to_map(player.get_global_mouse_position())
 			
