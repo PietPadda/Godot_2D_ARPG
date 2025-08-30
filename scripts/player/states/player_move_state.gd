@@ -10,6 +10,11 @@ extends PlayerState # Changed from 'State'
 var move_path: PackedVector2Array = []
 
 func enter() -> void:
+	# Remove the first point, which is the player's current location.
+	# This prevents trying to first walk to it's starting position
+	if not move_path.is_empty():
+		move_path.remove_at(0)
+
 	# When we enter, start listening for the component to finish a step.
 	grid_movement_component.move_finished.connect(_on_move_finished)
 	player.get_node("AnimationComponent").play_animation("Move")
