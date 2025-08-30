@@ -3,50 +3,35 @@
 class_name PlayerMoveState
 extends PlayerState # Changed from 'State'
 
-# References to the player's nodes we need to interact with.
-@onready var targeting_component: PlayerTargetingComponent = player.get_node("PlayerTargetingComponent")
+# Scene referenes needed for move state
+@onready var grid_movement_component: GridMovementComponent = player.get_node("GridMovementComponent")
 
 # This will hold the array of world positions we need to walk through.
 var move_path: PackedVector2Array = []
-var current_target_pos: Vector2
-@export var stopping_distance: float = 5.0
-# This flag is our new, reliable way to check if we have a destination.
-var has_target: bool = false
 
 func enter() -> void:
-	print("--- ENTERING MOVE STATE ---")
-	print("Initial path received: ", move_path)
+	# Immediately tell the component to start following the path.
+	grid_movement_component.move_along_path(move_path)
+	
+	# Listen for the component to tell us when the path is finished.
+	grid_movement_component.path_finished.connect(_on_path_finished)
 	# Play the move animation.
 	player.get_node("AnimationComponent").play_animation("Move") # play Move anim
-	# Start the process by getting the first tile from the path.
-	_set_next_target()
-
+	
 func exit() -> void:
-	# When we leave this state (e.g., finish moving or cast a skill),
-	# ensure the player stops moving immediately.
-	player.velocity = Vector2.ZERO
-	has_target = false
+	# IMPORTANT: Disconnect the signal when we leave this state to prevent bugs.
+	grid_movement_component.path_finished.disconnect(_on_path_finished)
 
-# This function now also manages our 'has_target' flag.
-func _set_next_target() -> bool:
-	# Check if the path is empty.
-	if move_path.is_empty():
-		has_target = false # We've run out of path.
-		print("Path is empty. No new target.")
-		return false # No more targets
+# When the component signals it's done, we transition back to Idle.
+func _on_path_finished() -> void:
+	state_machine.change_state(States.PLAYER_STATE_NAMES[States.PLAYER.IDLE])
 
-	# Get the next waypoint from the path.
-	has_target = true # We have a new target.
-	self.current_target_pos = move_path[0]
-	move_path.remove_at(0)
-	print("New Target Set: ", current_target_pos)
-	return true # We have a new target
-
+# We keep the input logic to handle interrupting a move with a new one or a skill cast.
 func process_input(event: InputEvent) -> void:
 	# First, check if a skill was cast, which should interrupt the movement.
 	if handle_skill_cast(event):
 		# Clear the path so we don't resume moving after the cast.
-		move_path.clear() # Clear the path so we don't resume moving
+		grid_movement_component.move_along_path([]) # Clear the path so we don't resume moving
 		return
 		
 	# Handle being interrupted by a new move command
@@ -56,29 +41,9 @@ func process_input(event: InputEvent) -> void:
 			Grid.world_to_map(player.get_global_mouse_position())
 		)
 		if not new_path.is_empty():
-			self.move_path = new_path
-			_set_next_target()
+			# Tell the component to start following the new path immediately.
+			grid_movement_component.move_along_path(new_path)
 			
+# The physics process is now empty because the component handles it.
 func process_physics(_delta: float) -> void:
-	# If we don't have a target, something is wrong. Go idle.
-	# Use our reliable flag for the check.
-	if not has_target:
-		state_machine.change_state(States.PLAYER_STATE_NAMES[States.PLAYER.IDLE])
-		return
-
-	# Check the distance to the center of the target tile.
-	var distance_to_target = player.global_position.distance_to(current_target_pos)
-	
-	# If we are very close to the center, we've "arrived" at the tile.
-	if distance_to_target < stopping_distance:
-		# Try to get the next tile in our path.
-		if not _set_next_target():
-			# If there are no more tiles, our journey is over.
-			state_machine.change_state(States.PLAYER_STATE_NAMES[States.PLAYER.IDLE])
-			return
-	
-	# If we haven't arrived yet, calculate velocity and move.
-	var direction = player.global_position.direction_to(current_target_pos) # dir
-	var move_speed = stats_component.get_total_stat("move_speed") # vel
-	player.velocity = direction * move_speed # dir * vel
-	player.move_and_slide() # apply
+	pass

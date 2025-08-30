@@ -8,7 +8,7 @@ extends Resource
 
 @export var level: int = 1
 @export var current_xp: int = 0
-@export var xp_to_next_level: int = 100
+@export var xp_to_next_level: int = 50
 @export var xp_reward: int = 0
 
 @export var max_health: int = 100

@@ -6,8 +6,8 @@
 script = ExtResource("1_e1cmu")
 level = 1
 current_xp = 0
-xp_to_next_level = 100
-xp_reward = 25
+xp_to_next_level = 50
+xp_reward = 50
 max_health = 50
 max_mana = 0
 strength = 0
