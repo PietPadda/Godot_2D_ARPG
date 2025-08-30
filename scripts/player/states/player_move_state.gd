@@ -14,6 +14,8 @@ var current_target_pos: Vector2
 var has_target: bool = false
 
 func enter() -> void:
+	print("--- ENTERING MOVE STATE ---")
+	print("Initial path received: ", move_path)
 	# Play the move animation.
 	player.get_node("AnimationComponent").play_animation("Move") # play Move anim
 	# Start the process by getting the first tile from the path.
@@ -30,12 +32,14 @@ func _set_next_target() -> bool:
 	# Check if the path is empty.
 	if move_path.is_empty():
 		has_target = false # We've run out of path.
+		print("Path is empty. No new target.")
 		return false # No more targets
 
 	# Get the next waypoint from the path.
 	has_target = true # We have a new target.
 	self.current_target_pos = move_path[0]
 	move_path.remove_at(0)
+	print("New Target Set: ", current_target_pos)
 	return true # We have a new target
 
 func process_input(event: InputEvent) -> void:
