@@ -19,7 +19,11 @@ const STOPPING_DISTANCE: float = 5.0
 # Public API
 # Starts moving the character along a given path of world coordinates.
 func move_along_path(path: PackedVector2Array) -> void:
+	# If the provided path is empty, treat it as a command to stop.
 	if path.is_empty():
+		move_path.clear()
+		has_target = false
+		character_body.velocity = Vector2.ZERO
 		return # no path
 	
 	move_path = path

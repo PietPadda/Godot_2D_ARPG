@@ -43,3 +43,16 @@ func process_input(event: InputEvent) -> void:
 				move_state.move_path = path
 				# Change the state to start moving.
 				state_machine.change_state(States.PLAYER_STATE_NAMES[States.PLAYER.MOVE])
+
+# We now check for continuous input every physics frame.
+func _physics_process(_delta: float) -> void:
+	# If the move button is held down, and we're not targeting an enemy.
+	if Input.is_action_pressed("move_click") and targeting_component.get_target_under_mouse() == null:
+		var start_pos = Grid.world_to_map(player.global_position)
+		var end_pos = Grid.world_to_map(player.get_global_mouse_position())
+		var path = Grid.find_path(start_pos, end_pos)
+		
+		if not path.is_empty():
+			var move_state: PlayerMoveState = state_machine.states["move"]
+			move_state.move_path = path
+			state_machine.change_state(States.PLAYER_STATE_NAMES[States.PLAYER.MOVE])
