@@ -66,6 +66,11 @@ func _recalculate_path() -> void:
 	self.last_target_tile = end_pos
 	self.move_path = Grid.find_path(start_pos, end_pos)
 	
+	# Remove the first point, which is the player's current location.
+	# This prevents trying to first walk to it's starting position
+	if not move_path.is_empty():
+		move_path.remove_at(0)
+	
 	player.get_node("AnimationComponent").play_animation("Move")
 	_move_to_next_tile()
 	
