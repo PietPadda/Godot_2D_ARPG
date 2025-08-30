@@ -13,6 +13,8 @@ signal move_finished
 # Pathfinding State
 # This flag will act as our "lock" to prevent interruptions.
 var is_moving: bool = false
+# We'll store the active tween here.
+var current_tween: Tween
 const STOPPING_DISTANCE: float = 5.0
 
 # Public API
@@ -21,18 +23,25 @@ func move_to(target_pos: Vector2) -> void:
 	if is_moving: return 
 	is_moving = true
 	
-	var tween = create_tween().set_parallel(false) # our inbetween tile state
+	# Kill any previous tween that might exist to be safe.
+	if current_tween:
+		current_tween.kill()
+	
+	current_tween  = create_tween().set_parallel(false) # our inbetween tile state
 	var duration = character_body.global_position.distance_to(target_pos) / stats_component.get_total_stat("move_speed")
 	
-	tween.tween_property(character_body, "global_position", target_pos, duration)
-	tween.tween_callback(_on_move_finished)
+	current_tween.tween_property(character_body, "global_position", target_pos, duration)
+	current_tween.tween_callback(_on_move_finished)
 
 # Stops all current movement immediately.
 func stop() -> void:
-	# (We will implement this in a future step if needed for things like stuns)
-	pass
+	if current_tween:
+		current_tween.kill()
+	is_moving = false
+	character_body.velocity = Vector2.ZERO # Ensure physics velocity is also stopped
 
 # Internal Logic
 func _on_move_finished() -> void:
 	is_moving = false
+	current_tween = null # Clear the finished tween
 	emit_signal("move_finished")
