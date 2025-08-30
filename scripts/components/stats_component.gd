@@ -88,8 +88,8 @@ func _level_up() -> void:
 	stats_data.xp_to_next_level = int(stats_data.xp_to_next_level * 1.5)
 
 	# Apply stat gains.
-	stats_data.max_health += 20 # hp increase
-	stats_data.max_mana += 10 # mana increase
+	stats_data.max_health += 25 # hp increase
+	stats_data.max_mana += 20 # mana increase
 	current_health = stats_data.max_health # Heal to full on level up.
 	current_mana = stats_data.max_mana # Restore to full on level up.
 

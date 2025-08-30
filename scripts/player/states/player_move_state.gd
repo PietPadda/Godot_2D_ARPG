@@ -26,24 +26,23 @@ func exit() -> void:
 func _on_path_finished() -> void:
 	state_machine.change_state(States.PLAYER_STATE_NAMES[States.PLAYER.IDLE])
 
-# We keep the input logic to handle interrupting a move with a new one or a skill cast.
+# The input logic is now moved to the physics process for continuous checks.
 func process_input(event: InputEvent) -> void:
 	# First, check if a skill was cast, which should interrupt the movement.
 	if handle_skill_cast(event):
 		# Clear the path so we don't resume moving after the cast.
 		grid_movement_component.move_along_path([]) # Clear the path so we don't resume moving
 		return
-		
-	# Handle being interrupted by a new move command
-	if event.is_action_pressed("move_click"):
+
+# The physics process is now empty because the component handles it.
+func process_physics(_delta: float) -> void:
+	# If the move button is still held, find a new path to the mouse.
+	if Input.is_action_pressed("move_click"):
 		var new_path = Grid.find_path(
 			Grid.world_to_map(player.global_position),
 			Grid.world_to_map(player.get_global_mouse_position())
 		)
+		# Only update if a valid path was found.
 		if not new_path.is_empty():
 			# Tell the component to start following the new path immediately.
 			grid_movement_component.move_along_path(new_path)
-			
-# The physics process is now empty because the component handles it.
-func process_physics(_delta: float) -> void:
-	pass
