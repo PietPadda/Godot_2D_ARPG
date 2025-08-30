@@ -8,8 +8,15 @@ extends PlayerState # Changed from 'State'
 
 # This will hold the array of world positions we need to walk through.
 var move_path: PackedVector2Array = []
+# We'll add a new variable to track the final tile of our current path.
+var final_destination_tile: Vector2i
 
 func enter() -> void:
+	# When we start moving, we need to know where our path ends.
+	if not move_path.is_empty():
+		var last_world_pos = move_path[move_path.size() - 1]
+		final_destination_tile = Grid.world_to_map(last_world_pos)
+	
 	# Immediately tell the component to start following the path.
 	grid_movement_component.move_along_path(move_path)
 	
@@ -38,11 +45,16 @@ func process_input(event: InputEvent) -> void:
 func process_physics(_delta: float) -> void:
 	# If the move button is still held, find a new path to the mouse.
 	if Input.is_action_pressed("move_click"):
-		var new_path = Grid.find_path(
-			Grid.world_to_map(player.global_position),
-			Grid.world_to_map(player.get_global_mouse_position())
-		)
-		# Only update if a valid path was found.
-		if not new_path.is_empty():
-			# Tell the component to start following the new path immediately.
-			grid_movement_component.move_along_path(new_path)
+		var current_mouse_tile = Grid.world_to_map(player.get_global_mouse_position())
+		
+		# ONLY recalculate the path if the mouse is pointing to a NEW tile.
+		if current_mouse_tile != final_destination_tile:
+			var start_pos = Grid.world_to_map(player.global_position)
+			var new_path = Grid.find_path(start_pos, current_mouse_tile)
+			
+			# Only update if a valid path was found.
+			if not new_path.is_empty():
+				# Update the destination we are tracking.
+				self.final_destination_tile = current_mouse_tile
+				# Tell the component to start following the new path immediately.
+				grid_movement_component.move_along_path(new_path)
