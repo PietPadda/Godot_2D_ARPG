@@ -91,10 +91,16 @@ func find_path(start_coord: Vector2i, end_coord: Vector2i) -> PackedVector2Array
 	var start_id = map_coords_to_id[start_coord]
 	var end_id = map_coords_to_id[end_coord]
 	
-	# Hand these two simple IDs to the powerful A* algorithm.
-	# It does all the heavy lifting and returns the best path.
-	# This returns an array of world positions, which is what we need for movement.
-	return astar_graph.get_point_path(start_id, end_id)
+	# Get the path of MAP coordinates from the A* graph.
+	var map_path = astar_graph.get_id_path(start_id, end_id)
+	
+	# This is the new, critical step: Convert the path of IDs to world positions.
+	var world_path: PackedVector2Array = []
+	for point_id in map_path:
+		var map_coord = astar_graph.get_point_position(point_id)
+		world_path.append(map_to_world(map_coord))
+		
+	return world_path
 
 # Converts a world position (like a mouse click) to a map grid coordinate.
 func world_to_map(world_position: Vector2) -> Vector2i:
