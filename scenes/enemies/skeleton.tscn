@@ -10,7 +10,7 @@
 [ext_resource type="Script" uid="uid://cq7nayflwwt05" path="res://scripts/enemies/states/enemy_chase_state.gd" id="4_vncds"]
 [ext_resource type="Script" uid="uid://dbt2oyeqhc5bu" path="res://scripts/enemies/states/enemy_attack_state.gd" id="6_quxur"]
 [ext_resource type="Script" uid="uid://bci6iykvj8w5a" path="res://scripts/components/attack_component.gd" id="10_quxur"]
-[ext_resource type="Script" uid="uid://cge2vo5fieiw2" path="res://scripts/components/ai_movement_component.gd" id="11_vnbgq"]
+[ext_resource type="Script" uid="uid://bv6wfr1422str" path="res://scripts/components/grid_movement_component.gd" id="11_vnbgq"]
 [ext_resource type="Resource" uid="uid://b27y5ph3w53qj" path="res://data/attacks/skeleton_claw.tres" id="11_xro8k"]
 [ext_resource type="PackedScene" uid="uid://c4bbgluq74ake" path="res://scenes/ui/HealthBar.tscn" id="13_xro8k"]
 
@@ -104,13 +104,11 @@ offset_bottom = -55.0
 script = ExtResource("2_xxwgs")
 stats_data = ExtResource("3_lj2r1")
 
-[node name="AIMovementComponent" type="Node" parent="."]
+[node name="GridMovementComponent" type="Node" parent="."]
 script = ExtResource("11_vnbgq")
 
 [node name="AttackComponent" type="Node" parent="."]
 script = ExtResource("10_quxur")
 attack_data = ExtResource("11_xro8k")
-
-[node name="NavigationAgent2D" type="NavigationAgent2D" parent="."]
 
 [connection signal="body_entered" from="AggroRadius" to="." method="_on_aggro_radius_body_entered"]

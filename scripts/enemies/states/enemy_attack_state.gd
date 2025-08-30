@@ -4,16 +4,15 @@ extends EnemyState # Corrected from State
 
 var target: Node2D
 
-# Component references are now inherited.
+@onready var grid_movement_component: GridMovementComponent = owner_node.get_node("GridMovementComponent")
 
 func enter() -> void:
-	print(owner_node.name + " is now Attacking.")
+	# Stop all movement before attacking.
+	grid_movement_component.stop()
+	
 	if not is_instance_valid(target):
 		state_machine.change_state(States.ENEMY_STATE_NAMES[States.ENEMY.IDLE]) # change state
 		return
-
-	# Stop moving before attacking.
-	movement_component.set_movement_target(owner_node.global_position)
 
 	# Exceute attacking
 	attack_component.execute(target)
