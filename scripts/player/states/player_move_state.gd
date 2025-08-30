@@ -37,6 +37,13 @@ func _on_move_finished() -> void:
 	# When we arrive, simply try to move to the next one.
 	_move_to_next_tile()
 
+# process_input handles discretse events like casting.
+func process_input(event: InputEvent) -> void:
+	if handle_skill_cast(event):
+		# A skill was successfully cast. Stop all movement immediately.
+		grid_movement_component.stop()
+		return
+
 # The physics process is now empty because the component handles it.
 func process_physics(_delta: float) -> void:
 	# We check for new move commands ONLY if the component is NOT busy.
