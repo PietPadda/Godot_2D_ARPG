@@ -10,6 +10,8 @@ extends PlayerState # Changed from 'State'
 var move_path: PackedVector2Array = []
 var current_target_pos: Vector2
 @export var stopping_distance: float = 5.0
+# This flag is our new, reliable way to check if we have a destination.
+var has_target: bool = false
 
 func enter() -> void:
 	# Play the move animation.
@@ -21,13 +23,17 @@ func exit() -> void:
 	# When we leave this state (e.g., finish moving or cast a skill),
 	# ensure the player stops moving immediately.
 	player.velocity = Vector2.ZERO
+	has_target = false
 
+# This function now also manages our 'has_target' flag.
 func _set_next_target() -> bool:
 	# Check if the path is empty.
 	if move_path.is_empty():
+		has_target = false # We've run out of path.
 		return false # No more targets
 
 	# Get the next waypoint from the path.
+	has_target = true # We have a new target.
 	self.current_target_pos = move_path[0]
 	move_path.remove_at(0)
 	return true # We have a new target
@@ -51,7 +57,8 @@ func process_input(event: InputEvent) -> void:
 			
 func process_physics(_delta: float) -> void:
 	# If we don't have a target, something is wrong. Go idle.
-	if current_target_pos == null:
+	# Use our reliable flag for the check.
+	if not has_target:
 		state_machine.change_state(States.PLAYER_STATE_NAMES[States.PLAYER.IDLE])
 		return
 
