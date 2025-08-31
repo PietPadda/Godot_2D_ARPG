@@ -72,7 +72,7 @@ position = Vector2(-2, 0)
 shape = SubResource("CircleShape2D_s0h66")
 
 [node name="CollisionShape2D" type="CollisionPolygon2D" parent="."]
-polygon = PackedVector2Array(-64, -51, -60, -60, -50, -64, 53, -64, 60, -59, 64, -51, 64, 52, 60, 59, 52, 64, -53, 64, -60, 59, -64, 51)
+polygon = PackedVector2Array(0, -62, 62, 0, 0, 63, -62, 0)
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
 libraries = {
