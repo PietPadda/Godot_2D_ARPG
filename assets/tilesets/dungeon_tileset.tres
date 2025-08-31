@@ -1,16 +1,25 @@
-[gd_resource type="TileSet" load_steps=3 format=3 uid="uid://c02d7kxsulago"]
+[gd_resource type="TileSet" load_steps=5 format=3 uid="uid://c02d7kxsulago"]
 
 [ext_resource type="Texture2D" uid="uid://4d68lc3a6uwp" path="res://assets/icon.svg" id="1_cqqpv"]
+[ext_resource type="Texture2D" uid="uid://c5rmkerpqllh4" path="res://assets/tilesets/floor.png" id="2_6qcrk"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_6qcrk"]
 texture = ExtResource("1_cqqpv")
 texture_region_size = Vector2i(128, 128)
 0:0/0 = 0
-0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(0, -64, -64, 0, 0, 64, 64, 0)
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_yct7i"]
+texture = ExtResource("2_6qcrk")
+texture_region_size = Vector2i(128, 128)
+0:0/0 = 0
+0:0/0/custom_data_0 = true
 
 [resource]
 tile_shape = 1
-tile_size = Vector2i(128, 128)
+tile_size = Vector2i(160, 80)
 physics_layer_0/collision_layer = 1
 physics_layer_0/collision_mask = 0
+custom_data_layer_0/name = "is_walkable"
+custom_data_layer_0/type = 1
 sources/0 = SubResource("TileSetAtlasSource_6qcrk")
+sources/1 = SubResource("TileSetAtlasSource_yct7i")

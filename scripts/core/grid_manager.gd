@@ -37,9 +37,18 @@ func build_level_graph():
 	for x in range(map_rect.position.x, map_rect.end.x): # loop x cells
 		for y in range(map_rect.position.y, map_rect.end.y): # loop y cells
 			var cell = Vector2i(x, y) # cell at x:y
-			# THE FIX: A tile is walkable if it has a source_id of -1 (meaning it's empty).
-			# This is much more reliable than checking for tile_data or physics.
-			if tile_map_layer.get_cell_source_id(cell) == -1:
+			
+			# THE NEW, ROBUST LOGIC:
+			var tile_data = tile_map_layer.get_cell_tile_data(cell)
+			
+			# A cell is walkable if it's empty (no tile data)
+			# OR if it has a tile, and that tile's "is_walkable" custom data is true.
+			var is_walkable = false
+			if not tile_data:
+				is_walkable = true # Empty space is walkable
+			else:
+				is_walkable = tile_data.get_custom_data("is_walkable") # Check the tile's property
+			if is_walkable:
 				walkable_cells.append(cell)
 				
 	# Debug Walkable Tiles Visualisation
