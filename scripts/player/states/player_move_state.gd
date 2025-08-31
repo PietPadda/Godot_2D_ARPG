@@ -35,12 +35,23 @@ func process_input(event: InputEvent) -> void:
 
 # The physics process is now empty because the component handles it.
 func process_physics(_delta: float) -> void:
-	# We check for new move commands ONLY if the component is NOT busy.
+	# If the move button is still held, find a new path to the mouse.
 	if Input.is_action_pressed("move_click"):
 		var current_mouse_tile = Grid.world_to_map(player.get_global_mouse_position())
+		
+		# ONLY recalculate the path if the mouse is pointing to a NEW tile.
 		if current_mouse_tile != final_destination_tile:
+			# --- DEBUG PRINT 2 ---
+			# Announce that we are about to recalculate.
+			print("MoveState: Recalculating path to new tile: ", current_mouse_tile)
+			
 			var start_pos = Grid.world_to_map(player.global_position)
 			var new_path = Grid.find_path(start_pos, current_mouse_tile)
+			
+			# --- DEBUG PRINT 3 ---
+			# Let's see what this new path is.
+			print("MoveState: New path calculated: ", new_path)
+			
 			# Only update if a valid path was found.
 			if not new_path.is_empty():
 				self.final_destination_tile = current_mouse_tile

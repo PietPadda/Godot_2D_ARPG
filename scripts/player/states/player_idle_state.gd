@@ -33,10 +33,18 @@ func process_input(event: InputEvent) -> void:
 func _physics_process(_delta: float) -> void:
 	# If the move button is held down, and we're not targeting an enemy.
 	if Input.is_action_pressed("move_click") and targeting_component.get_target_under_mouse() == null:
+		# Get starting and end positions for the path calc
 		var start_pos = Grid.world_to_map(player.global_position)
 		var end_pos = Grid.world_to_map(player.get_global_mouse_position())
+		
+		# Ask the GridManager for a path.
 		var path = Grid.find_path(start_pos, end_pos)
 		
+		# --- DEBUG PRINT 1 ---
+		# Let's see the raw path the moment it's created.
+		print("IdleState calculated path: ", path)
+		
+		# Only transition to the Move state if a valid path was found.
 		if not path.is_empty():
 			var move_state: PlayerMoveState = state_machine.states["move"]
 			move_state.move_path = path
