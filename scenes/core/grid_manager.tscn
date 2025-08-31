@@ -1,0 +1,8 @@
+[gd_scene load_steps=3 format=3 uid="uid://drk1a58hu0pwm"]
+
+[ext_resource type="Script" uid="uid://d1hfbuatlrubg" path="res://scripts/core/grid_manager.gd" id="1_dowsy"]
+[ext_resource type="PackedScene" uid="uid://bqwmbhdbdr7sf" path="res://scenes/debug/debug_tile.tscn" id="2_5nh28"]
+
+[node name="GridManager" type="Node"]
+script = ExtResource("1_dowsy")
+debug_tile_scene = ExtResource("2_5nh28")

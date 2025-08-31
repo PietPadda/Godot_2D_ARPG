@@ -2,6 +2,9 @@
 class_name GridManager
 extends Node
 
+# Our debug tile scene
+@export var debug_tile_scene: PackedScene
+
 # This will hold a reference to the main level's TileMapLayer.
 var tile_map_layer: TileMapLayer
 
@@ -38,6 +41,17 @@ func build_level_graph():
 			# get_cell_tile_data returns null if the cell is empty.
 			if not tile_map_layer.get_cell_tile_data(cell):
 				walkable_cells.append(cell)
+				
+	# START OF NEW DEBUG VISUALIZATION CODE
+	if debug_tile_scene:
+		var main_scene = get_tree().current_scene
+		for cell in walkable_cells:
+			var tile_instance = debug_tile_scene.instantiate()
+			main_scene.add_child(tile_instance)
+			# Center the debug tile over the grid cell
+			# Note: Convert the Vector2i to a Vector2 before subtracting
+			tile_instance.global_position = map_to_world(cell) - (Vector2(tile_map_layer.tile_set.tile_size) / 2)
+	# END OF NEW DEBUG VISUALIZATION CODE
 	
 	# We go through our list of walkable roads...
 	# First pass: Add all walkable tiles as points to the graph.
