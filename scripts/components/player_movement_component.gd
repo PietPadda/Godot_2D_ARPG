@@ -4,7 +4,7 @@ class_name PlayerMovementComponent
 extends Node
 
 # Export vars
-@export var stopping_distance: float = 32.0
+@export var stopping_distance: float = 6.0
 
 # The target position for the character to move towards.
 var target_position: Vector2
