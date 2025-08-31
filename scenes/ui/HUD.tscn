@@ -1,4 +1,4 @@
-[gd_scene load_steps=6 format=3 uid="uid://mhkp0k8x04dx"]
+[gd_scene load_steps=8 format=3 uid="uid://mhkp0k8x04dx"]
 
 [ext_resource type="Script" uid="uid://dhvhugt6bxkun" path="res://scripts/ui/hud.gd" id="1_kw0id"]
 [ext_resource type="PackedScene" uid="uid://mgpdom0bxt1y" path="res://scenes/ui/character_sheet.tscn" id="3_6ll6g"]
@@ -11,6 +11,12 @@ bg_color = Color(0.882353, 0, 0, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ig75s"]
 bg_color = Color(0, 0, 0.882353, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_4ed8p"]
+bg_color = Color(0, 0, 0, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_rnyu1"]
+bg_color = Color(1, 0.490196, 0, 1)
 
 [node name="HUD" type="CanvasLayer" groups=["hud"]]
 script = ExtResource("1_kw0id")
@@ -25,7 +31,7 @@ grow_vertical = 0
 theme_override_styles/background = SubResource("StyleBoxFlat_atyv1")
 theme_override_styles/fill = SubResource("StyleBoxFlat_6ll6g")
 step = 1.0
-value = 50.0
+value = 40.0
 show_percentage = false
 
 [node name="HealthLabel" type="Label" parent="PlayerHealthBar"]
@@ -35,7 +41,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-text = "50 / 100"
+text = "40 / 100"
 horizontal_alignment = 1
 vertical_alignment = 1
 
@@ -52,7 +58,7 @@ grow_vertical = 0
 theme_override_styles/background = SubResource("StyleBoxFlat_atyv1")
 theme_override_styles/fill = SubResource("StyleBoxFlat_ig75s")
 step = 1.0
-value = 50.0
+value = 60.0
 show_percentage = false
 
 [node name="ManaLabel" type="Label" parent="PlayerManaBar"]
@@ -62,7 +68,36 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-text = "50 / 100"
+text = "60 / 100"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="PlayerXpBar" type="ProgressBar" parent="."]
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -275.0
+offset_top = -40.0
+offset_right = 275.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_styles/background = SubResource("StyleBoxFlat_4ed8p")
+theme_override_styles/fill = SubResource("StyleBoxFlat_rnyu1")
+max_value = 4756.0
+step = 1.0
+value = 2213.0
+show_percentage = false
+
+[node name="XpLabel" type="Label" parent="PlayerXpBar"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Level 1: 2213/4756"
 horizontal_alignment = 1
 vertical_alignment = 1
 

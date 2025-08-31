@@ -6,6 +6,8 @@ extends CanvasLayer
 @onready var health_label: Label = $PlayerHealthBar/HealthLabel # child of healthbar
 @onready var mana_bar: ProgressBar = $PlayerManaBar
 @onready var mana_label: Label = $PlayerManaBar/ManaLabel # child of manabar
+@onready var xp_bar: ProgressBar = $PlayerXpBar
+@onready var xp_label: Label = $PlayerXpBar/XpLabel # child of xpbar
 @onready var character_sheet = $CharacterSheet
 
 func _ready() -> void:
@@ -17,10 +19,12 @@ func _ready() -> void:
 		# Connect our UI update function to the player's signal.
 		player_stats.health_changed.connect(on_player_health_changed)
 		player_stats.mana_changed.connect(on_player_mana_changed)
+		player_stats.xp_changed.connect(on_player_xp_changed)
 		
 		# Manually update bars once on startup to get the initial value.
 		on_player_health_changed(player_stats.current_health, player_stats.stats_data.max_health)
 		on_player_mana_changed(player_stats.current_mana, player_stats.stats_data.max_mana)
+		on_player_xp_changed(player_stats.stats_data.level, player_stats.stats_data.current_xp, player_stats.stats_data.xp_to_next_level)
 		
 		# We only need to pass the components to the character sheet now.
 		var player_inventory = player.get_node("InventoryComponent")
@@ -57,3 +61,9 @@ func on_player_mana_changed(current_mana: int, max_mana: int) -> void:
 	mana_bar.max_value = max_mana
 	mana_bar.value = current_mana
 	mana_label.text = "%d / %d" % [current_mana, max_mana]
+
+## handle xp & level updates
+func on_player_xp_changed(level: int, current_xp: int, xp_to_next_level: int) -> void:
+	xp_bar.max_value = xp_to_next_level
+	xp_bar.value = current_xp
+	xp_label.text = "Lvl %d: %d / %d XP" % [level, current_xp, xp_to_next_level]
