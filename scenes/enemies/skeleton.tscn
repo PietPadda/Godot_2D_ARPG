@@ -1,4 +1,4 @@
-[gd_scene load_steps=19 format=3 uid="uid://dg2sqch3jtd3h"]
+[gd_scene load_steps=21 format=3 uid="uid://dg2sqch3jtd3h"]
 
 [ext_resource type="Script" uid="uid://ccfvg0731wml7" path="res://scripts/core/fsm/state_machine.gd" id="1_038oa"]
 [ext_resource type="Texture2D" uid="uid://4d68lc3a6uwp" path="res://assets/icon.svg" id="1_p728r"]
@@ -13,6 +13,8 @@
 [ext_resource type="Script" uid="uid://bv6wfr1422str" path="res://scripts/components/grid_movement_component.gd" id="11_vnbgq"]
 [ext_resource type="Resource" uid="uid://b27y5ph3w53qj" path="res://data/attacks/skeleton_claw.tres" id="11_xro8k"]
 [ext_resource type="PackedScene" uid="uid://c4bbgluq74ake" path="res://scenes/ui/HealthBar.tscn" id="13_xro8k"]
+[ext_resource type="Script" uid="uid://crxo2p6i3ss52" path="res://scripts/components/loot_component.gd" id="14_f0dbl"]
+[ext_resource type="Resource" uid="uid://d053rkg5v7tfo" path="res://data/loot/skeleton_loot_table.tres" id="15_s01nw"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_s0h66"]
 radius = 406.769
@@ -113,5 +115,9 @@ script = ExtResource("11_vnbgq")
 [node name="AttackComponent" type="Node" parent="."]
 script = ExtResource("10_quxur")
 attack_data = ExtResource("11_xro8k")
+
+[node name="LootComponent" type="Node" parent="."]
+script = ExtResource("14_f0dbl")
+loot_table = ExtResource("15_s01nw")
 
 [connection signal="body_entered" from="AggroRadius" to="." method="_on_aggro_radius_body_entered"]
