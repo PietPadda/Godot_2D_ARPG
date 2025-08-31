@@ -80,9 +80,13 @@ func build_level_graph():
 				# We ask: "Is this neighbor a valid, walkable intersection we've already mapped?"
 				if map_coords_to_id.has(neighbor):
 					var neighbor_point_id = map_coords_to_id[neighbor]
-					# If yes, we tell the A* graph: "You can travel between these two points."
-					# Connect the points so the graph knows they are neighbors.
-					astar_graph.connect_points(current_point_id, neighbor_point_id)
+					
+					# THE FIX: Apply different weights for straight vs. diagonal moves.
+					var is_diagonal = (x != 0 and y != 0)
+					var weight = 1.414 if is_diagonal else 1.0
+					
+					# Connect the points with the correct weight.
+					astar_graph.connect_points(current_point_id, neighbor_point_id, weight)
 
 # Finds the shortest path between two points on the grid.
 func find_path(start_coord: Vector2i, end_coord: Vector2i) -> PackedVector2Array:
