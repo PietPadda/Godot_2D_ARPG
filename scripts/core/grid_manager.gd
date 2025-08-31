@@ -25,12 +25,6 @@ func build_level_graph():
 	if not tile_map_layer:
 		push_error("GridManager: TileMapLayer not set!")
 		return
-		
-	# This is the physics space we will query against.
-	var space_state = tile_map_layer.get_world_2d().direct_space_state
-	# We need to configure the query parameters. We only want to check against the 'world' layer.
-	var query_params = PhysicsPointQueryParameters2D.new()
-	query_params.collision_mask = 1 # Physics Layer 1 is our "world" layer for walls.
 
 	# We get the bounding box of all painted tiles, so we know the area we need to search.
 	var map_rect = tile_map_layer.get_used_rect()
@@ -40,12 +34,9 @@ func build_level_graph():
 	for x in range(map_rect.position.x, map_rect.end.x): # loop x cells
 		for y in range(map_rect.position.y, map_rect.end.y): # loop y cells
 			var cell = Vector2i(x, y) # cell at x:y
-			 # We get the world position of the tile's center.
-			query_params.position = map_to_world(cell)
-			# We ask the physics engine: "Is there a wall here?"
-			var result = space_state.intersect_point(query_params)
-			# If the result is empty, there's no wall. It's a "road"!
-			if result.is_empty():
+			# NEW LOGIC: A tile is walkable if it has NO tile data.
+			# get_cell_tile_data returns null if the cell is empty.
+			if not tile_map_layer.get_cell_tile_data(cell):
 				walkable_cells.append(cell)
 	
 	# We go through our list of walkable roads...
