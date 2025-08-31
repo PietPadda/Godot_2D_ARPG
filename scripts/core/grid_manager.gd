@@ -79,12 +79,20 @@ func build_level_graph():
 				var neighbor = cell + Vector2i(x, y)
 				# We ask: "Is this neighbor a valid, walkable intersection we've already mapped?"
 				if map_coords_to_id.has(neighbor):
-					var neighbor_point_id = map_coords_to_id[neighbor]
-					
-					# THE FIX: Apply different weights for straight vs. diagonal moves.
 					var is_diagonal = (x != 0 and y != 0)
-					var weight = 1.414 if is_diagonal else 1.0
 					
+					# THE FIX: If it's a diagonal move, check for walls.
+					if is_diagonal:
+						# Check if the two adjacent neighbors are also walkable.
+						var neighbor_x = cell + Vector2i(x, 0)
+						var neighbor_y = cell + Vector2i(0, y)
+						if not map_coords_to_id.has(neighbor_x) or not map_coords_to_id.has(neighbor_y):
+							continue # One of the corners is a wall, so this diagonal is invalid.
+					
+					# If we reach here, the connection is valid.
+					var neighbor_point_id = map_coords_to_id[neighbor]
+					# THE FIX: Apply different weights for straight vs. diagonal moves.
+					var weight = 1.414 if is_diagonal else 1.0
 					# Connect the points with the correct weight.
 					astar_graph.connect_points(current_point_id, neighbor_point_id, weight)
 
