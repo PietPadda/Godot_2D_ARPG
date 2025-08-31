@@ -19,10 +19,15 @@ func enter() -> void:
 		return # early exit
 		
 	player.get_node("AnimationComponent").play_animation("Move")
-		# Calculate the initial path to start the chase.
+	# Calculate the initial path to start the chase.
+	# NEW: Listen for the stuck signal
+	grid_movement_component.path_stuck.connect(_recalculate_path)
 	_recalculate_path()
 
 func exit() -> void:
+	# NEW: Disconnect from the stuck signal
+	if grid_movement_component.path_stuck.is_connected(_recalculate_path):
+		grid_movement_component.path_stuck.disconnect(_recalculate_path)
 	# Crucial cleanup: stop movement.
 	grid_movement_component.stop()
 

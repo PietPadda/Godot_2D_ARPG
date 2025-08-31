@@ -28,17 +28,47 @@ position = Vector2(1064, 566)
 [node name="Skeleton5" parent="." instance=ExtResource("2_2vj2h")]
 position = Vector2(-219, 1378)
 
+[node name="Skeleton47" parent="." instance=ExtResource("2_2vj2h")]
+position = Vector2(-64, 1463)
+
+[node name="Skeleton48" parent="." instance=ExtResource("2_2vj2h")]
+position = Vector2(-253, 1218)
+
+[node name="Skeleton49" parent="." instance=ExtResource("2_2vj2h")]
+position = Vector2(-82, 1226)
+
 [node name="Skeleton6" parent="." instance=ExtResource("2_2vj2h")]
 position = Vector2(803, 1196)
 
 [node name="Skeleton7" parent="." instance=ExtResource("2_2vj2h")]
 position = Vector2(2026, 1352)
 
+[node name="Skeleton17" parent="." instance=ExtResource("2_2vj2h")]
+position = Vector2(2099, 1189)
+
+[node name="Skeleton18" parent="." instance=ExtResource("2_2vj2h")]
+position = Vector2(1927, 1163)
+
+[node name="Skeleton23" parent="." instance=ExtResource("2_2vj2h")]
+position = Vector2(1787, 1183)
+
 [node name="Skeleton8" parent="." instance=ExtResource("2_2vj2h")]
 position = Vector2(2079, 566)
 
 [node name="Skeleton9" parent="." instance=ExtResource("2_2vj2h")]
 position = Vector2(1980, -83)
+
+[node name="Skeleton43" parent="." instance=ExtResource("2_2vj2h")]
+position = Vector2(1808, -62)
+
+[node name="Skeleton44" parent="." instance=ExtResource("2_2vj2h")]
+position = Vector2(1820, 120)
+
+[node name="Skeleton45" parent="." instance=ExtResource("2_2vj2h")]
+position = Vector2(1979, 93)
+
+[node name="Skeleton46" parent="." instance=ExtResource("2_2vj2h")]
+position = Vector2(1947, -237)
 
 [node name="Skeleton10" parent="." instance=ExtResource("2_2vj2h")]
 position = Vector2(1536, 540)
@@ -86,7 +116,7 @@ position = Vector2(1704, 803)
 position = Vector2(1364, 1251)
 
 [node name="Skeleton28" parent="." instance=ExtResource("2_2vj2h")]
-position = Vector2(1364, 1251)
+position = Vector2(1410, 1409)
 
 [node name="Skeleton29" parent="." instance=ExtResource("2_2vj2h")]
 position = Vector2(1021, 51)
@@ -105,3 +135,27 @@ position = Vector2(912, 229)
 
 [node name="Skeleton34" parent="." instance=ExtResource("2_2vj2h")]
 position = Vector2(822, 472)
+
+[node name="Skeleton35" parent="." instance=ExtResource("2_2vj2h")]
+position = Vector2(940, 738)
+
+[node name="Skeleton36" parent="." instance=ExtResource("2_2vj2h")]
+position = Vector2(1172, 815)
+
+[node name="Skeleton37" parent="." instance=ExtResource("2_2vj2h")]
+position = Vector2(1511, 746)
+
+[node name="Skeleton38" parent="." instance=ExtResource("2_2vj2h")]
+position = Vector2(1708, 581)
+
+[node name="Skeleton39" parent="." instance=ExtResource("2_2vj2h")]
+position = Vector2(1122, 1023)
+
+[node name="Skeleton40" parent="." instance=ExtResource("2_2vj2h")]
+position = Vector2(1403, 1102)
+
+[node name="Skeleton41" parent="." instance=ExtResource("2_2vj2h")]
+position = Vector2(1122, 1183)
+
+[node name="Skeleton42" parent="." instance=ExtResource("2_2vj2h")]
+position = Vector2(1798, 1343)
