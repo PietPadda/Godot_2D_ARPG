@@ -1,6 +1,5 @@
 [gd_scene format=3 uid="uid://bqwmbhdbdr7sf"]
 
-[node name="DebugTile" type="ColorRect"]
-offset_right = 128.0
-offset_bottom = 128.0
-color = Color(0.131873, 0.367611, 1, 0.392157)
+[node name="DebugTile" type="Polygon2D"]
+color = Color(0.333333, 0.333333, 1, 0.392157)
+polygon = PackedVector2Array(64, 0, 128, 64, 64, 128, 0, 64)
