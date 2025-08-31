@@ -5,7 +5,6 @@ extends State
 # Common components needed by all enemy states.
 @onready var owner_node: CharacterBody2D = get_owner()
 @onready var animation_component: AnimationComponent = owner_node.get_node("AnimationComponent")
-@onready var movement_component: AIMovementComponent = owner_node.get_node("AIMovementComponent")
 @onready var stats_component: StatsComponent = owner_node.get_node("StatsComponent")
 @onready var attack_component: AttackComponent = owner_node.get_node("AttackComponent")
 
