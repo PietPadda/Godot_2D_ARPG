@@ -10,6 +10,8 @@ signal died # death notification
 signal health_changed(current_health, max_health) # hp update
 ## mana update signal
 signal mana_changed(current_mana, max_mana) # mana update
+## xp and level update signal
+signal xp_changed(level, current_xp, xp_to_next_level)
 
 # Link to the resource file that holds the base stats.
 @export var stats_data: CharacterStats
@@ -32,9 +34,10 @@ func _ready() -> void:
 	# Initialize the current stats from the base stats data.
 	current_health = stats_data.max_health
 	current_mana = stats_data.max_mana
-	# Emit the signals on ready to initliase current stats
+	# Emit the signals on ready to initialise current stats
 	emit_signal("health_changed", current_health, stats_data.max_health)
 	emit_signal("mana_changed", current_mana, stats_data.max_mana)
+	emit_signal("xp_changed", stats_data.level, stats_data.current_xp, stats_data.xp_to_next_level)
 
 # Public function to apply damage to this entity.
 ## Lose life function
@@ -71,9 +74,8 @@ func use_mana(amount: int) -> bool:
 ## add xp to players
 func add_xp(amount: int) -> void:
 	if not stats_data: return # return if enemy doesn't have stats
-
 	stats_data.current_xp += amount # add xp
-
+	emit_signal("xp_changed", stats_data.level, stats_data.current_xp, stats_data.xp_to_next_level)
 	# Check if we have enough XP to level up.
 	while stats_data.current_xp >= stats_data.xp_to_next_level:
 		_level_up() # level up ONLY if more than req
@@ -84,15 +86,16 @@ func _level_up() -> void:
 	stats_data.current_xp -= stats_data.xp_to_next_level
 	stats_data.level += 1 # incr level
 	
-	# Increase the XP requirement for the next level (e.g., by 50%).
-	stats_data.xp_to_next_level = int(stats_data.xp_to_next_level * 1.5)
+	# Increase the XP requirement for the next level (static addition for now)
+	stats_data.xp_to_next_level = int(stats_data.xp_to_next_level + 100)
 
 	# Apply stat gains.
 	stats_data.max_health += 25 # hp increase
 	stats_data.max_mana += 20 # mana increase
+	emit_signal("xp_changed", stats_data.level, stats_data.current_xp, stats_data.xp_to_next_level)
+	
 	current_health = stats_data.max_health # Heal to full on level up.
 	current_mana = stats_data.max_mana # Restore to full on level up.
-
 	# Announce the stats changes so the UI updates.
 	refresh_stats()
 
@@ -100,6 +103,7 @@ func _level_up() -> void:
 func refresh_stats() -> void:
 	emit_signal("health_changed", current_health, stats_data.max_health)
 	emit_signal("mana_changed", current_mana, stats_data.max_mana)
+	emit_signal("xp_changed", stats_data.level, stats_data.current_xp, stats_data.xp_to_next_level)
 
 ## Calculates a final stat value by combining base stats with equipment modifiers.
 func get_total_stat(stat_name: String) -> float:
