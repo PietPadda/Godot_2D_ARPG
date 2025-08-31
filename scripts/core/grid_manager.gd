@@ -37,12 +37,12 @@ func build_level_graph():
 	for x in range(map_rect.position.x, map_rect.end.x): # loop x cells
 		for y in range(map_rect.position.y, map_rect.end.y): # loop y cells
 			var cell = Vector2i(x, y) # cell at x:y
-			# NEW LOGIC: A tile is walkable if it has NO tile data.
-			# get_cell_tile_data returns null if the cell is empty.
-			if not tile_map_layer.get_cell_tile_data(cell):
+			# THE FIX: A tile is walkable if it has a source_id of -1 (meaning it's empty).
+			# This is much more reliable than checking for tile_data or physics.
+			if tile_map_layer.get_cell_source_id(cell) == -1:
 				walkable_cells.append(cell)
 				
-	# START OF NEW DEBUG VISUALIZATION CODE
+	# Debug Walkable Tiles Visualisation
 	if debug_tile_scene:
 		var main_scene = get_tree().current_scene
 		for cell in walkable_cells:
@@ -51,7 +51,6 @@ func build_level_graph():
 			# Center the debug tile over the grid cell
 			# Note: Convert the Vector2i to a Vector2 before subtracting
 			tile_instance.global_position = map_to_world(cell) - (Vector2(tile_map_layer.tile_set.tile_size) / 2)
-	# END OF NEW DEBUG VISUALIZATION CODE
 	
 	# We go through our list of walkable roads...
 	# First pass: Add all walkable tiles as points to the graph.
