@@ -1,12 +1,9 @@
 # skeleton.gd
 extends CharacterBody2D
 
-# Preload the scenes and resources we need to spawn.
-const LootDropScene = preload("res://scenes/items/loot_drop.tscn")
-const DroppedItemData  = preload("res://data/items/crude_sword.tres")
-
 @onready var state_machine: StateMachine = $StateMachine
 @onready var stats_component: StatsComponent = $StatsComponent
+@onready var loot_component: LootComponent = $LootComponent
 @onready var health_bar = $HealthBar
 
 func _ready() -> void:
@@ -37,16 +34,8 @@ func _on_death() -> void:
 
 # This new function contains the logic that modifies the scene tree.
 func _spawn_loot_and_die():
-	# Create an instance of the loot drop.
-	var loot_instance = LootDropScene.instantiate()
-	# Position it where the enemy died.
-	loot_instance.global_position = global_position
-	# Add it to the main scene, not to the enemy.
-	get_tree().current_scene.add_child(loot_instance)
-	
-	# ONLY NOW SAFE TO CALL INIT
-	# Initialize it with preset loot
-	loot_instance.initialize(DroppedItemData)
+	# Tell the LootComponent to handle the drop at our current position.
+	loot_component.drop_loot(global_position)
 	
 	# When this enemy dies, it should remove itself from the game.
 	queue_free()
