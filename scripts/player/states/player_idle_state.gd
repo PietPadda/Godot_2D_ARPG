@@ -13,7 +13,7 @@ func enter() -> void:
 	# Play Idle Anim on Entering
 	animation_component.play_animation("Idle")
 
-# The process_input function now ONLY handles single-press targeting.
+# IdleState now only cares about the INITIAL press to decide what to do next.
 func process_input(event: InputEvent) -> void:
 	# Call the shared logic from our new base class first.
 	if handle_skill_cast(event):
@@ -28,16 +28,13 @@ func process_input(event: InputEvent) -> void:
 			var chase_state: PlayerChaseState = state_machine.states["chase"]
 			chase_state.target = target
 			state_machine.change_state(States.PLAYER_STATE_NAMES[States.PLAYER.CHASE])
-		
-# The physics_process handles the continuous "hold-to-move" action.
-func _physics_process(_delta: float) -> void:
-	# If the move button is held down, and we're not targeting an enemy.
-	if Input.is_action_pressed("move_click") and targeting_component.get_target_under_mouse() == null:
-		var start_pos = Grid.world_to_map(player.global_position)
-		var end_pos = Grid.world_to_map(player.get_global_mouse_position())
-		var path = Grid.find_path(start_pos, end_pos)
-		
-		if not path.is_empty():
+		else:
+			# The ground was clicked. Let the MoveState handle it.
 			var move_state: PlayerMoveState = state_machine.states["move"]
-			move_state.move_path = path
+			# We only pass the destination tile, not a full path.
+			move_state.destination_tile = Grid.world_to_map(player.get_global_mouse_position())
 			state_machine.change_state(States.PLAYER_STATE_NAMES[States.PLAYER.MOVE])
+		
+# IdleState no longer needs a physics_process. It doesn't do anything continuously.
+func _physics_process(_delta: float) -> void:
+	pass
