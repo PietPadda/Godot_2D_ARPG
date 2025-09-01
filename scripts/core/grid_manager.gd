@@ -20,7 +20,7 @@ var id_to_map_coords: Array = []
 
 # Builds the A* point graph from the level's TileMapLayer.
 func build_level_graph():
-	# Clear any old data
+	# Phase 0: Clear old data
 	astar_graph.clear()
 	map_coords_to_id.clear()
 	id_to_map_coords.clear()
@@ -31,79 +31,58 @@ func build_level_graph():
 
 	# We get the bounding box of all painted tiles, so we know the area we need to search.
 	var map_rect = tile_map_layer.get_used_rect()
-	var walkable_cells: Array[Vector2i] = []
-
-	# We visit every single tile within that boundary, one by one.
-	for x in range(map_rect.position.x, map_rect.end.x): # loop x cells
-		for y in range(map_rect.position.y, map_rect.end.y): # loop y cells
-			var cell = Vector2i(x, y) # cell at x:y
+	var valid_vertices: Dictionary = {}
+	
+	# Phase 1: Find all valid vertices
+	# A vertex is valid if all 4 surrounding tiles are walkable.
+	for x in range(map_rect.position.x, map_rect.end.x + 1): # loop x cells
+		for y in range(map_rect.position.y, map_rect.end.y + 1): # loop y cells
+			var vertex  = Vector2i(x, y) # cell at x:y
 			
-			# THE NEW, ROBUST LOGIC:
-			var tile_data = tile_map_layer.get_cell_tile_data(cell)
+			# Check the four tiles that meet at this vertex.
+			var top_left = tile_map_layer.get_cell_tile_data(vertex + Vector2i(-1, -1))
+			var top_right = tile_map_layer.get_cell_tile_data(vertex + Vector2i(0, -1))
+			var bot_left = tile_map_layer.get_cell_tile_data(vertex + Vector2i(-1, 0))
+			var bot_right = tile_map_layer.get_cell_tile_data(vertex + Vector2i(0, 0))
 			
-			# A cell is walkable if it's empty (no tile data)
-			# OR if it has a tile, and that tile's "is_walkable" custom data is true.
-			var is_walkable = false
-			if not tile_data:
-				is_walkable = true # Empty space is walkable
-			else:
-				is_walkable = tile_data.get_custom_data("is_walkable") # Check the tile's property
-			if is_walkable:
-				walkable_cells.append(cell)
+			var tl_walkable = (not top_left) or top_left.get_custom_data("is_walkable")
+			var tr_walkable = (not top_right) or top_right.get_custom_data("is_walkable")
+			var bl_walkable = (not bot_left) or bot_left.get_custom_data("is_walkable")
+			var br_walkable = (not bot_right) or bot_right.get_custom_data("is_walkable")
+			
+			if tl_walkable and tr_walkable and bl_walkable and br_walkable:
+				var point_id = id_to_map_coords.size()
+				id_to_map_coords.append(vertex)
+				map_coords_to_id[vertex] = point_id
+				astar_graph.add_point(point_id, map_to_world(vertex))
+				valid_vertices[vertex] = point_id
 				
 	# Debug Walkable Tiles Visualisation
 	if debug_tile_scene:
 		var main_scene = get_tree().current_scene
-		for cell in walkable_cells:
+		for cell in valid_vertices:
 			var tile_instance = debug_tile_scene.instantiate()
 			main_scene.add_child(tile_instance)
 			# Center the debug tile over the grid cell
 			# Note: Convert the Vector2i to a Vector2 before subtracting
 			tile_instance.global_position = map_to_world(cell) - (Vector2(tile_map_layer.tile_set.tile_size) / 2)
-	
-	# We go through our list of walkable roads...
-	# First pass: Add all walkable tiles as points to the graph.
-	for cell in walkable_cells:
-		 # Create a new, unique ID (0, then 1, then 2, etc.)
-		var point_id = id_to_map_coords.size() # get tilemap coords
+
+	# Phase 2: Connect adjacent valid vertices
+	for vertex in valid_vertices:
+		var current_point_id = valid_vertices[vertex]
+		var current_world_pos = map_to_world(vertex)
 		
-		# Update our address books.
-		id_to_map_coords.append(cell) # add to cell, ID 50 -> (8, 6)
-		map_coords_to_id[cell] = point_id # A* dict for quick lookup, (8, 6) -> ID 50
-		
-		# Add the "intersection" to the A* graph's map.
-		astar_graph.add_point(point_id, cell) # add A* point to graph
-	
-	# We visit every walkable tile again.
-	# Second pass: Connect adjacent points.
-	for cell in walkable_cells:
-		var current_point_id = map_coords_to_id[cell]
-		
-		# We check all 8 of its immediate neighbors (including diagonals)
-		for x in range(-1, 2):
-			for y in range(-1, 2):
-				if x == 0 and y == 0: # Skip the center tile itself
-					continue # Don't check against self
+		# Check the 4 cardinal neighbors (up, down, left, right on the vertex grid).
+		var neighbors = [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]
+		for offset in neighbors:
+			var neighbor = vertex + offset
+			if valid_vertices.has(neighbor):
+				var neighbor_point_id = valid_vertices[neighbor]
+				var neighbor_world_pos = map_to_world(neighbor)
 				
-				var neighbor = cell + Vector2i(x, y)
-				# We ask: "Is this neighbor a valid, walkable intersection we've already mapped?"
-				if map_coords_to_id.has(neighbor):
-					var is_diagonal = (x != 0 and y != 0)
-					
-					# THE FIX: If it's a diagonal move, check for walls.
-					if is_diagonal:
-						# Check if the two adjacent neighbors are also walkable.
-						var neighbor_x = cell + Vector2i(x, 0)
-						var neighbor_y = cell + Vector2i(0, y)
-						if not map_coords_to_id.has(neighbor_x) or not map_coords_to_id.has(neighbor_y):
-							continue # One of the corners is a wall, so this diagonal is invalid.
-					
-					# If we reach here, the connection is valid.
-					var neighbor_point_id = map_coords_to_id[neighbor]
-					# THE FIX: Apply different weights for straight vs. diagonal moves.
-					var weight = 1.414 if is_diagonal else 1.0
-					# Connect the points with the correct weight.
-					astar_graph.connect_points(current_point_id, neighbor_point_id, weight)
+				# The weight is the actual world distance between vertices.
+				var weight = current_world_pos.distance_to(neighbor_world_pos)
+				astar_graph.connect_points(current_point_id, neighbor_point_id, weight)
 
 # Finds the shortest path between two points on the grid.
 func find_path(start_coord: Vector2i, end_coord: Vector2i) -> PackedVector2Array:
@@ -133,8 +112,10 @@ func world_to_map(world_position: Vector2) -> Vector2i:
 		return tile_map_layer.local_to_map(world_position)
 	return Vector2i.ZERO # Return a default value if the tilemap isn't set
 
-# Converts a map grid coordinate back to a world position (the center of the tile).
+# Converts a map grid coordinate back to a world position (the corner of the tile)
 func map_to_world(map_position: Vector2i) -> Vector2:
 	if tile_map_layer:
-		return tile_map_layer.map_to_local(map_position)
+		# Use map_to_local, which for isometric maps points to the corner.
+		var local_pos = tile_map_layer.map_to_local(map_position)
+		return tile_map_layer.to_global(local_pos)
 	return Vector2.ZERO # Return a default value if the tilemap isn't set
