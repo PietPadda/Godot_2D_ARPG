@@ -78,6 +78,8 @@ func build_level_graph():
 	# Second pass: Connect adjacent points.
 	for cell in walkable_cells:
 		var current_point_id = map_coords_to_id[cell]
+		# Get the real-world pixel position of the current tile's center.
+		var current_world_pos = map_to_world(cell)
 		
 		# We check all 8 of its immediate neighbors (including diagonals)
 		for x in range(-1, 2):
@@ -90,7 +92,7 @@ func build_level_graph():
 				if map_coords_to_id.has(neighbor):
 					var is_diagonal = (x != 0 and y != 0)
 					
-					# THE FIX: If it's a diagonal move, check for walls.
+					# If it's a diagonal move, check for walls.
 					if is_diagonal:
 						# Check if the two adjacent neighbors are also walkable.
 						var neighbor_x = cell + Vector2i(x, 0)
@@ -100,8 +102,10 @@ func build_level_graph():
 					
 					# If we reach here, the connection is valid.
 					var neighbor_point_id = map_coords_to_id[neighbor]
-					# THE FIX: Apply different weights for straight vs. diagonal moves.
-					var weight = 1.414 if is_diagonal else 1.0
+					# Get the real-world pixel position of the neighbor tile's center.
+					var neighbor_world_pos = map_to_world(neighbor)
+					# The weight is now the actual distance in pixels.
+					var weight = current_world_pos.distance_to(neighbor_world_pos)
 					# Connect the points with the correct weight.
 					astar_graph.connect_points(current_point_id, neighbor_point_id, weight)
 
