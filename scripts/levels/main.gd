@@ -4,10 +4,14 @@ extends Node2D
 # scene nodes
 @onready var tile_map_layer = $TileMapLayer
 
+# Expose a slot in the Inspector for the music track.
+@export var level_music: MusicTrackData
+
 # The setup logic MUST be in _ready() to run once at the start.
 func _ready():
-	# Tell the MusicManager to play our dungeon theme.
-	Music.play_music(load("res://data/audio/dungeon_theme.tres"))
+	# Play the music track that has been assigned in the Inspector.
+	if level_music:
+		Music.play_music(level_music)
 	
 	# Give the GridManager a direct reference to our level's TileMapLayer.
 	Grid.tile_map_layer = tile_map_layer

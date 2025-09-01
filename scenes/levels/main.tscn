@@ -1,14 +1,16 @@
-[gd_scene load_steps=6 format=4 uid="uid://cys1ord7jy672"]
+[gd_scene load_steps=7 format=4 uid="uid://cys1ord7jy672"]
 
 [ext_resource type="PackedScene" uid="uid://c04jx6vcgex1j" path="res://scenes/player/player.tscn" id="1_72ix8"]
 [ext_resource type="Script" uid="uid://dyk4hmsc77wwb" path="res://scripts/levels/main.gd" id="1_y0acb"]
 [ext_resource type="PackedScene" uid="uid://dg2sqch3jtd3h" path="res://scenes/enemies/skeleton.tscn" id="2_2vj2h"]
+[ext_resource type="Resource" uid="uid://ceqwwvcv6s88b" path="res://data/audio/dungeon_theme.tres" id="2_b6bv0"]
 [ext_resource type="PackedScene" uid="uid://mhkp0k8x04dx" path="res://scenes/ui/HUD.tscn" id="4_j4d2a"]
 [ext_resource type="TileSet" uid="uid://c02d7kxsulago" path="res://assets/tilesets/dungeon_tileset.tres" id="5_u81e1"]
 
 [node name="Main" type="Node2D"]
 y_sort_enabled = true
 script = ExtResource("1_y0acb")
+level_music = ExtResource("2_b6bv0")
 
 [node name="HUD" parent="." instance=ExtResource("4_j4d2a")]
 

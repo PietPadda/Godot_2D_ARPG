@@ -37,6 +37,9 @@ func load_game() -> void:
 	if not FileAccess.file_exists(SAVE_PATH):
 		print("No save file found.")
 		return
+		
+	# Stop the current music before reloading.
+	Music.stop_music()
 
 	# Load the data and store it temporarily in our singleton.
 	loaded_player_data = ResourceLoader.load(SAVE_PATH)

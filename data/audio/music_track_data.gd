@@ -9,5 +9,5 @@ extends Resource
 @export var stream: AudioStream
 @export var loop: bool = true
 @export var volume_db: float = 0.0
-@export var fade_in_time: float = 2.0
-@export var fade_out_time: float = 2.0
+@export var fade_in_time: float = 1.0
+@export var fade_out_time: float = 1.0
