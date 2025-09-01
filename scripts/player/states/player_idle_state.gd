@@ -31,8 +31,8 @@ func process_input(event: InputEvent) -> void:
 		else:
 			# The ground was clicked. Let the MoveState handle it.
 			var move_state: PlayerMoveState = state_machine.states["move"]
-			# We only pass the destination tile, not a full path.
-			move_state.destination_tile = Grid.world_to_map(player.get_global_mouse_position())
+			# CHANGED: We now pass the raw world position, not a tile coordinate.
+			move_state.destination_world_pos = player.get_global_mouse_position()
 			state_machine.change_state(States.PLAYER_STATE_NAMES[States.PLAYER.MOVE])
 		
 # IdleState no longer needs a physics_process. It doesn't do anything continuously.
