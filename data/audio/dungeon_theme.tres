@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="MusicTrackData" load_steps=3 format=3 uid="uid://ceqwwvcv6s88b"]
+
+[ext_resource type="Script" uid="uid://37xuufbajwvj" path="res://data/audio/music_track_data.gd" id="1_rh8i7"]
+[ext_resource type="AudioStream" uid="uid://djrgubp5h01hp" path="res://assets/audio/music/music_dungeon.mp3" id="2_40fih"]
+
+[resource]
+script = ExtResource("1_rh8i7")
+stream = ExtResource("2_40fih")
+loop = true
+volume_db = 0.0
+fade_in_time = 2.0
+fade_out_time = 2.0
+metadata/_custom_type_script = "uid://37xuufbajwvj"
