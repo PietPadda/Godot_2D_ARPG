@@ -15,7 +15,7 @@ level_music = ExtResource("2_b6bv0")
 [node name="HUD" parent="." instance=ExtResource("4_j4d2a")]
 
 [node name="Player" parent="." instance=ExtResource("1_72ix8")]
-position = Vector2(-377, -63)
+position = Vector2(-407, 119)
 
 [node name="Skeleton" parent="." instance=ExtResource("2_2vj2h")]
 position = Vector2(2535, 792)
