@@ -84,46 +84,27 @@ func build_level_graph():
 				var weight = current_world_pos.distance_to(neighbor_world_pos)
 				astar_graph.connect_points(current_point_id, neighbor_point_id, weight)
 
-# Finds the path between two world positions.
-func find_path(start_world_pos: Vector2, end_world_pos: Vector2) -> PackedVector2Array:
-	# Find the closest valid graph points to our start and end positions.
-	var start_vertex = _get_closest_valid_vertex(start_world_pos)
-	var end_vertex = _get_closest_valid_vertex(end_world_pos)
-	
-	if not map_coords_to_id.has(start_vertex) or not map_coords_to_id.has(end_vertex):
+# Finds the shortest path between two points on the grid.
+func find_path(start_coord: Vector2i, end_coord: Vector2i) -> PackedVector2Array:
+	# First, a safety check: are the start and end points valid locations on our map?
+	if not map_coords_to_id.has(start_coord) or not map_coords_to_id.has(end_coord):
 		# If not, return an empty path.
-		return [] # No valid start or end point found.
+		return [] # Return empty path if start/end is not a valid walkable tile
 
 	# Use our "address book" to look up the simple IDs for our start and end tiles.
-	var start_id = map_coords_to_id[start_vertex]
-	var end_id = map_coords_to_id[end_vertex]
+	var start_id = map_coords_to_id[start_coord]
+	var end_id = map_coords_to_id[end_coord]
 	
 	# Get the path of MAP coordinates from the A* graph.
 	var map_path = astar_graph.get_id_path(start_id, end_id)
 	
-	#  The A* graph now returns world positions directly.
-	return astar_graph.get_point_path(start_id, end_id)
-	
-# Converts a world position to its closest map vertex coordinate.
-func world_to_map_vertex(world_position: Vector2) -> Vector2i:
-	if tile_map_layer:
-		# First, find the tile the position is on.
-		var tile_coord = tile_map_layer.local_to_map(tile_map_layer.to_local(world_position))
-		# Then, find the closest of that tile's 4 vertices.
-		var closest_vertex = Vector2i.ZERO
-		var min_dist_sq = INF
+	# This is the new, critical step: Convert the path of IDs to world positions.
+	var world_path: PackedVector2Array = []
+	for point_id in map_path:
+		var map_coord = astar_graph.get_point_position(point_id)
+		world_path.append(map_to_world(map_coord))
 		
-		# Check the 4 vertices around a tile's center
-		for x in range(2):
-			for y in range(2):
-				var vertex_coord = tile_coord + Vector2i(x, y)
-				var vertex_world_pos = map_to_world(vertex_coord)
-				var dist_sq = world_position.distance_squared_to(vertex_world_pos)
-				if dist_sq < min_dist_sq:
-					min_dist_sq = dist_sq
-					closest_vertex = vertex_coord
-		return closest_vertex
-	return Vector2i.ZERO
+	return world_path
 
 # Converts a world position (like a mouse click) to a map grid coordinate.
 func world_to_map(world_position: Vector2) -> Vector2i:
@@ -136,20 +117,5 @@ func map_to_world(map_position: Vector2i) -> Vector2:
 	if tile_map_layer:
 		# Use map_to_local, which for isometric maps points to the corner.
 		var local_pos = tile_map_layer.map_to_local(map_position)
-		# Must convert from local to global space.
 		return tile_map_layer.to_global(local_pos)
 	return Vector2.ZERO # Return a default value if the tilemap isn't set
-	
-# Helper to find the nearest valid point on our graph to a given world position.
-func _get_closest_valid_vertex(world_pos: Vector2) -> Vector2i:
-	var closest_vertex = Vector2i.ZERO
-	var min_dist_sq = INF
-	
-	# This is a simple brute-force search. For very large maps, this could be optimized.
-	for vertex in map_coords_to_id:
-		var vertex_world_pos = map_to_world(vertex)
-		var dist_sq = world_pos.distance_squared_to(vertex_world_pos)
-		if dist_sq < min_dist_sq:
-			min_dist_sq = dist_sq
-			closest_vertex = vertex
-	return closest_vertex
