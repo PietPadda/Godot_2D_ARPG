@@ -23,10 +23,11 @@ func build_level_graph():
 	astar_grid.region = map_rect
 	astar_grid.cell_size = Vector2(1, 1) # We use a 1-to-1 mapping
 	
-	# HEURISTIC_EUCLIDEAN is more accurate for 8-directional movement.
-	astar_grid.default_compute_heuristic = AStarGrid2D.HEURISTIC_EUCLIDEAN
-	astar_grid.default_estimate_heuristic = AStarGrid2D.HEURISTIC_EUCLIDEAN
+	# HEURISTIC_OCTILE is generally best for 8-directional grids.
+	astar_grid.default_compute_heuristic = AStarGrid2D.HEURISTIC_OCTILE
+	astar_grid.default_estimate_heuristic = AStarGrid2D.HEURISTIC_OCTILE
 	
+	# This is the key change to prevent zig-zagging on isometric "straight" lines.
 	astar_grid.diagonal_mode = AStarGrid2D.DIAGONAL_MODE_ALWAYS
 	astar_grid.update()
 	

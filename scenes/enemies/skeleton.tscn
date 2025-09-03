@@ -17,7 +17,7 @@
 [ext_resource type="Resource" uid="uid://d053rkg5v7tfo" path="res://data/loot/skeleton_loot_table.tres" id="15_s01nw"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_s0h66"]
-radius = 406.769
+radius = 357.022
 
 [sub_resource type="Animation" id="Animation_pxfki"]
 resource_name = "Attack"
