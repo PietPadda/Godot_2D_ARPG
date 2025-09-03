@@ -8,4 +8,5 @@ script = ExtResource("1_naxqm")
 
 [node name="TooltipLabel" type="RichTextLabel" parent="."]
 layout_mode = 2
-bbcode_enabled = true
+fit_content = true
+autowrap_mode = 0
