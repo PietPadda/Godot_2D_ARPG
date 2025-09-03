@@ -4,4 +4,10 @@
 
 [resource]
 script = ExtResource("1_28end")
+equipped_items = {
+1: null,
+2: null,
+3: null,
+4: null
+}
 metadata/_custom_type_script = "uid://dgh3foyejc60"
