@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=3 format=3 uid="uid://gvgdx6yv2ili"]
+
+[ext_resource type="Script" uid="uid://dsidci2l4yr4r" path="res://data/items/item_data.gd" id="1_5113a"]
+[ext_resource type="Texture2D" uid="uid://dw13t38ng7br1" path="res://assets/items/boots/d2_leather_boots.png" id="2_oh6q4"]
+
+[resource]
+script = ExtResource("1_5113a")
+item_name = "Leather Boots"
+texture = ExtResource("2_oh6q4")
+equipment_slot = 4
+item_type = 0
+value = 1
+stat_modifiers = {
+"damage": 15.0
+}
+metadata/_custom_type_script = "uid://dsidci2l4yr4r"

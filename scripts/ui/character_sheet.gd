@@ -5,6 +5,8 @@ extends PanelContainer
 @onready var inventory_panel = %InventoryPanel # Make InventoryPanel a unique name
 @onready var weapon_slot: PanelContainer = $HBoxContainer/VBoxContainer/WeaponSlot
 @onready var armor_slot: PanelContainer = $HBoxContainer/VBoxContainer/ArmorSlot
+@onready var helm_slot: PanelContainer = $HBoxContainer/VBoxContainer/HelmSlot
+@onready var boots_slot: PanelContainer = $HBoxContainer/VBoxContainer/BootsSlot
 @onready var gold_label: Label = %GoldLabel # unique name rather than child node
 
 # Remove the setter functions. These are now just regular variables.
@@ -37,6 +39,10 @@ func initialize(inv_comp: InventoryComponent, equip_comp: EquipmentComponent, st
 	weapon_slot.hide_tooltip.connect(Tooltip.hide_tooltip.bind(weapon_slot))
 	armor_slot.show_tooltip.connect(Tooltip.show_tooltip)
 	armor_slot.hide_tooltip.connect(Tooltip.hide_tooltip.bind(armor_slot))
+	helm_slot.show_tooltip.connect(Tooltip.show_tooltip)
+	helm_slot.hide_tooltip.connect(Tooltip.hide_tooltip.bind(helm_slot))
+	boots_slot.show_tooltip.connect(Tooltip.show_tooltip)
+	boots_slot.hide_tooltip.connect(Tooltip.hide_tooltip.bind(boots_slot))
 	
 	# Manually draw once on init to show initial state
 	redraw()
@@ -45,6 +51,8 @@ func _ready() -> void:
 	# Connect signals from the UI slots to our controller logic.
 	weapon_slot.slot_clicked.connect(_on_equipment_slot_clicked)
 	armor_slot.slot_clicked.connect(_on_equipment_slot_clicked)
+	helm_slot.slot_clicked.connect(_on_equipment_slot_clicked)
+	boots_slot.slot_clicked.connect(_on_equipment_slot_clicked)
 
 # When an inventory item is clicked, try to equip it.
 func _on_inventory_slot_clicked(item_data: ItemData) -> void:
@@ -94,4 +102,6 @@ func redraw() -> void:
 	inventory_panel.redraw(inventory_component.inventory_data)
 	weapon_slot.update_slot(equipment_component.equipment_data.equipped_items[ItemData.EquipmentSlot.WEAPON])
 	armor_slot.update_slot(equipment_component.equipment_data.equipped_items[ItemData.EquipmentSlot.ARMOR])
+	helm_slot.update_slot(equipment_component.equipment_data.equipped_items[ItemData.EquipmentSlot.HELM])
+	boots_slot.update_slot(equipment_component.equipment_data.equipped_items[ItemData.EquipmentSlot.BOOTS])
 	_on_gold_changed(stats_component.stats_data.gold)

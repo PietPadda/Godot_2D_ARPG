@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=3 format=3 uid="uid://bgqro0j5mqo6v"]
+
+[ext_resource type="Script" uid="uid://dsidci2l4yr4r" path="res://data/items/item_data.gd" id="1_p3c8t"]
+[ext_resource type="Texture2D" uid="uid://de3rsxpxn3q2e" path="res://assets/items/helms/d1_leather_cap.png" id="2_0s3l0"]
+
+[resource]
+script = ExtResource("1_p3c8t")
+item_name = "Leather Cap"
+texture = ExtResource("2_0s3l0")
+equipment_slot = 3
+item_type = 0
+value = 1
+stat_modifiers = {
+"damage": 15.0
+}
+metadata/_custom_type_script = "uid://dsidci2l4yr4r"
