@@ -8,5 +8,7 @@ script = ExtResource("1_tqhf0")
 item_name = "Gold Coin"
 texture = ExtResource("2_6rgyv")
 equipment_slot = 0
+item_type = 1
+value = 1
 stat_modifiers = {}
 metadata/_custom_type_script = "uid://dsidci2l4yr4r"

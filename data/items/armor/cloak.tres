@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=3 format=3 uid="uid://cjymwwk3xexn4"]
+
+[ext_resource type="Script" uid="uid://dsidci2l4yr4r" path="res://data/items/item_data.gd" id="1_fcd15"]
+[ext_resource type="Texture2D" uid="uid://hpbt7dgibxxo" path="res://assets/items/d1_cloak.png" id="2_irfxa"]
+
+[resource]
+script = ExtResource("1_fcd15")
+item_name = "Cloak"
+texture = ExtResource("2_irfxa")
+equipment_slot = 2
+item_type = 0
+value = 1
+stat_modifiers = {
+"damage": 15.0
+}
+metadata/_custom_type_script = "uid://dsidci2l4yr4r"
