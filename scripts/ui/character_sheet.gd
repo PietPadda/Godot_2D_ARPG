@@ -24,12 +24,15 @@ func initialize(inv_comp: InventoryComponent, equip_comp: EquipmentComponent):
 	# Connect to the UI slots now that they've been created
 	for slot in inventory_panel.grid_container.get_children():
 		slot.slot_clicked.connect(_on_inventory_slot_clicked)
-		# TEMPORARY TEST CONNECTION for inventory slots
-		slot.show_tooltip.connect(func(item, _node): print("Hovering over INVENTORY item: ", item.item_name))
+		# Inventory Tooltip calls
+		slot.show_tooltip.connect(Tooltip.show_tooltip)
+		slot.hide_tooltip.connect(Tooltip.hide_tooltip.bind(slot)) # Bind the slot node as an argument
 	
-	# TEMPORARY TEST CONNECTIONS for equipment slots
-	weapon_slot.show_tooltip.connect(func(item, _node): print("Hovering over WEAPON item: ", item.item_name))
-	armor_slot.show_tooltip.connect(func(item, _node): print("Hovering over ARMOR item: ", item.item_name))
+	# Equipment Tooltip calls
+	weapon_slot.show_tooltip.connect(Tooltip.show_tooltip)
+	weapon_slot.hide_tooltip.connect(Tooltip.hide_tooltip.bind(weapon_slot))
+	armor_slot.show_tooltip.connect(Tooltip.show_tooltip)
+	armor_slot.hide_tooltip.connect(Tooltip.hide_tooltip.bind(armor_slot))
 	
 	# Manually draw once on init to show initial state
 	redraw()
