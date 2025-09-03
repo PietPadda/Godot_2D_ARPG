@@ -24,6 +24,7 @@ States="*res://scripts/core/state_manager.gd"
 Grid="*res://scenes/core/grid_manager.tscn"
 Music="*res://scenes/core/music_manager.tscn"
 Tooltip="*res://scenes/core/tooltip_manager.tscn"
+Scene="*res://scripts/core/scene_manager.gd"
 
 [input]
 
