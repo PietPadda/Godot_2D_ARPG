@@ -21,7 +21,7 @@ stretch_mode = 5
 [node name="SlotNameLabel" type="Label" parent="."]
 layout_mode = 2
 size_flags_vertical = 0
-text = "Weapon"
+text = "EqSlot"
 horizontal_alignment = 3
 
 [connection signal="gui_input" from="." to="." method="_on_gui_input"]

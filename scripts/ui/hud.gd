@@ -31,7 +31,7 @@ func _ready() -> void:
 		var player_equipment: EquipmentComponent = player.get_node("EquipmentComponent")
 		
 		# Call the new, explicit initialize function
-		character_sheet.initialize(player_inventory, player_equipment)
+		character_sheet.initialize(player_inventory, player_equipment, player_stats)
 
 func _unhandled_input(event: InputEvent) -> void:
 	# Toggle the character sheet panel's visibility

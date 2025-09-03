@@ -5,19 +5,23 @@ extends PanelContainer
 @onready var inventory_panel = %InventoryPanel # Make InventoryPanel a unique name
 @onready var weapon_slot: PanelContainer = $HBoxContainer/VBoxContainer/WeaponSlot
 @onready var armor_slot: PanelContainer = $HBoxContainer/VBoxContainer/ArmorSlot
+@onready var gold_label: Label = %GoldLabel # unique name rather than child node
 
 # Remove the setter functions. These are now just regular variables.
 var inventory_component: InventoryComponent
 var equipment_component: EquipmentComponent
+var stats_component: StatsComponent
 
 # This is our new, explicit setup function.
-func initialize(inv_comp: InventoryComponent, equip_comp: EquipmentComponent):
-	self.inventory_component = inv_comp
-	self.equipment_component = equip_comp
+func initialize(inv_comp: InventoryComponent, equip_comp: EquipmentComponent, stats_comp: StatsComponent):
+	inventory_component = inv_comp
+	equipment_component = equip_comp
+	stats_component = stats_comp
 
 	# Connect to the data component signals
 	inventory_component.inventory_changed.connect(redraw)
 	equipment_component.equipment_changed.connect(redraw)
+	stats_component.gold_changed.connect(_on_gold_changed)
 
 	# Initialize the UI
 	inventory_panel.initialize_inventory(inventory_component.inventory_data)
@@ -76,13 +80,18 @@ func _unequip_item(slot_type: ItemData.EquipmentSlot, item_data: ItemData) -> vo
 		# Call the component's method instead of modifying its data directly.
 		equipment_component.unequip_item_by_slot(slot_type)
 	# Redraw will also happen automatically here.
+	
+# This function is called when the StatsComponent emits the "gold_changed" signal.
+func _on_gold_changed(total_gold: int) -> void:
+	gold_label.text = "Gold: " + str(total_gold)
 
 # A central function to update all UI elements.
 func redraw() -> void:
 	# Check if the components are ready before redrawing.
-	if not is_instance_valid(inventory_component) or not is_instance_valid(equipment_component):
+	if not is_instance_valid(inventory_component) or not is_instance_valid(equipment_component) or not is_instance_valid(stats_component):
 		return
 	
 	inventory_panel.redraw(inventory_component.inventory_data)
 	weapon_slot.update_slot(equipment_component.equipment_data.equipped_items[ItemData.EquipmentSlot.WEAPON])
 	armor_slot.update_slot(equipment_component.equipment_data.equipped_items[ItemData.EquipmentSlot.ARMOR])
+	_on_gold_changed(stats_component.stats_data.gold)
