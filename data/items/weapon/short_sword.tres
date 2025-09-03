@@ -5,7 +5,7 @@
 
 [resource]
 script = ExtResource("1_jvapx")
-item_name = "Crude Sword"
+item_name = "Short Sword"
 texture = ExtResource("2_wi4uq")
 equipment_slot = 1
 item_type = 0
