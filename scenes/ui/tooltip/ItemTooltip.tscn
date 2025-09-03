@@ -3,7 +3,9 @@
 [ext_resource type="Script" uid="uid://dgf35ww1pv3er" path="res://scripts/ui/tooltip/item_tooltip.gd" id="1_naxqm"]
 
 [node name="ItemTooltip" type="PanelContainer"]
+mouse_filter = 2
 script = ExtResource("1_naxqm")
 
-[node name="RichTextLabel" type="RichTextLabel" parent="."]
+[node name="TooltipLabel" type="RichTextLabel" parent="."]
 layout_mode = 2
+bbcode_enabled = true
