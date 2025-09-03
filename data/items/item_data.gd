@@ -7,7 +7,7 @@ extends Resource
 ## A data container for all item properties.
 
 # Defines the possible slots an item can be equipped in.
-enum EquipmentSlot { NONE, WEAPON, ARMOR }
+enum EquipmentSlot { NONE, WEAPON, ARMOR, HELM, BOOTS }
 # Defines the type of the item.
 enum ItemType { REGULAR, CURRENCY }
 

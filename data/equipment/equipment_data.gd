@@ -8,5 +8,7 @@ extends Resource
 # A dictionary to hold the currently equipped items, indexed by slot.
 @export var equipped_items: Dictionary = {
 	ItemData.EquipmentSlot.WEAPON: null,
-	ItemData.EquipmentSlot.ARMOR: null
+	ItemData.EquipmentSlot.ARMOR: null,
+	ItemData.EquipmentSlot.HELM: null,
+	ItemData.EquipmentSlot.BOOTS: null
 }
