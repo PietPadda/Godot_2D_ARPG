@@ -13,4 +13,6 @@ func change_scene(scene_path: String) -> void:
 	# This is Godot's built-in function to change scenes.
 	# We've wrapped it in our manager so we can easily add fade-out/fade-in
 	# transitions here later without changing any other code.
-	get_tree().change_scene_to_file(scene_path)
+	
+	# defer the call to a safe time at the end of the current physics frame.
+	get_tree().call_deferred("change_scene_to_file", scene_path)
