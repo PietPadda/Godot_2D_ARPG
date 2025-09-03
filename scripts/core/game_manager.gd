@@ -41,9 +41,14 @@ func load_game() -> void:
 	# Stop the current music before reloading.
 	Music.stop_music()
 
-	# Load the data and store it temporarily in our singleton.
-	loaded_player_data = ResourceLoader.load(SAVE_PATH)
-
+	# Load the data from the file.
+	var loaded_data: SaveData = ResourceLoader.load(SAVE_PATH)
+	
+	# Create a deep, unique copy of the loaded data.
+	# This breaks the "live link" to the save file resource.
+	if is_instance_valid(loaded_data):
+		loaded_player_data = loaded_data.duplicate(true)
+		
 	# Now, reload the entire level. Diablo 2 style!!
 	get_tree().change_scene_to_file("res://scenes/levels/main.tscn")
 	print("Game loaded!")
