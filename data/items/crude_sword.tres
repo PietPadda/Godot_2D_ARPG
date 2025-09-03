@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=3 format=3 uid="uid://bllc505jsueh7"]
+
+[ext_resource type="Script" uid="uid://dsidci2l4yr4r" path="res://data/items/item_data.gd" id="1_bwt3i"]
+[ext_resource type="Texture2D" uid="uid://djbpadgfwswic" path="res://assets/items/d1_short_sword.png" id="2_u74g6"]
+
+[resource]
+script = ExtResource("1_bwt3i")
+item_name = "Crude Sword"
+texture = ExtResource("2_u74g6")
+equipment_slot = 1
+stat_modifiers = {
+"damage": 15.0
+}
+metadata/_custom_type_script = "uid://dsidci2l4yr4r"
