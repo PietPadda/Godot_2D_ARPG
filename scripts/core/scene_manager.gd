@@ -14,5 +14,8 @@ func change_scene(scene_path: String) -> void:
 	# We've wrapped it in our manager so we can easily add fade-out/fade-in
 	# transitions here later without changing any other code.
 	
+	# Tell the GameManager to grab the player's data before we leave.
+	GameManager.carry_player_data()
+		
 	# defer the call to a safe time at the end of the current physics frame.
 	get_tree().call_deferred("change_scene_to_file", scene_path)

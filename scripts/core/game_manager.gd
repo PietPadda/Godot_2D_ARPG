@@ -5,6 +5,28 @@ const SAVE_PATH = "user://savegame.tres"
 
 # This variable will temporarily hold our loaded data during a scene change.
 var loaded_player_data: SaveData = null
+# This variable will hold our player's data during a normal scene transition.
+var player_data_on_transition: SaveData = null
+
+# --- Public API ---
+
+#  This function grabs the current player's data and stores it for the transition.
+## Save chardata between scene transitions
+func carry_player_data() -> void:
+	var player = get_tree().get_first_node_in_group("player") # get player
+	if not player:
+		push_error("GameManager: Could not find player to carry data.")
+		return
+	
+	# We create a new SaveData resource to hold the current data.
+	# We use .duplicate() to ensure it's a unique copy.
+	var current_data = SaveData.new()
+	current_data.player_stats_data = player.get_node("StatsComponent").stats_data.duplicate(true)
+	current_data.player_inventory_data = player.get_node("InventoryComponent").inventory_data.duplicate(true)
+	current_data.player_equipment_data = player.get_node("EquipmentComponent").equipment_data.duplicate(true)
+	
+	player_data_on_transition = current_data # save prescene change data
+	print("Carrying player data for scene transition.")
 
 ## Save player's game
 func save_game() -> void:
