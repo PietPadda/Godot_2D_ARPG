@@ -5,18 +5,26 @@ extends Node
 # Our debug tile scene
 @export var debug_tile_scene: PackedScene
 
-# This will hold a reference to the main level's TileMapLayer.
-var tile_map_layer: TileMapLayer
+# This will hold a reference to the current level's TileMapLayer.
+# Convert the variable into a property with a setter.
+var tile_map_layer: TileMapLayer:
+	set(value):
+		tile_map_layer = value
+		# If the new value is valid, automatically rebuild the graph.
+		if is_instance_valid(tile_map_layer):
+			# We still defer to ensure the tilemap is fully ready in the scene tree.
+			call_deferred("build_level_graph")
 
-# Pathfinding
-# --- THE FIX: Use AStarGrid2D ---
+# Pathfinding: Use AStarGrid2D
 var astar_grid := AStarGrid2D.new()
 
 # Builds the A* pathfrom the level's TileMapLayer.
 func build_level_graph():
-	if not tile_map_layer:
-		push_error("GridManager: TileMapLayer not set!")
+	if not is_instance_valid(tile_map_layer):
+		push_error("GridManager: Attempted to build graph with an invalid TileMapLayer.")
 		return
+	
+	print("GridManager: Building new pathfinding graph for map: ", tile_map_layer.get_path())
 
 	# Set up the AStarGrid2D with our map's data
 	var map_rect = tile_map_layer.get_used_rect()
