@@ -13,3 +13,5 @@ extends Resource
 # Live Stats for Scene Transitions
 var current_health: int
 var current_mana: int
+# Add a variable to hold the target position in the new scene.
+var target_spawn_position: Vector2 = Vector2.INF

@@ -44,6 +44,11 @@ func _ready() -> void:
 		get_node("InventoryComponent").inventory_data = transition_data.player_inventory_data
 		get_node("EquipmentComponent").equipment_data = transition_data.player_equipment_data
 		
+		# Check if a target spawn position was carried over.
+		if transition_data.target_spawn_position != Vector2.INF:
+			# Use call_deferred to wait for the physics engine to settle.
+			call_deferred("set_global_position", transition_data.target_spawn_position)
+		
 		# On SCENE TRANSITION, apply the carried-over health and mana.
 		stats_component.current_health = transition_data.current_health
 		stats_component.current_mana = transition_data.current_mana
