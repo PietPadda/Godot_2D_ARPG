@@ -94,4 +94,4 @@ tile_set = ExtResource("5_u81e1")
 
 [node name="Portal" parent="." instance=ExtResource("7_ubwgw")]
 position = Vector2(1668, 347)
-target_scene_path = "uid://cys1ord7jy672"
+target_scene_path = "uid://d3xic0inlmby0"
