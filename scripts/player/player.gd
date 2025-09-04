@@ -21,7 +21,7 @@ func _ready() -> void:
 		var equipment_component = get_node("EquipmentComponent")
 		equipment_component.equipment_data = GameManager.loaded_player_data.player_equipment_data
 		
-		# Manually update current health/mana from the loaded data.
+		# On SAVE LOAD, restore to full health and mana (Diablo II style).
 		stats_component.current_health = stats_component.stats_data.max_health
 		stats_component.current_mana = stats_component.stats_data.max_mana
 
@@ -44,9 +44,11 @@ func _ready() -> void:
 		get_node("InventoryComponent").inventory_data = transition_data.player_inventory_data
 		get_node("EquipmentComponent").equipment_data = transition_data.player_equipment_data
 		
-		# Manually update health/mana and refresh the UI.
-		stats_component.current_health = stats_component.stats_data.max_health
-		stats_component.current_mana = stats_component.stats_data.max_mana
+		# On SCENE TRANSITION, apply the carried-over health and mana.
+		stats_component.current_health = transition_data.current_health
+		stats_component.current_mana = transition_data.current_mana
+		
+		# Tell the UI to update.
 		stats_component.refresh_stats()
 		
 		# Clear the transition data from the manager so it's not reused.

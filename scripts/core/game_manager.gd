@@ -18,12 +18,21 @@ func carry_player_data() -> void:
 		push_error("GameManager: Could not find player to carry data.")
 		return
 	
+	# get player's components
+	var stats_component: StatsComponent = player.get_node("StatsComponent")
+	var inventory_component: InventoryComponent = player.get_node("InventoryComponent")
+	var equipment_component: EquipmentComponent = player.get_node("EquipmentComponent")
+	
 	# We create a new SaveData resource to hold the current data.
 	# We use .duplicate() to ensure it's a unique copy.
 	var current_data = SaveData.new()
-	current_data.player_stats_data = player.get_node("StatsComponent").stats_data.duplicate(true)
-	current_data.player_inventory_data = player.get_node("InventoryComponent").inventory_data.duplicate(true)
-	current_data.player_equipment_data = player.get_node("EquipmentComponent").equipment_data.duplicate(true)
+	current_data.player_stats_data = stats_component.stats_data.duplicate(true)
+	current_data.player_inventory_data = inventory_component.inventory_data.duplicate(true)
+	current_data.player_equipment_data = equipment_component.equipment_data.duplicate(true)
+	
+	# Store the player's live health and mana.
+	current_data.current_health = stats_component.current_health
+	current_data.current_mana = stats_component.current_mana
 	
 	player_data_on_transition = current_data # save prescene change data
 	print("Carrying player data for scene transition.")
