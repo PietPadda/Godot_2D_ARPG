@@ -9,17 +9,25 @@ extends Node
 # Convert the variable into a property with a setter.
 var tile_map_layer: TileMapLayer:
 	set(value):
+		# DEBUG: Announce when this setter is called and what it's receiving.
+		print("GridManager: tile_map_layer.set() called with: ", value)
 		tile_map_layer = value
 		# If the new value is valid, automatically rebuild the graph.
 		if is_instance_valid(tile_map_layer):
 			# We still defer to ensure the tilemap is fully ready in the scene tree.
 			call_deferred("build_level_graph")
+		else:
+			# This helps us see if we're ever setting it to an invalid node.
+			print("GridManager: WARNING - tile_map_layer was set to an invalid instance.")
 
 # Pathfinding: Use AStarGrid2D
 var astar_grid := AStarGrid2D.new()
 
 # Builds the A* pathfrom the level's TileMapLayer.
 func build_level_graph():
+	# DEBUG: Announce when the graph building actually starts.
+	print("GridManager: Executing build_level_graph() for tilemap: ", tile_map_layer)
+	
 	if not is_instance_valid(tile_map_layer):
 		push_error("GridManager: Attempted to build graph with an invalid TileMapLayer.")
 		return
