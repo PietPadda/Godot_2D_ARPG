@@ -8,68 +8,56 @@ extends Node
 
 # vars
 var current_track: MusicTrackData = null
-var current_tween: Tween
+var active_transition_tween: Tween = null
 
 # The main public function to play a new music track.
-func play_music(track_data: MusicTrackData) -> void:
-	if not track_data or track_data == current_track:
-		return # Don't replay the same track.
+func play_music(new_track: MusicTrackData) -> void:
+	# If the requested track is already playing and no transition is active, do nothing.
+	if new_track == current_track and not active_transition_tween:
+		return # do nothing
 
-	# If a tween is already running, kill it to cancel any pending operations.
-	if current_tween:
-		current_tween.kill()
+	# If there's an active transition, kill it immediately. We have a new command.
+	if active_transition_tween:
+		active_transition_tween.kill()
 		
-	# This tween is ONLY for the fade-out.
-	var fade_out_tween = create_tween()
+	# Create a new, authoritative tween for this entire operation.
+	active_transition_tween = create_tween()
+	# When the tween finishes ALL its tasks, clean up the reference.
+	active_transition_tween.finished.connect(func(): active_transition_tween = null)
 
-	# If a track is currently playing, fade it out first.
+	# The Transition Sequence
+	# If music is currently audible, fade it out first.
 	if audio_player.playing and audio_player.volume_db > -79.0:
-		var fade_time = 2.0 # set a default
-		if current_track: # if there is a time in the data resource
-			fade_time = current_track.fade_out_time # update it
-			
-		# Fade volume to "silence" (-80 db is effectively inaudible).
-		fade_out_tween.tween_property(audio_player, "volume_db", -80.0, fade_time)
-		# After fading out, call the function to play the new track.
-		fade_out_tween.tween_callback(_play_new_track.bind(track_data))
-	else:
-		# If nothing is playing, just start the new track immediately.
-		_play_new_track(track_data)
+		var fade_time = current_track.fade_out_time if current_track else 1.0
+		active_transition_tween.tween_property(audio_player, "volume_db", -80.0, fade_time)
+
+	# Chain the track switch callback. This will run after the fade-out (if any).
+	active_transition_tween.tween_callback(_play_new_track.bind(new_track))
+
+	# Chain the fade-in for the new track.
+	active_transition_tween.tween_property(audio_player, "volume_db", new_track.volume_db, new_track.fade_in_time)
 
 # Public function to stop the music with a fade-out.
 func stop_music(fade_out_time: float = 1.0) -> void:
 	if not audio_player.playing:
 		return
 
-	if current_tween:
-		current_tween.kill()
+	if active_transition_tween:
+		active_transition_tween.kill()
 	
 	current_track = null
-	
-	# This stop_tween is temporary and self-contained.
-	var stop_tween = create_tween()
-	stop_tween.tween_property(audio_player, "volume_db", -80.0, fade_out_time)
-	stop_tween.tween_callback(audio_player.stop)
+	active_transition_tween = create_tween()
+	active_transition_tween.finished.connect(func(): active_transition_tween = null) # Also cleanup here
+	active_transition_tween.tween_property(audio_player, "volume_db", -80.0, fade_out_time)
+	active_transition_tween.tween_callback(audio_player.stop)
 
-# Internal function to handle the actual switch and fade-in.
+# Internal function that is ONLY responsible for switching the audio stream.
 func _play_new_track(track_data: MusicTrackData) -> void:
 	# Add a safety check in case the resource is missing its stream.
-	if not track_data.stream or not is_instance_valid(track_data):
+	if not is_instance_valid(track_data) or not track_data.stream:
 		push_error("Music track data or its audio stream is invalid!")
 		return
 		
 	current_track = track_data # set track
 	audio_player.stream = track_data.stream # update stream
-	audio_player.volume_db = -80.0 # Start silent
 	audio_player.play()
-
-	# Create a NEW, SEPARATE tween for the fade-in.
-	# This becomes the new "current_tween".
-	current_tween = create_tween()
-	current_tween.finished.connect(_on_tween_finished)
-	current_tween.tween_property(audio_player, "volume_db", track_data.volume_db, track_data.fade_in_time)
-
-# This is our cleanup function. It runs when a tween is truly finished.
-func _on_tween_finished() -> void:
-	# Set the reference to null so the manager knows it's free.
-	current_tween = null
