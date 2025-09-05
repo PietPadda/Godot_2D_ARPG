@@ -25,14 +25,12 @@ var astar_grid := AStarGrid2D.new()
 
 # Builds the A* pathfrom the level's TileMapLayer.
 func build_level_graph():
-	# DEBUG: Announce when the graph building actually starts.
-	print("GridManager: Executing build_level_graph() for tilemap: ", tile_map_layer)
-	
 	if not is_instance_valid(tile_map_layer):
 		push_error("GridManager: Attempted to build graph with an invalid TileMapLayer.")
 		return
-	
-	print("GridManager: Building new pathfinding graph for map: ", tile_map_layer.get_path())
+		
+	# Clear all old points and connections from the previous level's graph.
+	astar_grid.clear()
 
 	# Set up the AStarGrid2D with our map's data
 	var map_rect = tile_map_layer.get_used_rect()

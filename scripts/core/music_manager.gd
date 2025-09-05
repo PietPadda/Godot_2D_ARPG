@@ -12,6 +12,8 @@ var current_tween: Tween
 
 # The main public function to play a new music track.
 func play_music(track_data: MusicTrackData) -> void:
+	# If the requested track is already the current one, do nothing.
+	# This prevents restarting the music if you quickly re-enter a scene.
 	if not track_data or track_data == current_track:
 		return # Don't replay the same track.
 
