@@ -1,0 +1,21 @@
+[gd_scene load_steps=2 format=3 uid="uid://beblgbp3jcefu"]
+
+[ext_resource type="Script" uid="uid://cp3a02tlckb0g" path="res://scripts/ui/shop_panel.gd" id="1_3b8rw"]
+
+[node name="ShopPanel" type="PanelContainer"]
+offset_right = 400.0
+offset_bottom = 500.0
+script = ExtResource("1_3b8rw")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="VBoxContainer"]
+layout_mode = 2
+text = "Shop"
+
+[node name="CloseButton" type="Button" parent="VBoxContainer"]
+layout_mode = 2
+text = "Close"
+
+[connection signal="pressed" from="VBoxContainer/CloseButton" to="." method="_on_close_button_pressed"]
