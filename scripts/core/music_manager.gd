@@ -19,10 +19,8 @@ func play_music(track_data: MusicTrackData) -> void:
 	if current_tween:
 		current_tween.kill()
 		
-	# Always create a new, fresh tween for this operation.
-	current_tween = create_tween()
-	# When this new tween finishes ALL its tasks, it will call our cleanup function.
-	current_tween.finished.connect(_on_tween_finished)
+	# This tween is ONLY for the fade-out.
+	var fade_out_tween = create_tween()
 
 	# If a track is currently playing, fade it out first.
 	if audio_player.playing and audio_player.volume_db > -79.0:
@@ -31,9 +29,9 @@ func play_music(track_data: MusicTrackData) -> void:
 			fade_time = current_track.fade_out_time # update it
 			
 		# Fade volume to "silence" (-80 db is effectively inaudible).
-		current_tween.tween_property(audio_player, "volume_db", -80.0, fade_time)
+		fade_out_tween.tween_property(audio_player, "volume_db", -80.0, fade_time)
 		# After fading out, call the function to play the new track.
-		current_tween.tween_callback(_play_new_track.bind(track_data))
+		fade_out_tween.tween_callback(_play_new_track.bind(track_data))
 	else:
 		# If nothing is playing, just start the new track immediately.
 		_play_new_track(track_data)
@@ -47,24 +45,28 @@ func stop_music(fade_out_time: float = 1.0) -> void:
 		current_tween.kill()
 	
 	current_track = null
-	current_tween = create_tween()
-	current_tween.finished.connect(_on_tween_finished) # Also connect the cleanup here.
-	current_tween.tween_property(audio_player, "volume_db", -80.0, fade_out_time)
-	current_tween.tween_callback(audio_player.stop)
+	
+	# This stop_tween is temporary and self-contained.
+	var stop_tween = create_tween()
+	stop_tween.tween_property(audio_player, "volume_db", -80.0, fade_out_time)
+	stop_tween.tween_callback(audio_player.stop)
 
 # Internal function to handle the actual switch and fade-in.
 func _play_new_track(track_data: MusicTrackData) -> void:
 	# Add a safety check in case the resource is missing its stream.
-	if not track_data.stream:
-		push_error("Music track data is missing its audio stream!")
+	if not track_data.stream or not is_instance_valid(track_data):
+		push_error("Music track data or its audio stream is invalid!")
 		return
 		
-	current_track = track_data
-	audio_player.stream = track_data.stream
+	current_track = track_data # set track
+	audio_player.stream = track_data.stream # update stream
 	audio_player.volume_db = -80.0 # Start silent
 	audio_player.play()
 
-	# The fade-in is now part of the SAME tween.
+	# Create a NEW, SEPARATE tween for the fade-in.
+	# This becomes the new "current_tween".
+	current_tween = create_tween()
+	current_tween.finished.connect(_on_tween_finished)
 	current_tween.tween_property(audio_player, "volume_db", track_data.volume_db, track_data.fade_in_time)
 
 # This is our cleanup function. It runs when a tween is truly finished.
