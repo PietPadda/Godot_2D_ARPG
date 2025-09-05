@@ -1,10 +1,11 @@
-[gd_scene load_steps=7 format=4 uid="uid://d3xic0inlmby0"]
+[gd_scene load_steps=8 format=4 uid="uid://d3xic0inlmby0"]
 
 [ext_resource type="Script" uid="uid://brrmrbxhxogiy" path="res://scripts/levels/town.gd" id="1_6a6b3"]
 [ext_resource type="Resource" uid="uid://dq55lbqvcquuy" path="res://data/audio/town_theme.tres" id="2_3ay17"]
 [ext_resource type="PackedScene" uid="uid://mhkp0k8x04dx" path="res://scenes/ui/HUD.tscn" id="3_ip0dd"]
 [ext_resource type="PackedScene" uid="uid://c04jx6vcgex1j" path="res://scenes/player/player.tscn" id="4_35lbs"]
 [ext_resource type="TileSet" uid="uid://c02d7kxsulago" path="res://assets/tilesets/dungeon_tileset.tres" id="6_5ycnk"]
+[ext_resource type="PackedScene" uid="uid://c3ohkke4ps7j6" path="res://scenes/npcs/shop_npc.tscn" id="7_0x67q"]
 [ext_resource type="PackedScene" uid="uid://dmnp50wydxhid" path="res://scenes/world/portal.tscn" id="7_rklyf"]
 
 [node name="Town" type="Node2D"]
@@ -25,3 +26,6 @@ tile_set = ExtResource("6_5ycnk")
 [node name="Portal" parent="." instance=ExtResource("7_rklyf")]
 position = Vector2(1668, 347)
 target_scene_path = "uid://cys1ord7jy672"
+
+[node name="ShopNpc" parent="." instance=ExtResource("7_0x67q")]
+position = Vector2(1265, 233)

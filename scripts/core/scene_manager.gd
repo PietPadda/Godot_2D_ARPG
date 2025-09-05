@@ -1,4 +1,4 @@
-# file: scripts/core/scene_manager.gd
+# scripts/core/scene_manager.gd
 # A global singleton for managing scene transitions.
 class_name SceneManager
 extends Node

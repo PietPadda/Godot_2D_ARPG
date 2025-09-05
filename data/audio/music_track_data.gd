@@ -1,4 +1,4 @@
-# file: data/audio/music_track_data.gd
+# data/audio/music_track_data.gd
 # A data container for a single music track's properties.
 class_name MusicTrackData
 extends Resource
