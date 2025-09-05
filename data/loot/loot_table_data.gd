@@ -1,4 +1,4 @@
-# file: data/loot/loot_table_data.gd
+# data/loot/loot_table_data.gd
 # A data container for defining a set of possible item drops and their weights.
 class_name LootTableData
 extends Resource

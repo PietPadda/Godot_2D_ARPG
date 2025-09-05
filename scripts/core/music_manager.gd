@@ -1,4 +1,4 @@
-# file: scripts/core/music_manager.gd
+# scripts/core/music_manager.gd
 # A global singleton for managing background music and transitions.
 class_name MusicManager
 extends Node

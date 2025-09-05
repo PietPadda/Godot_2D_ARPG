@@ -1,4 +1,4 @@
-# file: scripts/components/loot_component.gd
+# scripts/components/loot_component.gd
 # Handles the logic for dropping an item from a weighted loot table.
 class_name LootComponent
 extends Node

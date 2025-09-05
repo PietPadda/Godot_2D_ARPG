@@ -1,4 +1,4 @@
-# file: scripts/world/portal.gd
+# scripts/world/portal.gd
 # A reusable portal that transitions the player to a new scene.
 class_name Portal
 extends Area2D

@@ -1,4 +1,4 @@
-# file: data/loot/loot_table_entry.gd
+# data/loot/loot_table_entry.gd
 # Defines a single entry in a loot table, pairing an item with its drop weight.
 class_name LootTableEntry
 extends Resource
