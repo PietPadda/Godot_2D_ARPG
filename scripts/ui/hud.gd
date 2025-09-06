@@ -76,10 +76,15 @@ func on_player_xp_changed(level: int, current_xp: int, xp_to_next_level: int) ->
 	
 # This function runs when the EventBus emits the signal.
 func _on_shop_panel_requested() -> void:
-	# First, check if a shop panel already exists to prevent duplicates.
-	if find_child("ShopPanel"):
-		return
-
-	var shop_panel_instance = ShopPanelScene.instantiate()
-	# Add the panel as a child of the HUD. This is the crucial change.
-	add_child(shop_panel_instance)
+	# Check if a shop panel already exists as a child of the HUD.
+	var existing_panel = find_child("ShopPanel", true, false)
+	if existing_panel:
+		# If it exists, simply remove it.
+		existing_panel.queue_free()
+		# Also, ensure we return to gameplay state.
+		EventBus.change_game_state(EventBus.GameState.GAMEPLAY)
+	else:
+		# If it does not exist, create a new one.
+		var shop_panel_instance = ShopPanelScene.instantiate()
+		# Add the panel as a child of the HUD. This is the crucial change.
+		add_child(shop_panel_instance)
