@@ -9,6 +9,19 @@ const GameOverScreen = preload("res://scenes/ui/game_over_screen.tscn")
 @onready var state_machine: StateMachine = $StateMachine
 
 func _ready() -> void:
+	 # Get the camera node using its unique name.
+	var camera = find_child("player_camera")
+
+	# This is the crucial check for multiplayer.
+	if is_multiplayer_authority():
+		# This is our character, so enable its camera.
+		if camera:
+			camera.enabled = true
+	else:
+		# This is a remote player's puppet. Disable its camera.
+		if camera:
+			camera.enabled = false
+	
 	# Check for SAVE GAME data first (highest priority).
 	if is_instance_valid(GameManager.loaded_player_data):
 		print("Applying loaded data to player...")
