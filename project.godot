@@ -12,7 +12,7 @@ config_version=5
 
 config/name="2D_ARPG"
 config/tags=PackedStringArray("game")
-run/main_scene="uid://cys1ord7jy672"
+run/main_scene="uid://cefwayew7ouqs"
 config/features=PackedStringArray("4.4", "Mobile")
 config/icon="res://assets/icon.svg"
 
