@@ -8,6 +8,10 @@ signal closed
 
 # When the panel is created and ready, it immediately takes control.
 func _ready() -> void:
+	# Explicitly center the panel to ensure it's always visible.
+	var viewport_size = get_viewport_rect().size
+	self.position = (viewport_size - self.size) / 2.0
+	
 	EventBus.change_game_state(EventBus.GameState.UI_MODE)
 
 # This function is automatically called when the CloseButton is pressed.

@@ -80,6 +80,9 @@ func load_game() -> void:
 	if is_instance_valid(loaded_data):
 		loaded_player_data = loaded_data.duplicate(true)
 		
+	# After loading, ALWAYS reset the game state to ensure the player has control.
+	EventBus.change_game_state(EventBus.GameState.GAMEPLAY)
+		
 	# Now, reload the entire level. Diablo 2 style!!
 	get_tree().change_scene_to_file("res://scenes/levels/main.tscn")
 	print("Game loaded!")
