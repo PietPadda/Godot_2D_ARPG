@@ -1,7 +1,6 @@
-[gd_scene load_steps=4 format=3 uid="uid://beblgbp3jcefu"]
+[gd_scene load_steps=3 format=3 uid="uid://beblgbp3jcefu"]
 
 [ext_resource type="Script" uid="uid://cp3a02tlckb0g" path="res://scripts/ui/shop_panel.gd" id="1_3b8rw"]
-[ext_resource type="Script" uid="uid://bf0f8nojdavba" path="res://scripts/ui/inventory_panel.gd" id="2_qecyp"]
 [ext_resource type="PackedScene" uid="uid://i8r3dhcqw1wa" path="res://scenes/ui/inventory_panel.tscn" id="3_sjk1b"]
 
 [node name="ShopPanel" type="PanelContainer"]
@@ -18,9 +17,9 @@ text = "Shop"
 
 [node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer"]
 layout_mode = 2
-script = ExtResource("2_qecyp")
 
 [node name="InventoryPanel" parent="VBoxContainer/HBoxContainer" instance=ExtResource("3_sjk1b")]
+unique_name_in_owner = true
 layout_mode = 2
 
 [node name="GoldLabel" type="Label" parent="VBoxContainer"]
