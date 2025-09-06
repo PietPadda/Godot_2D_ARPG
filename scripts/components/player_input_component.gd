@@ -18,21 +18,27 @@ func _unhandled_input(event: InputEvent) -> void:
 	# Only process input if the game is in a state that allows it.
 	if EventBus.current_game_state != EventBus.GameState.GAMEPLAY:
 		return
+		
+	# We only care about the initial press of an action in this function.
+	if not event.is_pressed():
+		return
 
-	if event.is_action_pressed("move_click"):
+	if event.is_action("move_click"):
+		# This is the single, correct block for handling the move_click action.
+		var mouse_pos = get_parent().get_global_mouse_position()
 		var target = targeting_component.get_target_under_mouse()
 		if is_instance_valid(target):
 			# An enemy or interactable was clicked.
 			target_requested.emit(target)
 		else:
-			# The ground was clicked. We get the position from the event itself,
-			# as InputEventMouseButton contains a 'global_position' property.
-			move_to_requested.emit(event.global_position)
+			move_to_requested.emit(mouse_pos)
 			
 	# logic for handling the cast action
 	if event.is_action_pressed("cast_skill") and event is InputEventMouseButton:
 		# For now, we hardcode the skill slot to 0. This can be expanded later.
-		cast_requested.emit(0, event.global_position)
+		# Use the same reliable source for the cast position.
+		var mouse_pos = get_parent().get_global_mouse_position()
+		cast_requested.emit(0, mouse_pos)
 
 # We add _physics_process for continuous actions, like holding a button down.
 # _unhandled_input is better for discrete, single-press events.

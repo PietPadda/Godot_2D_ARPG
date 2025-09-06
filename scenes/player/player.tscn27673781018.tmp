@@ -1,0 +1,202 @@
+[gd_scene load_steps=31 format=3 uid="uid://c04jx6vcgex1j"]
+
+[ext_resource type="Texture2D" uid="uid://4d68lc3a6uwp" path="res://assets/icon.svg" id="1_8afob"]
+[ext_resource type="Script" uid="uid://d0khsl1q2udiw" path="res://scripts/player/player.gd" id="1_dovo2"]
+[ext_resource type="Script" uid="uid://ccfvg0731wml7" path="res://scripts/core/fsm/state_machine.gd" id="2_qek5x"]
+[ext_resource type="Script" uid="uid://weqoimty07p" path="res://scripts/player/states/player_idle_state.gd" id="3_5gtgg"]
+[ext_resource type="Script" uid="uid://cndcfdfejnpon" path="res://scripts/components/stats_component.gd" id="3_lvxji"]
+[ext_resource type="Script" uid="uid://b6lamxdxaec0k" path="res://scripts/player/states/player_move_state.gd" id="4_h17s1"]
+[ext_resource type="Resource" uid="uid://cd88rd50ljhgk" path="res://data/stats/player_stats.tres" id="4_p47bc"]
+[ext_resource type="Script" uid="uid://dfuec360wxegi" path="res://scripts/player/states/player_attack_state.gd" id="5_5gtgg"]
+[ext_resource type="Script" uid="uid://cnpddeatw31gb" path="res://scripts/player/states/player_chase_state.gd" id="6_fm80t"]
+[ext_resource type="Script" uid="uid://dxe6f52ev5gap" path="res://scripts/player/states/player_dead_state.gd" id="8_ugbui"]
+[ext_resource type="Script" uid="uid://b4yijrma5vfhf" path="res://scripts/player/states/player_cast_state.gd" id="9_lgqa7"]
+[ext_resource type="Script" uid="uid://bci6iykvj8w5a" path="res://scripts/components/attack_component.gd" id="10_je7p5"]
+[ext_resource type="Resource" uid="uid://t8iutpr512nx" path="res://data/attacks/player_melee_attack.tres" id="11_fm80t"]
+[ext_resource type="Script" uid="uid://cnaea40kdh1f3" path="res://scripts/components/animation_component.gd" id="13_gx1jg"]
+[ext_resource type="Script" uid="uid://nanf76fbrypr" path="res://scripts/components/player_input_component.gd" id="15_ioxgp"]
+[ext_resource type="Script" uid="uid://b0gmo25sa2eae" path="res://scripts/components/inventory_component.gd" id="15_myrg7"]
+[ext_resource type="Script" uid="uid://bv6wfr1422str" path="res://scripts/components/grid_movement_component.gd" id="15_yj68g"]
+[ext_resource type="Resource" uid="uid://pfmek7nj2qbc" path="res://data/inventory/player_inventory.tres" id="16_kvlxm"]
+[ext_resource type="Script" uid="uid://b3kxcsphggh56" path="res://scripts/components/player_targeting_component.gd" id="17_kvlxm"]
+[ext_resource type="Script" uid="uid://cfvlrb6dmesqd" path="res://scripts/components/skill_caster_component.gd" id="18_uf5tr"]
+[ext_resource type="Resource" uid="uid://buvyst3ml008j" path="res://data/skills/fireball_skill.tres" id="20_8ydkj"]
+[ext_resource type="Script" uid="uid://begj65nx7hvi1" path="res://scripts/components/equipment_component.gd" id="21_3j4b4"]
+[ext_resource type="Resource" uid="uid://cu2vgajgv44b5" path="res://data/equipment/player_equipment.tres" id="22_yj68g"]
+
+[sub_resource type="Animation" id="Animation_fcs02"]
+resource_name = "Attack"
+length = 0.5
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Sprite2D:scale")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.1, 0.5),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [Vector2(1, 1), Vector2(1.5, 1.5), Vector2(1, 1)]
+}
+
+[sub_resource type="Animation" id="Animation_myrg7"]
+resource_name = "Dead"
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Sprite2D:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 1),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 1), Color(1, 1, 1, 0)]
+}
+
+[sub_resource type="Animation" id="Animation_fm80t"]
+resource_name = "Idle"
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Sprite2D:scale")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.5, 1),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [Vector2(1, 1), Vector2(1.05, 1.05), Vector2(1, 1)]
+}
+
+[sub_resource type="Animation" id="Animation_ugbui"]
+resource_name = "Move"
+length = 0.4
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Sprite2D:scale")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.2, 0.4),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [Vector2(1, 1), Vector2(0.9, 1.1), Vector2(1, 1)]
+}
+
+[sub_resource type="Animation" id="Animation_gx1jg"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Sprite2D:scale")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(1, 1)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Sprite2D:modulate")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 1)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_ugbui"]
+_data = {
+&"Attack": SubResource("Animation_fcs02"),
+&"Dead": SubResource("Animation_myrg7"),
+&"Idle": SubResource("Animation_fm80t"),
+&"Move": SubResource("Animation_ugbui"),
+&"RESET": SubResource("Animation_gx1jg")
+}
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_yj68g"]
+radius = 63.0
+
+[node name="Player" type="CharacterBody2D" groups=["player"]]
+collision_layer = 4
+collision_mask = 15
+motion_mode = 1
+script = ExtResource("1_dovo2")
+
+[node name="AnimationComponent" type="Node" parent="."]
+script = ExtResource("13_gx1jg")
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+libraries = {
+&"": SubResource("AnimationLibrary_ugbui")
+}
+
+[node name="StateMachine" type="Node" parent="." node_paths=PackedStringArray("initial_state")]
+script = ExtResource("2_qek5x")
+initial_state = NodePath("Idle")
+
+[node name="Idle" type="Node" parent="StateMachine"]
+script = ExtResource("3_5gtgg")
+
+[node name="Move" type="Node" parent="StateMachine"]
+script = ExtResource("4_h17s1")
+
+[node name="Attack" type="Node" parent="StateMachine"]
+script = ExtResource("5_5gtgg")
+
+[node name="Chase" type="Node" parent="StateMachine"]
+script = ExtResource("6_fm80t")
+
+[node name="Dead" type="Node" parent="StateMachine"]
+script = ExtResource("8_ugbui")
+
+[node name="Cast" type="Node" parent="StateMachine"]
+script = ExtResource("9_lgqa7")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("1_8afob")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_yj68g")
+
+[node name="StatsComponent" type="Node" parent="."]
+script = ExtResource("3_lvxji")
+stats_data = ExtResource("4_p47bc")
+
+[node name="InventoryComponent" type="Node" parent="."]
+script = ExtResource("15_myrg7")
+inventory_data = ExtResource("16_kvlxm")
+
+[node name="PlayerInputComponent" type="Node" parent="."]
+script = ExtResource("15_ioxgp")
+
+[node name="GridMovementComponent" type="Node" parent="."]
+script = ExtResource("15_yj68g")
+
+[node name="AttackComponent" type="Node" parent="."]
+script = ExtResource("10_je7p5")
+attack_data = ExtResource("11_fm80t")
+
+[node name="PlayerTargetingComponent" type="Node" parent="."]
+script = ExtResource("17_kvlxm")
+target_layer_mask = 2
+
+[node name="SkillCasterComponent" type="Node" parent="."]
+script = ExtResource("18_uf5tr")
+secondary_attack_skill = ExtResource("20_8ydkj")
+
+[node name="EquipmentComponent" type="Node" parent="."]
+script = ExtResource("21_3j4b4")
+equipment_data = ExtResource("22_yj68g")
+
+[node name="Camera2D" type="Camera2D" parent="."]
