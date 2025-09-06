@@ -34,7 +34,8 @@ func host_game():
 	
 	# Add the host player to the players dictionary.
 	# The ID for the host is always 1.
-	players[1] = { "name": "Host Player" }
+	# Manually trigger the connection logic for the host, whose ID is always 1.
+	_on_peer_connected(1)
 
 # Call this to connect to a server at a given IP address.
 func join_game(ip_address: String):
