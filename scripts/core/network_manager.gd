@@ -36,10 +36,9 @@ func host_game():
 	multiplayer.multiplayer_peer = peer
 	print("Server created successfully. Waiting for players...")
 	
-	# Add the host player to the players dictionary.
-	# The ID for the host is always 1.
-	# Manually trigger the connection logic for the host, whose ID is always 1.
-	_on_peer_connected(1)
+	# Add the host player to the players dictionary directly.
+	# We REMOVE the call to _on_peer_connected(1).
+	players[1] = { "name": "Host Player" }
 
 # Call this to connect to a server at a given IP address.
 func join_game(ip_address: String):
@@ -72,8 +71,10 @@ func _on_peer_connected(id: int):
 	players[id] = { "name": "Player " + str(id) }
 	player_connected.emit(id)
 	
-	# We NO LONGER emit the spawn request here immediately.
-	# We wait for the main scene to tell us it's ready.
+	# Request a spawn for the newly connected client.
+	# This is now safe because this function only runs for remote clients,
+	# after the host's game world is already loaded.
+	player_spawn_requested.emit(id)
 
 
 func _on_peer_disconnected(id: int):
