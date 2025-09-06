@@ -27,3 +27,12 @@ enum ENEMY {
 const ENEMY_STATE_NAMES = [
 	"Idle", "Chase", "Attack"
 ]
+
+# An enum for skill slots. This lets us use readable names instead of numbers.
+enum SkillSlots {
+	SECONDARY, # This will have a value of 0
+	SKILL_1,   # 1
+	SKILL_2,   # 2
+	SKILL_3,   # 3
+	SKILL_4    # 4
+}

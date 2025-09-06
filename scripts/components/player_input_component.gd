@@ -35,10 +35,9 @@ func _unhandled_input(event: InputEvent) -> void:
 			
 	# logic for handling the cast action
 	if event.is_action_pressed("cast_skill") and event is InputEventMouseButton:
-		# For now, we hardcode the skill slot to 0. This can be expanded later.
 		# Use the same reliable source for the cast position.
 		var mouse_pos = get_parent().get_global_mouse_position()
-		cast_requested.emit(0, mouse_pos)
+		cast_requested.emit(States.SkillSlots.SECONDARY, mouse_pos)
 
 # We add _physics_process for continuous actions, like holding a button down.
 # _unhandled_input is better for discrete, single-press events.
