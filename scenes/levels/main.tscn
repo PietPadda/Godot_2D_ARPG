@@ -39,6 +39,12 @@ position = Vector2(1295, 450)
 [node name="Skeleton7" parent="." instance=ExtResource("2_2vj2h")]
 position = Vector2(1490, 528)
 
+[node name="Skeleton24" parent="." instance=ExtResource("2_2vj2h")]
+position = Vector2(1418, 440)
+
+[node name="Skeleton25" parent="." instance=ExtResource("2_2vj2h")]
+position = Vector2(1385, 360)
+
 [node name="Skeleton8" parent="." instance=ExtResource("2_2vj2h")]
 position = Vector2(1001, 743)
 
