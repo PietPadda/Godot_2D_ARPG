@@ -3,6 +3,7 @@ extends Node2D
 
 # scene nodes
 @onready var tile_map_layer = $TileMapLayer
+@onready var player_spawner: MultiplayerSpawner = $PlayerSpawner # Add a reference to our spawner.
 
 # Expose a slot in the Inspector for the music track.
 @export var level_music: MusicTrackData
@@ -19,7 +20,18 @@ func _ready():
 	# Give the GridManager a direct reference to our level's TileMapLayer.
 	# The GridManager will handle the rest automatically.
 	Grid.tile_map_layer = tile_map_layer
+	
+	# Listen for the NetworkManager's request to spawn a player.
+	NetworkManager.player_spawn_requested.connect(_on_player_spawn_requested)
 
 # This function can now be left empty or used for other inputs.
 func _unhandled_input(event: InputEvent) -> void:
 	pass
+
+# -- Signal Handlers --
+# This function will run when the signal is received.
+# It contains the logic we moved from the NetworkManager.
+func _on_player_spawn_requested(id: int):
+	var player_instance = NetworkManager.PLAYER_SCENE.instantiate()
+	player_instance.name = str(id)
+	player_spawner.add_child(player_instance)
