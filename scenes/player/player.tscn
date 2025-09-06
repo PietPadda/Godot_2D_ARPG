@@ -236,4 +236,4 @@ secondary_attack_skill = ExtResource("20_8ydkj")
 script = ExtResource("21_3j4b4")
 equipment_data = ExtResource("22_yj68g")
 
-[node name="Camera2D" type="Camera2D" parent="."]
+[node name="Camera2D" type="Camera2D" parent="." groups=["player_camera"]]
