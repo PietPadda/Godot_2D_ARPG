@@ -3,7 +3,9 @@ class_name PlayerDeadState
 extends State
 
 @onready var player: CharacterBody2D = get_owner()
-@onready var animation_component: AnimationComponent = player.get_node("AnimationComponent")
+
+# Export Components
+@export var animation_component: AnimationComponent
 
 func enter() -> void:
 	print("Player has entered the Dead state.")

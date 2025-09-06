@@ -4,8 +4,10 @@ extends State
 
 # We can put references needed by ALL player states here.
 @onready var player: CharacterBody2D = get_owner()
-@onready var skill_caster_component: SkillCasterComponent = player.get_node("SkillCasterComponent")
-@onready var stats_component: StatsComponent = player.get_node("StatsComponent")
+
+# export components
+@export var skill_caster_component: SkillCasterComponent
+@export var stats_component: StatsComponent
 
 # This is our shared input logic.
 func handle_skill_cast(event: InputEvent) -> bool:

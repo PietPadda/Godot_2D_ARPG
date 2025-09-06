@@ -4,8 +4,8 @@ class_name PlayerMoveState
 extends PlayerState # Changed from 'State'
 
 # Scene referenes needed for move state
-@onready var grid_movement_component: GridMovementComponent = player.get_node("GridMovementComponent")
-@onready var input_component: PlayerInputComponent = player.get_node("PlayerInputComponent")
+@export var grid_movement_component: GridMovementComponent
+@export var input_component: PlayerInputComponent
 
 # This state now receives a single destination tile, not a pre-calculated path.
 var destination_tile: Vector2i

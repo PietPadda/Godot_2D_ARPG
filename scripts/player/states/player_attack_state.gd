@@ -6,8 +6,8 @@ extends State
 var target: Node2D # holds the attack target
 
 # A reference to the AttackComponent.
-@onready var attack_component: AttackComponent = get_owner().get_node("AttackComponent")
-@onready var animation_component: AnimationComponent = get_owner().get_node("AnimationComponent")
+@export var animation_component: AnimationComponent
+@export var attack_component: AttackComponent
 
 func enter() -> void:
 	print("Entering Attack State")
