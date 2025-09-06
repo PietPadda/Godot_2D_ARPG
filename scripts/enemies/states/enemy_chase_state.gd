@@ -12,7 +12,7 @@ func enter() -> void:
 		return
 		
 	#animation_component.play_animation("Move") # Assuming enemy has a "Move" animation
-	# NEW: Listen for the stuck signal
+	# Listen for the stuck signal
 	grid_movement_component.path_stuck.connect(_recalculate_path)
 	_recalculate_path()
 
@@ -31,7 +31,7 @@ func process_physics(delta: float) -> void:
 	# First, check if we are in range to attack.
 	var distance = owner_node.global_position.distance_to(target.global_position)
 	if distance <= stats_component.get_total_stat("range"):
-		var attack_state: EnemyAttackState = state_machine.states["attack"]
+		var attack_state: EnemyAttackState = state_machine.get_state(States.ENEMY.ATTACK)
 		attack_state.target = target
 		state_machine.change_state(States.ENEMY_STATE_NAMES[States.ENEMY.ATTACK])
 		return

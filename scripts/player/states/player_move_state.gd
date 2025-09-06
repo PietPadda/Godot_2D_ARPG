@@ -70,17 +70,6 @@ func _on_move_to_requested(target_position: Vector2) -> void:
 
 func _on_target_requested(target: Node2D) -> void:
 	grid_movement_component.stop()
-	var chase_state: PlayerChaseState = state_machine.states["chase"]
+	var chase_state: PlayerChaseState = state_machine.get_state(States.PLAYER.CHASE)
 	chase_state.target = target
 	state_machine.change_state(States.PLAYER_STATE_NAMES[States.PLAYER.CHASE])
-
-func _on_cast_requested(skill_slot: int, target_position: Vector2) -> void:
-	grid_movement_component.stop()
-	# (Logic to set up cast state is the same as in Idle state)
-	var skill_to_cast = skill_caster_component.secondary_attack_skill
-	if not skill_to_cast: return
-	
-	var cast_state: PlayerCastState = state_machine.states["cast"]
-	cast_state.skill_to_cast = skill_to_cast
-	cast_state.cast_target_position = target_position
-	state_machine.change_state(States.PLAYER_STATE_NAMES[States.PLAYER.CAST])
