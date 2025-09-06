@@ -55,6 +55,16 @@ func join_game(ip_address: String):
 
 	multiplayer.multiplayer_peer = peer
 	print("Joining game at %s..." % ip_address)
+	
+# This function is called by the game world when it's ready for players.
+func spawn_existing_players():
+	# Only the server should spawn players.
+	if not multiplayer.is_server():
+		return
+
+	# Go through the list of already-connected players and request their spawn.
+	for player_id in players:
+		player_spawn_requested.emit(player_id)
 
 # --- Signal Callbacks ---
 func _on_peer_connected(id: int):
@@ -62,9 +72,8 @@ func _on_peer_connected(id: int):
 	players[id] = { "name": "Player " + str(id) }
 	player_connected.emit(id)
 	
-	# Instead of calling a function, we emit a signal.
-	# The active game scene will be responsible for listening to this.
-	player_spawn_requested.emit(id)
+	# We NO LONGER emit the spawn request here immediately.
+	# We wait for the main scene to tell us it's ready.
 
 
 func _on_peer_disconnected(id: int):

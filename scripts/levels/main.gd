@@ -21,8 +21,12 @@ func _ready():
 	# The GridManager will handle the rest automatically.
 	Grid.tile_map_layer = tile_map_layer
 	
-	# Listen for the NetworkManager's request to spawn a player.
+	# Connect our listener FIRST, so we are ready to receive requests.
 	NetworkManager.player_spawn_requested.connect(_on_player_spawn_requested)
+	
+	# Now that we're ready, ask the NetworkManager to spawn everyone
+	# who has already connected (including ourselves if we are the host).
+	NetworkManager.spawn_existing_players()
 
 # This function can now be left empty or used for other inputs.
 func _unhandled_input(event: InputEvent) -> void:
