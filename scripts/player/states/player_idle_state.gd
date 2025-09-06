@@ -4,8 +4,10 @@ class_name PlayerIdleState
 extends PlayerState # Changed from 'State'
 
 # References to the player's nodes we need to interact with.
-@onready var animation_component: AnimationComponent = player.get_node("AnimationComponent")
-@onready var input_component: PlayerInputComponent = get_owner().get_node("PlayerInputComponent")
+# We are replacing get_node() with @export. These variables will now appear
+# as slots in the Godot editor's Inspector for this state.
+@export var animation_component: AnimationComponent
+@export var input_component: PlayerInputComponent
 
 func enter() -> void:
 	# Explicitly stop all movement when entering the Idle state.

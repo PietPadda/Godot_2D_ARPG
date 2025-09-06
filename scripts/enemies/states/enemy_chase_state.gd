@@ -7,7 +7,7 @@ var move_path: PackedVector2Array = []
 var last_target_tile: Vector2i
 
 # We now get the GridMovementComponent instead of the old AI one.
-@onready var grid_movement_component: GridMovementComponent = owner_node.get_node("GridMovementComponent")
+@export var grid_movement_component: GridMovementComponent
 
 func enter() -> void:
 	if not is_instance_valid(target):

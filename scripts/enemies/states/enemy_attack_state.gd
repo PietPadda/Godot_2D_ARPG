@@ -4,7 +4,7 @@ extends EnemyState # Corrected from State
 
 var target: Node2D
 
-@onready var grid_movement_component: GridMovementComponent = owner_node.get_node("GridMovementComponent")
+@export var grid_movement_component: GridMovementComponent
 
 func enter() -> void:
 	# Stop all movement before attacking.

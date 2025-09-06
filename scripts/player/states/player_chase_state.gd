@@ -8,10 +8,10 @@ var target: Node2D
 var last_target_tile: Vector2i
 
 # Scene referenes needed for move state
-@onready var attack_component: AttackComponent = player.get_node("AttackComponent")
-@onready var animation_component: AnimationComponent = player.get_node("AnimationComponent")
-@onready var grid_movement_component: GridMovementComponent = player.get_node("GridMovementComponent")
-@onready var input_component: PlayerInputComponent = player.get_node("PlayerInputComponent")
+@export var animation_component: AnimationComponent
+@export var attack_component: AttackComponent
+@export var grid_movement_component: GridMovementComponent
+@export var input_component: PlayerInputComponent
 
 func enter() -> void:
 	# On entering, immediately start moving towards the target.

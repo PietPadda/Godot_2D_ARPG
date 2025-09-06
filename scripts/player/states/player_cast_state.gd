@@ -8,8 +8,10 @@ var cast_target_position: Vector2
 
 # scene nodes
 @onready var player: CharacterBody2D = get_owner()
-@onready var animation_component: AnimationComponent = player.get_node("AnimationComponent")
-@onready var skill_caster_component: SkillCasterComponent = player.get_node("SkillCasterComponent")
+
+# export components
+@export var animation_component: AnimationComponent
+@export var skill_caster_component: SkillCasterComponent
 
 func enter() -> void:
 	# For now, we'll reuse the Attack animation for casting.
