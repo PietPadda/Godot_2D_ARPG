@@ -88,3 +88,10 @@ func _on_shop_panel_requested() -> void:
 		var shop_panel_instance = ShopPanelScene.instantiate()
 		# Add the panel as a child of the HUD. This is the crucial change.
 		add_child(shop_panel_instance)
+		
+		# Get player components and initialize the shop
+		var player = get_tree().get_first_node_in_group("player")
+		if player:
+			var inv_comp = player.get_node("InventoryComponent")
+			var stats_comp = player.get_node("StatsComponent")
+			shop_panel_instance.initialize(inv_comp, stats_comp)
