@@ -1,6 +1,9 @@
 # hud.gd
 extends CanvasLayer
 
+# Preload the panel scene we will be creating instances of.
+const ShopPanelScene = preload("res://scenes/ui/shop_panel.tscn")
+
 # scene nodes
 @onready var health_bar: ProgressBar = $PlayerHealthBar
 @onready var health_label: Label = $PlayerHealthBar/HealthLabel # child of healthbar
@@ -32,6 +35,9 @@ func _ready() -> void:
 		
 		# Call the new, explicit initialize function
 		character_sheet.initialize(player_inventory, player_equipment, player_stats)
+		
+		# The HUD now listens for requests to open the shop.
+		EventBus.shop_panel_requested.connect(_on_shop_panel_requested)
 
 func _unhandled_input(event: InputEvent) -> void:
 	# Toggle the character sheet panel's visibility
@@ -67,3 +73,13 @@ func on_player_xp_changed(level: int, current_xp: int, xp_to_next_level: int) ->
 	xp_bar.max_value = xp_to_next_level
 	xp_bar.value = current_xp
 	xp_label.text = "Lvl %d: %d / %d XP" % [level, current_xp, xp_to_next_level]
+	
+# This function runs when the EventBus emits the signal.
+func _on_shop_panel_requested() -> void:
+	# First, check if a shop panel already exists to prevent duplicates.
+	if find_child("ShopPanel"):
+		return
+
+	var shop_panel_instance = ShopPanelScene.instantiate()
+	# Add the panel as a child of the HUD. This is the crucial change.
+	add_child(shop_panel_instance)
