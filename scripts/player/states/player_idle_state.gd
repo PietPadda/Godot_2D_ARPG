@@ -3,12 +3,6 @@
 class_name PlayerIdleState
 extends PlayerState # Changed from 'State'
 
-# References to the player's nodes we need to interact with.
-# We are replacing get_node() with @export. These variables will now appear
-# as slots in the Godot editor's Inspector for this state.
-@export var animation_component: AnimationComponent
-@export var input_component: PlayerInputComponent
-
 func enter() -> void:
 	# Explicitly stop all movement when entering the Idle state.
 	player.velocity = Vector2.ZERO
@@ -45,21 +39,3 @@ func _on_target_requested(target: Node2D) -> void:
 	var chase_state: PlayerChaseState = state_machine.states["chase"]
 	chase_state.target = target
 	state_machine.change_state(States.PLAYER_STATE_NAMES[States.PLAYER.CHASE])
-	
-# Add the handler for our new cast signal.
-func _on_cast_requested(skill_slot: int, target_position: Vector2) -> void:
-	# Use the skill_slot to get the actual skill data from the component.
-	# For now, since we only have one skill, we'll just grab the secondary_attack_skill.
-	var skill_to_cast: SkillData = skill_caster_component.secondary_attack_skill
-	
-	# edge case handling
-	if not is_instance_valid(skill_to_cast):
-		print("No skill equipped to cast.")
-		return
-	
-	var cast_state: PlayerCastState = state_machine.states["cast"]
-	# assign the SkillData object and the Vector2 position.
-	cast_state.skill_to_cast = skill_to_cast
-	cast_state.cast_target_position = target_position
-	
-	state_machine.change_state(States.PLAYER_STATE_NAMES[States.PLAYER.CAST])

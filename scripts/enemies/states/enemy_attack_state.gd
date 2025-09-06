@@ -4,8 +4,6 @@ extends EnemyState # Corrected from State
 
 var target: Node2D
 
-@export var grid_movement_component: GridMovementComponent
-
 func enter() -> void:
 	# Stop all movement before attacking.
 	grid_movement_component.stop()
