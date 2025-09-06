@@ -9,6 +9,7 @@ extends Node
 # --- Signals ---
 signal move_to_requested(target_position: Vector2)
 signal target_requested(target: Node2D)
+signal cast_requested(skill_slot: int, target_position: Vector2)
 
 # --- Scene Nodes ---
 @onready var targeting_component: PlayerTargetingComponent = get_parent().get_node("PlayerTargetingComponent")
@@ -27,3 +28,8 @@ func _unhandled_input(event: InputEvent) -> void:
 			# The ground was clicked. We get the position from the event itself,
 			# as InputEventMouseButton contains a 'global_position' property.
 			move_to_requested.emit(event.global_position)
+			
+	# logic for handling the cast action
+	if event.is_action_pressed("cast_skill") and event is InputEventMouseButton:
+		# For now, we hardcode the skill slot to 0. This can be expanded later.
+		cast_requested.emit(0, event.global_position)
