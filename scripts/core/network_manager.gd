@@ -36,6 +36,20 @@ func host_game():
 	# The ID for the host is always 1.
 	players[1] = { "name": "Host Player" }
 
+# Call this to connect to a server at a given IP address.
+func join_game(ip_address: String):
+	var peer = ENetMultiplayerPeer.new()
+	# Default to 127.0.0.1 (yourself) if no IP is provided.
+	if ip_address == "":
+		ip_address = "127.0.0.1"
+
+	var error = peer.create_client(ip_address, DEFAULT_PORT)
+	if error != OK:
+		print("Failed to create client!")
+		return
+
+	multiplayer.multiplayer_peer = peer
+	print("Joining game at %s..." % ip_address)
 
 # --- Signal Callbacks ---
 func _on_peer_connected(id: int):
