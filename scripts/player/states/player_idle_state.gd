@@ -31,11 +31,11 @@ func _physics_process(_delta: float) -> void:
 
 # -- Signal Handlers ---
 func _on_move_to_requested(target_position: Vector2) -> void:
-	var move_state: PlayerMoveState = state_machine.states["move"]
+	var move_state: PlayerMoveState = state_machine.get_state(States.PLAYER.MOVE)
 	move_state.destination_tile = Grid.world_to_map(target_position)
 	state_machine.change_state(States.PLAYER_STATE_NAMES[States.PLAYER.MOVE])
 
 func _on_target_requested(target: Node2D) -> void:
-	var chase_state: PlayerChaseState = state_machine.states["chase"]
+	var chase_state: PlayerChaseState = state_machine.get_state(States.PLAYER.CHASE)
 	chase_state.target = target
 	state_machine.change_state(States.PLAYER_STATE_NAMES[States.PLAYER.CHASE])

@@ -53,3 +53,15 @@ func change_state(new_state_name: String) -> void:
 	
 	current_state = new_state
 	current_state.enter()
+	
+# A helper function to safely get a state using an enum.
+# This prevents us from ever needing to use a magic string to access a state.
+func get_state(state_enum: int) -> State:
+	# First, determine if we are the player or an enemy FSM
+	var state_names_array = States.PLAYER_STATE_NAMES
+	if get_owner().is_in_group("Enemy"):
+		state_names_array = States.ENEMY_STATE_NAMES
+		
+	# Use the enum to look up the string name from our global manager
+	var state_key = state_names_array[state_enum]
+	return states.get(state_key)

@@ -45,7 +45,7 @@ func _process_physics(delta: float) -> void:
 	var attack_range = stats_component.get_total_stat("range")
 
 	if distance <= attack_range:
-		var attack_state: PlayerAttackState = state_machine.states["attack"]
+		var attack_state: PlayerAttackState = state_machine.get_state(States.PLAYER.ATTACK)
 		attack_state.target = target
 		state_machine.change_state(States.PLAYER_STATE_NAMES[States.PLAYER.ATTACK])
 		return
@@ -72,7 +72,7 @@ func _recalculate_path() -> void:
 
 # --- Signal Handlers ---
 func _on_move_to_requested(target_position: Vector2) -> void:
-	var move_state: PlayerMoveState = state_machine.states["move"]
+	var move_state: PlayerMoveState = state_machine.get_state(States.PLAYER.MOVE)
 	move_state.destination_tile = Grid.world_to_map(target_position)
 	state_machine.change_state(States.PLAYER_STATE_NAMES[States.PLAYER.MOVE])
 
@@ -80,12 +80,3 @@ func _on_target_requested(new_target: Node2D) -> void:
 	if new_target != self.target:
 		self.target = new_target
 		_recalculate_path() # Immediately repath to the new target
-
-func _on_cast_requested(skill_slot: int, target_position: Vector2) -> void:
-	var skill_to_cast = skill_caster_component.secondary_attack_skill
-	if not skill_to_cast: return
-	
-	var cast_state: PlayerCastState = state_machine.states["cast"]
-	cast_state.skill_to_cast = skill_to_cast
-	cast_state.cast_target_position = target_position
-	state_machine.change_state(States.PLAYER_STATE_NAMES[States.PLAYER.CAST])

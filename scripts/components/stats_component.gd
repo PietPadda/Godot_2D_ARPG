@@ -90,7 +90,6 @@ func add_gold(amount: int) -> void:
 		return
 	stats_data.gold += amount # inr
 	emit_signal("gold_changed", stats_data.gold) # signal
-	print("Player picked up %d gold. Total: %d" % [amount, stats_data.gold]) # debug
 
 ## Helper to Announce to UI stats update
 func refresh_stats() -> void:
