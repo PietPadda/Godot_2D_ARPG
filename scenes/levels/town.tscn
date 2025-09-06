@@ -28,4 +28,4 @@ position = Vector2(1668, 347)
 target_scene_path = "uid://cys1ord7jy672"
 
 [node name="ShopNpc" parent="." instance=ExtResource("7_0x67q")]
-position = Vector2(1265, 233)
+position = Vector2(1270, 152)
