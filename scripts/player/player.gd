@@ -7,7 +7,6 @@ const GameOverScreen = preload("res://scenes/ui/game_over_screen.tscn")
 # get components
 @onready var stats_component: StatsComponent = $StatsComponent
 @onready var state_machine: StateMachine = $StateMachine
-@onready var movement_component: PlayerMovementComponent = $PlayerMovementComponent
 
 func _ready() -> void:
 	# Check for SAVE GAME data first (highest priority).

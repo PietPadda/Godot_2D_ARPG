@@ -11,6 +11,7 @@ var last_target_tile: Vector2i
 @onready var attack_component: AttackComponent = player.get_node("AttackComponent")
 @onready var animation_component: AnimationComponent = player.get_node("AnimationComponent")
 @onready var grid_movement_component: GridMovementComponent = player.get_node("GridMovementComponent")
+@onready var input_component: PlayerInputComponent = player.get_node("PlayerInputComponent")
 
 func enter() -> void:
 	# On entering, immediately start moving towards the target.
@@ -19,19 +20,27 @@ func enter() -> void:
 		return # early exit
 		
 	player.get_node("AnimationComponent").play_animation("Move")
-	# Calculate the initial path to start the chase.
-	# NEW: Listen for the stuck signal
-	grid_movement_component.path_stuck.connect(_recalculate_path)
-	_recalculate_path()
+	
+	# Connect to signals for interruption and movement logic
+	grid_movement_component.path_stuck.connect(_recalculate_path) # Calculate the initial path to start the chase.
+	input_component.move_to_requested.connect(_on_move_to_requested)
+	input_component.target_requested.connect(_on_target_requested)
+	input_component.cast_requested.connect(_on_cast_requested)
+	
+	_recalculate_path() # Start the chase
 
 func exit() -> void:
-	# NEW: Disconnect from the stuck signal
+	# Disconnect from all signals for clean state transitions
 	if grid_movement_component.path_stuck.is_connected(_recalculate_path):
 		grid_movement_component.path_stuck.disconnect(_recalculate_path)
-	# Crucial cleanup: stop movement.
+	input_component.move_to_requested.disconnect(_on_move_to_requested)
+	input_component.target_requested.disconnect(_on_target_requested)
+	input_component.cast_requested.disconnect(_on_cast_requested)
+	
+	# Crucial cleanup to stop movement when exiting the state.
 	grid_movement_component.stop()
 
-func process_physics(delta: float) -> void:
+func _process_physics(delta: float) -> void:
 	# First, check if our target still exists.
 	if not is_instance_valid(target):
 		state_machine.change_state(States.PLAYER_STATE_NAMES[States.PLAYER.IDLE]) # just idle if invalid target
@@ -52,8 +61,11 @@ func process_physics(delta: float) -> void:
 	if current_target_tile != last_target_tile:
 		_recalculate_path()
 
+# --- Helper Functions ---
 # Gets a new path and starts the movement process.
 func _recalculate_path() -> void:
+	if not is_instance_valid(target): 
+		return
 	var start_pos = Grid.world_to_map(player.global_position)
 	var end_pos = Grid.world_to_map(target.global_position)
 	
@@ -61,4 +73,25 @@ func _recalculate_path() -> void:
 	var path = Grid.find_path(start_pos, end_pos)
 	
 	# The state simply tells the component what path to follow.
-	grid_movement_component.move_along_path(path)
+	if not path.is_empty():
+		grid_movement_component.move_along_path(path)
+
+# --- Signal Handlers ---
+func _on_move_to_requested(target_position: Vector2) -> void:
+	var move_state: PlayerMoveState = state_machine.states["move"]
+	move_state.destination_tile = Grid.world_to_map(target_position)
+	state_machine.change_state(States.PLAYER_STATE_NAMES[States.PLAYER.MOVE])
+
+func _on_target_requested(new_target: Node2D) -> void:
+	if new_target != self.target:
+		self.target = new_target
+		_recalculate_path() # Immediately repath to the new target
+
+func _on_cast_requested(skill_slot: int, target_position: Vector2) -> void:
+	var skill_to_cast = skill_caster_component.secondary_attack_skill
+	if not skill_to_cast: return
+	
+	var cast_state: PlayerCastState = state_machine.states["cast"]
+	cast_state.skill_to_cast = skill_to_cast
+	cast_state.cast_target_position = target_position
+	state_machine.change_state(States.PLAYER_STATE_NAMES[States.PLAYER.CAST])
