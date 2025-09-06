@@ -6,15 +6,12 @@ var target: Node2D
 var move_path: PackedVector2Array = []
 var last_target_tile: Vector2i
 
-# We now get the GridMovementComponent instead of the old AI one.
-@export var grid_movement_component: GridMovementComponent
-
 func enter() -> void:
 	if not is_instance_valid(target):
 		state_machine.change_state(States.ENEMY_STATE_NAMES[States.ENEMY.IDLE])
 		return
 		
-	animation_component.play_animation("Move") # Assuming enemy has a "Move" animation
+	#animation_component.play_animation("Move") # Assuming enemy has a "Move" animation
 	# NEW: Listen for the stuck signal
 	grid_movement_component.path_stuck.connect(_recalculate_path)
 	_recalculate_path()

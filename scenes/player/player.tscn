@@ -145,24 +145,32 @@ libraries = {
 script = ExtResource("2_qek5x")
 initial_state = NodePath("Idle")
 
-[node name="Idle" type="Node" parent="StateMachine" node_paths=PackedStringArray("animation_component", "input_component", "skill_caster_component", "stats_component")]
+[node name="Idle" type="Node" parent="StateMachine" node_paths=PackedStringArray("animation_component", "attack_component", "grid_movement_component", "input_component", "skill_caster_component", "stats_component")]
 script = ExtResource("3_5gtgg")
 animation_component = NodePath("../../AnimationComponent")
-input_component = NodePath("../../PlayerInputComponent")
-skill_caster_component = NodePath("../../SkillCasterComponent")
-stats_component = NodePath("../../StatsComponent")
-
-[node name="Move" type="Node" parent="StateMachine" node_paths=PackedStringArray("grid_movement_component", "input_component", "skill_caster_component", "stats_component")]
-script = ExtResource("4_h17s1")
+attack_component = NodePath("../../AttackComponent")
 grid_movement_component = NodePath("../../GridMovementComponent")
 input_component = NodePath("../../PlayerInputComponent")
 skill_caster_component = NodePath("../../SkillCasterComponent")
 stats_component = NodePath("../../StatsComponent")
 
-[node name="Attack" type="Node" parent="StateMachine" node_paths=PackedStringArray("animation_component", "attack_component")]
+[node name="Move" type="Node" parent="StateMachine" node_paths=PackedStringArray("animation_component", "attack_component", "grid_movement_component", "input_component", "skill_caster_component", "stats_component")]
+script = ExtResource("4_h17s1")
+animation_component = NodePath("../../AnimationComponent")
+attack_component = NodePath("../../AttackComponent")
+grid_movement_component = NodePath("../../GridMovementComponent")
+input_component = NodePath("../../PlayerInputComponent")
+skill_caster_component = NodePath("../../SkillCasterComponent")
+stats_component = NodePath("../../StatsComponent")
+
+[node name="Attack" type="Node" parent="StateMachine" node_paths=PackedStringArray("animation_component", "attack_component", "grid_movement_component", "input_component", "skill_caster_component", "stats_component")]
 script = ExtResource("5_5gtgg")
 animation_component = NodePath("../../AnimationComponent")
 attack_component = NodePath("../../AttackComponent")
+grid_movement_component = NodePath("../../GridMovementComponent")
+input_component = NodePath("../../PlayerInputComponent")
+skill_caster_component = NodePath("../../SkillCasterComponent")
+stats_component = NodePath("../../StatsComponent")
 
 [node name="Chase" type="Node" parent="StateMachine" node_paths=PackedStringArray("animation_component", "attack_component", "grid_movement_component", "input_component", "skill_caster_component", "stats_component")]
 script = ExtResource("6_fm80t")
@@ -173,14 +181,23 @@ input_component = NodePath("../../PlayerInputComponent")
 skill_caster_component = NodePath("../../SkillCasterComponent")
 stats_component = NodePath("../../StatsComponent")
 
-[node name="Dead" type="Node" parent="StateMachine" node_paths=PackedStringArray("animation_component")]
+[node name="Dead" type="Node" parent="StateMachine" node_paths=PackedStringArray("animation_component", "attack_component", "grid_movement_component", "input_component", "skill_caster_component", "stats_component")]
 script = ExtResource("8_ugbui")
 animation_component = NodePath("../../AnimationComponent")
+attack_component = NodePath("../../AttackComponent")
+grid_movement_component = NodePath("../../GridMovementComponent")
+input_component = NodePath("../../PlayerInputComponent")
+skill_caster_component = NodePath("../../SkillCasterComponent")
+stats_component = NodePath("../../StatsComponent")
 
-[node name="Cast" type="Node" parent="StateMachine" node_paths=PackedStringArray("animation_component", "skill_caster_component")]
+[node name="Cast" type="Node" parent="StateMachine" node_paths=PackedStringArray("animation_component", "attack_component", "grid_movement_component", "input_component", "skill_caster_component", "stats_component")]
 script = ExtResource("9_lgqa7")
 animation_component = NodePath("../../AnimationComponent")
+attack_component = NodePath("../../AttackComponent")
+grid_movement_component = NodePath("../../GridMovementComponent")
+input_component = NodePath("../../PlayerInputComponent")
 skill_caster_component = NodePath("../../SkillCasterComponent")
+stats_component = NodePath("../../StatsComponent")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 texture = ExtResource("1_8afob")

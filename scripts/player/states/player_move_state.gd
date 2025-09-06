@@ -3,10 +3,6 @@
 class_name PlayerMoveState
 extends PlayerState # Changed from 'State'
 
-# Scene referenes needed for move state
-@export var grid_movement_component: GridMovementComponent
-@export var input_component: PlayerInputComponent
-
 # This state now receives a single destination tile, not a pre-calculated path.
 var destination_tile: Vector2i
 

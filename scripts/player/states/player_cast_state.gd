@@ -1,17 +1,10 @@
 # player_cast_state.gd
 class_name PlayerCastState
-extends State
+extends PlayerState
 
 # var type init
 var skill_to_cast: SkillData
 var cast_target_position: Vector2
-
-# scene nodes
-@onready var player: CharacterBody2D = get_owner()
-
-# export components
-@export var animation_component: AnimationComponent
-@export var skill_caster_component: SkillCasterComponent
 
 func enter() -> void:
 	# For now, we'll reuse the Attack animation for casting.

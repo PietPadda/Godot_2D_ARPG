@@ -7,8 +7,9 @@ extends State
 
 # export components
 @export var animation_component: AnimationComponent
-@export var stats_component: StatsComponent
 @export var attack_component: AttackComponent
+@export var grid_movement_component: GridMovementComponent
+@export var stats_component: StatsComponent
 
 # We can also move shared logic here, like the target validity check.
 func is_target_valid(target: Node2D) -> bool:

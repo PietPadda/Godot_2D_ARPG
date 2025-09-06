@@ -7,12 +7,6 @@ var target: Node2D
 # We need to track the target's last known tile to avoid spamming the pathfinder.
 var last_target_tile: Vector2i
 
-# Scene referenes needed for move state
-@export var animation_component: AnimationComponent
-@export var attack_component: AttackComponent
-@export var grid_movement_component: GridMovementComponent
-@export var input_component: PlayerInputComponent
-
 func enter() -> void:
 	# On entering, immediately start moving towards the target.
 	if not is_instance_valid(target):

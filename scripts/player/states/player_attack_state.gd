@@ -1,13 +1,9 @@
 # player_attack_state.gd
 # The state for when the player is performing an attack.
 class_name PlayerAttackState
-extends State
+extends PlayerState
 
 var target: Node2D # holds the attack target
-
-# A reference to the AttackComponent.
-@export var animation_component: AnimationComponent
-@export var attack_component: AttackComponent
 
 func enter() -> void:
 	print("Entering Attack State")

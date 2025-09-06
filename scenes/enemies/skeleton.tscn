@@ -85,25 +85,26 @@ libraries = {
 script = ExtResource("1_038oa")
 initial_state = NodePath("Idle")
 
-[node name="Idle" type="Node" parent="StateMachine" node_paths=PackedStringArray("animation_component", "stats_component", "attack_component")]
+[node name="Idle" type="Node" parent="StateMachine" node_paths=PackedStringArray("animation_component", "attack_component", "grid_movement_component", "stats_component")]
 script = ExtResource("2_3mw36")
 animation_component = NodePath("../../AnimationComponent")
-stats_component = NodePath("../../StatsComponent")
 attack_component = NodePath("../../AttackComponent")
+grid_movement_component = NodePath("../../GridMovementComponent")
+stats_component = NodePath("../../StatsComponent")
 
-[node name="Chase" type="Node" parent="StateMachine" node_paths=PackedStringArray("grid_movement_component", "animation_component", "stats_component", "attack_component")]
+[node name="Chase" type="Node" parent="StateMachine" node_paths=PackedStringArray("animation_component", "attack_component", "grid_movement_component", "stats_component")]
 script = ExtResource("4_vncds")
-grid_movement_component = NodePath("../../GridMovementComponent")
 animation_component = NodePath("../../AnimationComponent")
-stats_component = NodePath("../../StatsComponent")
 attack_component = NodePath("../../AttackComponent")
+grid_movement_component = NodePath("../../GridMovementComponent")
+stats_component = NodePath("../../StatsComponent")
 
-[node name="Attack" type="Node" parent="StateMachine" node_paths=PackedStringArray("grid_movement_component", "animation_component", "stats_component", "attack_component")]
+[node name="Attack" type="Node" parent="StateMachine" node_paths=PackedStringArray("animation_component", "attack_component", "grid_movement_component", "stats_component")]
 script = ExtResource("6_quxur")
-grid_movement_component = NodePath("../../GridMovementComponent")
 animation_component = NodePath("../../AnimationComponent")
-stats_component = NodePath("../../StatsComponent")
 attack_component = NodePath("../../AttackComponent")
+grid_movement_component = NodePath("../../GridMovementComponent")
+stats_component = NodePath("../../StatsComponent")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 modulate = Color(1, 0, 0, 1)
