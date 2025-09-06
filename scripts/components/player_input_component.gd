@@ -33,3 +33,15 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("cast_skill") and event is InputEventMouseButton:
 		# For now, we hardcode the skill slot to 0. This can be expanded later.
 		cast_requested.emit(0, event.global_position)
+
+# We add _physics_process for continuous actions, like holding a button down.
+# _unhandled_input is better for discrete, single-press events.
+func _physics_process(_delta: float) -> void:
+	if EventBus.current_game_state != EventBus.GameState.GAMEPLAY:
+		return
+
+	# If the move action is held down, continuously broadcast the intention to move.
+	if Input.is_action_pressed("move_click"):
+		# Since this is a Node, we ask our parent (the Player, a Node2D)
+		# for the global mouse position.
+		move_to_requested.emit(get_parent().get_global_mouse_position())
