@@ -10,6 +10,8 @@ signal player_connected(player_id)
 # Signal emitted on the server when a player disconnects.
 signal player_disconnected(player_id)
 
+# --- Constants & Vars ---
+const PLAYER_SCENE = preload("res://scenes/player/player.tscn")
 const DEFAULT_PORT = 7777 # The default port for our game server.
 var players = {} # A dictionary to store information about connected players.
 
@@ -57,6 +59,10 @@ func _on_peer_connected(id: int):
 	print("Player connected: %d" % id)
 	players[id] = { "name": "Player " + str(id) }
 	player_connected.emit(id)
+	
+	# Spawn a player for the new peer.
+	# This function will only run on the server.
+	_spawn_player(id)
 
 func _on_peer_disconnected(id: int):
 	print("Player disconnected: %d" % id)
@@ -70,3 +76,17 @@ func _on_connected_to_server():
 func _on_connection_failed():
 	print("Failed to connect to server.")
 	connection_failed.emit()
+
+# --- Private Functions ---
+# This function is called by the server to spawn a player instance
+# for a specific peer ID.
+func _spawn_player(id: int):
+	# We create an instance of the player scene.
+	var player_instance = PLAYER_SCENE.instantiate()
+	# The node's name MUST be the player's unique ID for networking to work.
+	player_instance.name = str(id)
+
+	# We add the instance to the scene tree. This will automatically replicate
+	# it on all clients because the Player scene is a spawnable scene.
+	# (We'll configure that in the next step).
+	get_tree().get_root().get_node("Main/PlayerSpawner").add_child(player_instance)
