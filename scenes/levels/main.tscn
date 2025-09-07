@@ -98,6 +98,9 @@ tile_set = ExtResource("5_u81e1")
 position = Vector2(1668, 347)
 target_scene_path = "uid://d3xic0inlmby0"
 
+[node name="PlayerContainer" type="Node2D" parent="."]
+position = Vector2(214, -240)
+
 [node name="PlayerSpawner" type="MultiplayerSpawner" parent="."]
 _spawnable_scenes = PackedStringArray("uid://c04jx6vcgex1j")
-spawn_path = NodePath("..")
+spawn_path = NodePath("../PlayerContainer")

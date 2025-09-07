@@ -3,7 +3,8 @@ extends Node2D
 
 # scene nodes
 @onready var tile_map_layer = $TileMapLayer
-@onready var player_spawner: MultiplayerSpawner = $PlayerSpawner # Add a reference to our spawner.
+# player container used for spawning
+@onready var player_container: Node2D = $PlayerContainer
 
 # Expose a slot in the Inspector for the music track.
 @export var level_music: MusicTrackData
@@ -43,7 +44,5 @@ func _on_player_spawn_requested(id: int):
 	# Set the authority of the player scene to the peer that just connected.
 	player_instance.set_multiplayer_authority(id)
 	
-	# Spawn the player in game
-	player_spawner.add_child(player_instance)
-	
-	# TODO: Set player's starting position.
+	# Add the player to the container that the MultiplayerSpawner is watching.
+	player_container.add_child(player_instance)
