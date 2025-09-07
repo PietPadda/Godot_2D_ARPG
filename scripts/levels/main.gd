@@ -5,12 +5,21 @@ extends Node2D
 @onready var tile_map_layer = $TileMapLayer
 # player container used for spawning
 @onready var player_container: Node2D = $PlayerContainer
+# Add a reference to our new spawn points container.
+@onready var spawn_points_container: Node2D = $SpawnPoints
 
 # Expose a slot in the Inspector for the music track.
 @export var level_music: MusicTrackData
 
+# Consts and vars
+var spawn_points: Array = []
+var current_spawn_index: int = 0
+
 # The setup logic MUST be in _ready() to run once at the start.
 func _ready():
+	# Get all the spawn point children into an array when the level loads.
+	spawn_points = spawn_points_container.get_children()
+	
 	# Play the music track that has been assigned in the Inspector.
 	if level_music:
 		Music.play_music(level_music)
@@ -37,12 +46,17 @@ func _unhandled_input(event: InputEvent) -> void:
 # This function will run when the signal is received.
 # It contains the logic we moved from the NetworkManager.
 func _on_player_spawn_requested(id: int):
-	var player_scene = preload("res://scenes/player/player.tscn")
 	var player_instance = NetworkManager.PLAYER_SCENE.instantiate()
 	player_instance.name = str(id)
-	
 	# Set the authority of the player scene to the peer that just connected.
 	player_instance.set_multiplayer_authority(id)
+	
+	# Check if we have any spawn points defined.
+	if not spawn_points.is_empty():
+		# Get the position of the next spawn point in the cycle.
+		player_instance.global_position = spawn_points[current_spawn_index].global_position
+		# Move to the next index, wrapping around if we reach the end.
+		current_spawn_index = (current_spawn_index + 1) % spawn_points.size()
 	
 	# Add the player to the container that the MultiplayerSpawner is watching.
 	player_container.add_child(player_instance)
