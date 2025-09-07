@@ -7,20 +7,26 @@ const GameOverScreen = preload("res://scenes/ui/game_over_screen.tscn")
 # get components
 @onready var stats_component: StatsComponent = $StatsComponent
 @onready var state_machine: StateMachine = $StateMachine
+@onready var camera: Camera2D = $Camera2D
 
 func _ready() -> void:
-	 # Get the camera node using its unique name.
-	var camera = find_child("player_camera")
+	# This is the crucial check. Do it first!
+	if not is_multiplayer_authority():
+		# This is a remote player's puppet.
+		camera.enabled = false # disable the camera
+		# Deactivate its StateMachine so it doesn't try to run logic.
+		state_machine.set_physics_process(false)
+		state_machine.set_process_unhandled_input(false)
+		# Do nothing else
+		return # This is the most important part!
 
-	# This is the crucial check for multiplayer.
-	if is_multiplayer_authority():
-		# This is our character, so enable its camera.
-		if camera:
-			camera.enabled = true
-	else:
-		# This is a remote player's puppet. Disable its camera.
-		if camera:
-			camera.enabled = false
+	# Connect signals only for the local player.
+	stats_component.died.connect(_on_death) # player died
+	EventBus.enemy_died.connect(_on_enemy_died) # enemy died
+	EventBus.game_state_changed.connect(_on_game_state_changed) # game state change
+	
+	# Manually call the handler on startup to set the initial correct state.
+	_on_game_state_changed(EventBus.current_game_state)
 	
 	# Check for SAVE GAME data first (highest priority).
 	if is_instance_valid(GameManager.loaded_player_data):
@@ -72,15 +78,6 @@ func _ready() -> void:
 		# Clear the transition data from the manager so it's not reused.
 		GameManager.player_data_on_transition = null
 	
-	# Connect our component's signal to a function in this script.
-	stats_component.died.connect(_on_death) # player died
-	EventBus.enemy_died.connect(_on_enemy_died) # enemy died
-	
-	# Connect to the global game state signal.
-	EventBus.game_state_changed.connect(_on_game_state_changed)
-	# Manually call the handler on startup to set the initial correct state.
-	_on_game_state_changed(EventBus.current_game_state)
-
 # This function is called when the StatsComponent emits the "died" signal.
 ## Player death function for Player
 func _on_death() -> void:
