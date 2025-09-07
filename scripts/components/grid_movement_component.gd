@@ -106,7 +106,6 @@ func _physics_process(_delta: float) -> void:
 func _on_stuck_timer_timeout() -> void:
 	# If we haven't moved far enough since the last check...
 	if character_body.global_position.distance_to(last_position) < STUCK_DISTANCE_THRESHOLD:
-		print(character_body.name + " is stuck!")
 		# ...we are stuck. Stop everything and announce it.
 		stop()
 		emit_signal("path_stuck")

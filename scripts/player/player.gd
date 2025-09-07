@@ -19,6 +19,9 @@ func _ready() -> void:
 		state_machine.set_process_unhandled_input(false)
 		# Do nothing else
 		return # This is the most important part!
+		
+	# Force this camera to be the active one for the viewport.
+	camera.make_current() # <-- Add this line
 
 	# Connect signals only for the local player.
 	stats_component.died.connect(_on_death) # player died

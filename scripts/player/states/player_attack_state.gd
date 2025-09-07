@@ -6,7 +6,6 @@ extends PlayerState
 var target: Node2D # holds the attack target
 
 func enter() -> void:
-	print("Entering Attack State")
 	if not is_instance_valid(target):
 		# If we enter this state without a valid target, exit immediately.
 		state_machine.change_state(States.PLAYER_STATE_NAMES[States.PLAYER.IDLE])
@@ -18,7 +17,6 @@ func enter() -> void:
 	attack_component.attack_finished.connect(on_attack_finished, CONNECT_ONE_SHOT)
 
 func on_attack_finished() -> void:
-	print("Exiting Attack State")
 	# Once the attack is finished, go back to being idle.
 	state_machine.change_state(States.PLAYER_STATE_NAMES[States.PLAYER.IDLE])
  
