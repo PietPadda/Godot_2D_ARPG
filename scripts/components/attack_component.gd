@@ -33,7 +33,7 @@ func execute(target: Node2D) -> void:
 		
 	if not is_instance_valid(target):
 		print("Invalid target.")
-		emit_signal("attack_finished") # Fail safely
+		emit_signal("attack_finished") # Faiil safely
 		return
 		
 	# Get the animation from the AnimationPlayer
@@ -52,8 +52,6 @@ func execute(target: Node2D) -> void:
 	# Get the character's total damage from the StatCalculator.
 	var total_damage = get_owner().get_node("StatsComponent").get_total_stat("damage")
 
-	print("Attacking %s for %d damage!" % [target.name, total_damage])
-	
 	 # Find the target's StatsComponent and deal damage.
 	var target_stats: StatsComponent = target.get_node("StatsComponent")
 	if target_stats:

@@ -16,9 +16,6 @@ func _on_aggro_radius_body_entered(body: Node2D) -> void:
 	if state_machine.current_state.name != "Idle":
 		return
 		
-	# The body that entered is the player.
-	print("Player detected! Giving chase.")
-	
 	# Get the Chase state, give it the player as a target, and change state.
 	var chase_state = state_machine.states["chase"] # set state var
 	chase_state.target = body # set state target
