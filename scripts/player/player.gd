@@ -146,8 +146,11 @@ func _on_game_state_changed(new_state: EventBus.GameState) -> void:
 			
 # -- Remote Procedure Calls (RPCs) ---
 # Set initial player spawn position
-@rpc("authority", "call_local")
+@rpc("any_peer", "call_local")
 func set_initial_position(pos: Vector2):
-	# This function will only be executed on the machine that owns this character.
-	print("[%s] Received initial position RPC from server: %s" % [name, pos])
-	global_position = pos
+	# get_remote_sender_id() tells us which player made this RPC call.
+	# We only accept the call if it comes from the server (whose ID is always 1).
+	if multiplayer.get_remote_sender_id() == 1:
+		# This function will only be executed on the machine that owns this character.
+		print("[%s] Received initial position RPC from server: %s" % [name, pos])
+		global_position = pos
