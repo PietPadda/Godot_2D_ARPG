@@ -23,8 +23,8 @@ signal gold_changed(total_gold) # Announce when gold total changes.
 @onready var attack_component: AttackComponent = get_parent().get_node_or_null("AttackComponent")
 
 # The entity's current, in-game stats.
-var current_health: int # entity hp tracker
-var current_mana: int # mana tracker
+@export var current_health: int # entity hp tracker
+@export var current_mana: int # mana tracker
 var is_dead: bool = false # death tracker
 
 func _ready() -> void:

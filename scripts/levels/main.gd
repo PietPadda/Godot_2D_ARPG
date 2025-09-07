@@ -36,6 +36,14 @@ func _unhandled_input(event: InputEvent) -> void:
 # This function will run when the signal is received.
 # It contains the logic we moved from the NetworkManager.
 func _on_player_spawn_requested(id: int):
+	var player_scene = preload("res://scenes/player/player.tscn")
 	var player_instance = NetworkManager.PLAYER_SCENE.instantiate()
 	player_instance.name = str(id)
+	
+	# Set the authority of the player scene to the peer that just connected.
+	player_instance.set_multiplayer_authority(id)
+	
+	# Spawn the player in game
 	player_spawner.add_child(player_instance)
+	
+	# TODO: Set player's starting position.
