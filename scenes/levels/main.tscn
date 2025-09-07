@@ -99,8 +99,21 @@ position = Vector2(1668, 347)
 target_scene_path = "uid://d3xic0inlmby0"
 
 [node name="PlayerContainer" type="Node2D" parent="."]
-position = Vector2(214, -240)
 
 [node name="PlayerSpawner" type="MultiplayerSpawner" parent="."]
 _spawnable_scenes = PackedStringArray("uid://c04jx6vcgex1j")
 spawn_path = NodePath("../PlayerContainer")
+
+[node name="SpawnPoints" type="Node2D" parent="."]
+
+[node name="SpawnPoint1" type="Marker2D" parent="SpawnPoints"]
+position = Vector2(234, -278)
+
+[node name="SpawnPoint2" type="Marker2D" parent="SpawnPoints"]
+position = Vector2(482, -170)
+
+[node name="SpawnPoint3" type="Marker2D" parent="SpawnPoints"]
+position = Vector2(-85, -133)
+
+[node name="SpawnPoint4" type="Marker2D" parent="SpawnPoints"]
+position = Vector2(175, -94)

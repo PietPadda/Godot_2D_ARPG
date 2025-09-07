@@ -22,7 +22,6 @@ func _unhandled_input(event: InputEvent) -> void:
 		
 	# Only process input if the game is in a state that allows it.
 	if EventBus.current_game_state != EventBus.GameState.GAMEPLAY:
-		print("[%s] InputComponent: 'move_click' action detected." % get_parent().name)
 		return
 		
 	# We only care about the initial press of an action in this function.
