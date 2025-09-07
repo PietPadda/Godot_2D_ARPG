@@ -7,6 +7,7 @@ extends PlayerState # Changed from 'State'
 var destination_tile: Vector2i
 
 func enter() -> void:
+	print("[%s] PlayerMoveState: Successfully entered state." % player.name)
 	player.get_node("AnimationComponent").play_animation("Move")
 	# When we enter, start listening for the component to finish a step.
 	grid_movement_component.path_finished.connect(_on_path_finished)
