@@ -9,6 +9,13 @@ const GameOverScreen = preload("res://scenes/ui/game_over_screen.tscn")
 @onready var state_machine: StateMachine = $StateMachine
 @onready var camera: Camera2D = $Camera2D
 
+# This is a built-in Godot function.
+func _enter_tree() -> void:
+	# The player's name is its multiplayer ID, set by the server upon creation.
+	# We convert the name (which is a String) to an integer.
+	# The engine error log specifically tells us to set authority here.
+	set_multiplayer_authority(int(name))
+
 func _ready() -> void:
 	# This is the crucial check. Do it first!
 	if not is_multiplayer_authority():
@@ -23,14 +30,6 @@ func _ready() -> void:
 	# Force this camera to be the active one for the viewport.
 	camera.make_current() # <-- Add this line
 
-	# Connect signals only for the local player.
-	stats_component.died.connect(_on_death) # player died
-	EventBus.enemy_died.connect(_on_enemy_died) # enemy died
-	EventBus.game_state_changed.connect(_on_game_state_changed) # game state change
-	
-	# Manually call the handler on startup to set the initial correct state.
-	_on_game_state_changed(EventBus.current_game_state)
-	
 	# Check for SAVE GAME data first (highest priority).
 	if is_instance_valid(GameManager.loaded_player_data):
 		print("Applying loaded data to player...")
@@ -80,6 +79,16 @@ func _ready() -> void:
 		
 		# Clear the transition data from the manager so it's not reused.
 		GameManager.player_data_on_transition = null
+		
+	# Connect signals only for the local player.
+	stats_component.died.connect(_on_death) # player died
+	EventBus.enemy_died.connect(_on_enemy_died) # enemy died
+	EventBus.game_state_changed.connect(_on_game_state_changed) # game state change
+	
+	# Manually call the handler on startup to set the initial correct state.
+	_on_game_state_changed(EventBus.current_game_state)
+	
+	print("[%s] Player _ready() completed successfully." % name)
 	
 # This function is called when the StatsComponent emits the "died" signal.
 ## Player death function for Player

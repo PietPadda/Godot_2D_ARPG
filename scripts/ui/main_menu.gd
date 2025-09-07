@@ -20,7 +20,11 @@ func _on_host_button_pressed():
 
 # When the "Join" button is pressed, call the NetworkManager with the IP address.
 func _on_join_button_pressed():
+	# Add this line to prevent old data from interfering with our spawn position.
+	GameManager.player_data_on_transition = null
+	
 	NetworkManager.join_game(ip_address_edit.text)
 	# The client also switches to the main game scene. The NetworkManager will
 	# tell us if the connection fails.
+	# The client also switches to the main game scene.
 	get_tree().change_scene_to_file("res://scenes/levels/main.tscn")
