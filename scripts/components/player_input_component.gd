@@ -15,6 +15,11 @@ signal cast_requested(skill_slot: int, target_position: Vector2)
 @onready var targeting_component: PlayerTargetingComponent = get_parent().get_node("PlayerTargetingComponent")
 
 func _unhandled_input(event: InputEvent) -> void:
+	# Only process input if this client has authority over the player character.
+	# The Player node is the parent of this component.
+	if not get_parent().is_multiplayer_authority():
+		return # If not the authority, stop right here.
+		
 	# Only process input if the game is in a state that allows it.
 	if EventBus.current_game_state != EventBus.GameState.GAMEPLAY:
 		return
@@ -42,6 +47,11 @@ func _unhandled_input(event: InputEvent) -> void:
 # We add _physics_process for continuous actions, like holding a button down.
 # _unhandled_input is better for discrete, single-press events.
 func _physics_process(_delta: float) -> void:
+	# Only process input if this client has authority over the player character.
+	# The Player node is the parent of this component.
+	if not get_parent().is_multiplayer_authority():
+		return # If not the authority, stop right here.
+	
 	if EventBus.current_game_state != EventBus.GameState.GAMEPLAY:
 		return
 
