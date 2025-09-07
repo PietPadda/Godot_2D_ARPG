@@ -48,8 +48,8 @@ func _unhandled_input(event: InputEvent) -> void:
 func _on_player_spawn_requested(id: int):
 	var player_instance = NetworkManager.PLAYER_SCENE.instantiate()
 	player_instance.name = str(id)
-	# Set the authority of the player scene to the peer that just connected.
-	player_instance.set_multiplayer_authority(id)
+	# REMOVE THIS LINE - The player now does this itself in _enter_tree.
+	# player_instance.set_multiplayer_authority(id)
 	
 	# Check if we have any spawn points defined.
 	if not spawn_points.is_empty():
