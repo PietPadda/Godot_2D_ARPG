@@ -51,12 +51,19 @@ func _on_player_spawn_requested(id: int):
 	# REMOVE THIS LINE - The player now does this itself in _enter_tree.
 	# player_instance.set_multiplayer_authority(id)
 	
+	var spawn_pos = Vector2.ZERO # Default in case we have no spawn points
 	# Check if we have any spawn points defined.
 	if not spawn_points.is_empty():
 		# Get the position of the next spawn point in the cycle.
-		player_instance.global_position = spawn_points[current_spawn_index].global_position
+		spawn_pos = spawn_points[current_spawn_index].global_position
 		# Move to the next index, wrapping around if we reach the end.
 		current_spawn_index = (current_spawn_index + 1) % spawn_points.size()
 	
+	# We still set the position on the server instance.
+	player_instance.global_position = spawn_pos
+	
 	# Add the player to the container that the MultiplayerSpawner is watching.
 	player_container.add_child(player_instance)
+	
+	# Call the RPC on the client who owns this new player.
+	player_instance.set_initial_position.rpc_id(id, spawn_pos)

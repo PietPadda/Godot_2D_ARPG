@@ -9,14 +9,26 @@ const GameOverScreen = preload("res://scenes/ui/game_over_screen.tscn")
 @onready var state_machine: StateMachine = $StateMachine
 @onready var camera: Camera2D = $Camera2D
 
+# consts and vars
+var _first_physics_frame_checked: bool = false
+
 # This is a built-in Godot function.
 func _enter_tree() -> void:
 	# The player's name is its multiplayer ID, set by the server upon creation.
 	# We convert the name (which is a String) to an integer.
 	# The engine error log specifically tells us to set authority here.
 	set_multiplayer_authority(int(name))
+	
+	# We only want to print these messages for our own character
+	if is_multiplayer_authority():
+		# This is the very first moment our node exists in the scene.
+		print("--- 1. ENTER TREE --- Initial Position: %s" % global_position)
 
 func _ready() -> void:
+	if is_multiplayer_authority():
+		# This runs right after _enter_tree.
+		print("--- 2. READY START --- Position is: %s" % global_position)
+	
 	# This is the crucial check. Do it first!
 	if not is_multiplayer_authority():
 		# This is a remote player's puppet.
@@ -29,7 +41,7 @@ func _ready() -> void:
 		
 	# Force this camera to be the active one for the viewport.
 	camera.make_current() # <-- Add this line
-
+	
 	# Check for SAVE GAME data first (highest priority).
 	if is_instance_valid(GameManager.loaded_player_data):
 		print("Applying loaded data to player...")
@@ -90,6 +102,17 @@ func _ready() -> void:
 	
 	print("[%s] Player _ready() completed successfully." % name)
 	
+	if is_multiplayer_authority():
+		# This runs at the very end of the _ready function.
+		print("--- 3. READY END --- Position is: %s" % global_position)
+
+# We need to add _physics_process to see the position on the first frame of gameplay.
+func _physics_process(delta: float) -> void:
+	# This code will only run once for our controlled character.
+	if is_multiplayer_authority() and not _first_physics_frame_checked:
+		print("--- 4. FIRST PHYSICS FRAME --- Position is: %s" % global_position)
+		_first_physics_frame_checked = true
+
 # This function is called when the StatsComponent emits the "died" signal.
 ## Player death function for Player
 func _on_death() -> void:
@@ -120,3 +143,11 @@ func _on_game_state_changed(new_state: EventBus.GameState) -> void:
 		var movement_component = get_node_or_null("GridMovementComponent")
 		if movement_component:
 			movement_component.stop()
+			
+# -- Remote Procedure Calls (RPCs) ---
+# Set initial player spawn position
+@rpc("authority", "call_local")
+func set_initial_position(pos: Vector2):
+	# This function will only be executed on the machine that owns this character.
+	print("[%s] Received initial position RPC from server: %s" % [name, pos])
+	global_position = pos
