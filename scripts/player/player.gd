@@ -154,3 +154,10 @@ func set_initial_position(pos: Vector2):
 		# This function will only be executed on the machine that owns this character.
 		print("[%s] Received initial position RPC from server: %s" % [name, pos])
 		global_position = pos
+
+# This function allows any peer to send a position update.
+# The check inside ensures we only apply it to characters we don't control.
+@rpc("any_peer", "call_local", "unreliable")
+func force_sync_position(pos: Vector2):
+	if not is_multiplayer_authority():
+		global_position = pos

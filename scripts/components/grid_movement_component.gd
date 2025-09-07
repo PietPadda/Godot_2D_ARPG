@@ -101,6 +101,11 @@ func _physics_process(_delta: float) -> void:
 	var move_speed = stats_component.get_total_stat("move_speed")
 	character_body.velocity = direction * move_speed
 	character_body.move_and_slide()
+	
+	# Multiplayer Sync
+	# If we are in control of this character, broadcast our new position via RPC.
+	if character_body.is_multiplayer_authority():
+		character_body.force_sync_position.rpc(character_body.global_position)
 
 # NEW: This function runs every STUCK_CHECK_INTERVAL seconds
 func _on_stuck_timer_timeout() -> void:
