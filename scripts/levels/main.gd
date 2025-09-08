@@ -49,6 +49,10 @@ func _ready():
 		# ...delete all the enemies that were pre-placed in the scene.
 		for enemy in enemies_container.get_children():
 			enemy.queue_free()
+	# If this game instance IS the server, take ownership of all pre-placed enemies.
+	else:
+		for enemy in enemies_container.get_children():
+			enemy.set_multiplayer_authority(1)
 
 # This function can now be left empty or used for other inputs.
 func _unhandled_input(event: InputEvent) -> void:
