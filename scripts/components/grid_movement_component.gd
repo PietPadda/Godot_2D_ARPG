@@ -8,6 +8,9 @@ signal path_finished
  # NEW: Announce when we can't reach a target
 signal path_stuck
 
+# Preload the Player script to make the "Player" type available for our type check.
+const Player = preload("res://scripts/player/player.gd")
+
 # Component References
 @onready var character_body: CharacterBody2D = get_parent()
 @onready var stats_component: StatsComponent = character_body.get_node("StatsComponent")
@@ -103,9 +106,11 @@ func _physics_process(_delta: float) -> void:
 	character_body.move_and_slide()
 	
 	# Multiplayer Sync
-	# If we are in control of this character, broadcast our new position via RPC.
-	if character_body.is_multiplayer_authority():
-		character_body.force_sync_position.rpc(character_body.global_position)
+	# First, we check if the object we're moving is actually a Player.
+	if character_body is Player:
+		# If we are in control of this character, broadcast our new position via RPC.
+		if character_body.is_multiplayer_authority():
+			character_body.force_sync_position.rpc(character_body.global_position)
 
 # NEW: This function runs every STUCK_CHECK_INTERVAL seconds
 func _on_stuck_timer_timeout() -> void:
