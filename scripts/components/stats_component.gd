@@ -136,3 +136,10 @@ func _level_up() -> void:
 	current_mana = stats_data.max_mana # Restore to full on level up.
 	# Announce the stats changes so the UI updates.
 	refresh_stats()
+	
+# --- RPCs ---
+# This function can be called by any client, but will only run on the server/owner.
+@rpc("any_peer", "call_local", "reliable")
+func server_take_damage(damage_amount: int):
+	# The server, upon receiving the request, runs the actual damage logic.
+	take_damage(damage_amount)
