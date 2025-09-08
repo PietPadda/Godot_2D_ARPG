@@ -23,14 +23,14 @@ var player_spawn_points: Array = []
 var current_player_spawn_index: int = 0
 
 var enemy_spawn_points: Array = []
-var current_enemy_spawn_index: int = 0
 
 # The setup logic MUST be in _ready() to run once at the start.
 func _ready():
-	# Get all the spawn point children into an array when the level loads.
-	player_spawn_points = spawn_points_container.get_children()
+	# CRITICAL: Give the server ownership of the spawner FIRST.
+	enemy_spawner.set_multiplayer_authority(1)
 	
 	# Get all the spawn point children into an array when the level loads.
+	player_spawn_points = spawn_points_container.get_children()
 	enemy_spawn_points = enemy_spawn_points_container.get_children()
 	
 	# Play the music track that has been assigned in the Inspector.
@@ -90,8 +90,10 @@ func _spawn_initial_enemies():
 	# This debug print helps confirm the server is running this code.
 	print("[HOST] Spawning initial enemies...")
 	
-	# We'll use the same spawn points you defined for players,
-	# but you could create a separate group for enemies.
+	# We need a counter to create unique names.
+	var enemy_counter = 0
+	
+	# Enemy spawn points
 	for point in enemy_spawn_points:
 		# Create a new instance of our skeleton scene.
 		var skeleton = SKELETON_SCENE.instantiate()
@@ -99,7 +101,12 @@ func _spawn_initial_enemies():
 		# Set its starting position based on the spawn point.
 		skeleton.global_position = point.global_position
 		
-		# THIS IS THE MOST IMPORTANT STEP:
-		# Add the new skeleton as a child of the MultiplayerSpawner.
-		# The spawner will now automatically create this skeleton on all clients.
+		# Give the node a unique name BEFORE adding it to the scene.
+		skeleton.name = "Skeleton_" + str(enemy_counter)
+		enemy_counter += 1
+		
+		# Manually set the server as the owner of this new enemy.
+		skeleton.set_multiplayer_authority(multiplayer.get_unique_id())
+		
+		# Now, add the fully configured skeleton to the container.
 		enemies_container.add_child(skeleton)
