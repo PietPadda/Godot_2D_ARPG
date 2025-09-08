@@ -7,6 +7,11 @@ extends Node2D
 @onready var player_container: Node2D = $PlayerContainer
 # Add a reference to our new spawn points container.
 @onready var spawn_points_container: Node2D = $SpawnPoints
+# Add a reference to our bunch of enemies.
+@onready var enemies_container: Node2D = $EnemyContainer
+# Add a reference to our new spawner.
+@onready var enemy_spawner: MultiplayerSpawner = $EnemySpawner
+const SKELETON_SCENE = preload("res://scenes/enemies/skeleton.tscn")
 
 # Expose a slot in the Inspector for the music track.
 @export var level_music: MusicTrackData
@@ -37,6 +42,13 @@ func _ready():
 	# Now that we're ready, ask the NetworkManager to spawn everyone
 	# who has already connected (including ourselves if we are the host).
 	NetworkManager.spawn_existing_players()
+	
+	# NEW LOGIC FOR PRE-PLACED ENEMIES:
+	# If this game instance is a client (i.e., not the server/host)...
+	if not multiplayer.is_server():
+		# ...delete all the enemies that were pre-placed in the scene.
+		for enemy in enemies_container.get_children():
+			enemy.queue_free()
 
 # This function can now be left empty or used for other inputs.
 func _unhandled_input(event: InputEvent) -> void:

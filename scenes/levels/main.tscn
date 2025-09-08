@@ -14,81 +14,6 @@ level_music = ExtResource("2_b6bv0")
 
 [node name="HUD" parent="." instance=ExtResource("4_j4d2a")]
 
-[node name="Skeleton" parent="." instance=ExtResource("2_2vj2h")]
-position = Vector2(-473, 1428)
-
-[node name="Skeleton2" parent="." instance=ExtResource("2_2vj2h")]
-position = Vector2(-637, 1429)
-
-[node name="Skeleton3" parent="." instance=ExtResource("2_2vj2h")]
-position = Vector2(-414, 1294)
-
-[node name="Skeleton4" parent="." instance=ExtResource("2_2vj2h")]
-position = Vector2(1506, 377)
-
-[node name="Skeleton5" parent="." instance=ExtResource("2_2vj2h")]
-position = Vector2(1653, 441)
-
-[node name="Skeleton6" parent="." instance=ExtResource("2_2vj2h")]
-position = Vector2(1295, 450)
-
-[node name="Skeleton7" parent="." instance=ExtResource("2_2vj2h")]
-position = Vector2(1490, 528)
-
-[node name="Skeleton24" parent="." instance=ExtResource("2_2vj2h")]
-position = Vector2(1418, 440)
-
-[node name="Skeleton25" parent="." instance=ExtResource("2_2vj2h")]
-position = Vector2(1385, 360)
-
-[node name="Skeleton8" parent="." instance=ExtResource("2_2vj2h")]
-position = Vector2(1001, 743)
-
-[node name="Skeleton9" parent="." instance=ExtResource("2_2vj2h")]
-position = Vector2(383, 995)
-
-[node name="Skeleton10" parent="." instance=ExtResource("2_2vj2h")]
-position = Vector2(-963, 625)
-
-[node name="Skeleton11" parent="." instance=ExtResource("2_2vj2h")]
-position = Vector2(-741, 663)
-
-[node name="Skeleton12" parent="." instance=ExtResource("2_2vj2h")]
-position = Vector2(-1496, 934)
-
-[node name="Skeleton13" parent="." instance=ExtResource("2_2vj2h")]
-position = Vector2(-1204, 1087)
-
-[node name="Skeleton14" parent="." instance=ExtResource("2_2vj2h")]
-position = Vector2(-1246, 877)
-
-[node name="Skeleton15" parent="." instance=ExtResource("2_2vj2h")]
-position = Vector2(-1272, 450)
-
-[node name="Skeleton16" parent="." instance=ExtResource("2_2vj2h")]
-position = Vector2(-895, 294)
-
-[node name="Skeleton17" parent="." instance=ExtResource("2_2vj2h")]
-position = Vector2(-461, 421)
-
-[node name="Skeleton18" parent="." instance=ExtResource("2_2vj2h")]
-position = Vector2(-310, 812)
-
-[node name="Skeleton19" parent="." instance=ExtResource("2_2vj2h")]
-position = Vector2(-147, 491)
-
-[node name="Skeleton20" parent="." instance=ExtResource("2_2vj2h")]
-position = Vector2(254, 364)
-
-[node name="Skeleton21" parent="." instance=ExtResource("2_2vj2h")]
-position = Vector2(577, 432)
-
-[node name="Skeleton22" parent="." instance=ExtResource("2_2vj2h")]
-position = Vector2(1044, 255)
-
-[node name="Skeleton23" parent="." instance=ExtResource("2_2vj2h")]
-position = Vector2(-71, 300)
-
 [node name="TileMapLayer" type="TileMapLayer" parent="."]
 position = Vector2(-10, -10)
 tile_map_data = PackedByteArray("AAD7//n/AAAAAAAAAAD7//v/AAAAAAAAAAD7//3/AAAAAAAAAAD7////AAAAAAAAAAD7/wEAAAAAAAAAAAD7/wMAAAAAAAAAAAD7/wUAAAAAAAAAAAD7/wcAAAAAAAAAAAD7/wkAAAAAAAAAAAD7/wsAAAAAAAAAAAD7/w0AAAAAAAAAAAD7/w8AAAAAAAAAAAD7/xEAAAAAAAAAAAD7/xMAAAAAAAAAAAD7/xUAAAAAAAAAAAD7/xcAAAAAAAAAAAD8/xgAAAAAAAAAAAD9/xgAAAAAAAAAAAD+/xgAAAAAAAAAAAD//xgAAAAAAAAAAAAAABgAAAAAAAAAAAABABgAAAAAAAAAAAACABgAAAAAAAAAAAADABgAAAAAAAAAAAAEABgAAAAAAAAAAAAFABgAAAAAAAAAAAAGABgAAAAAAAAAAAAHABgAAAAAAAAAAAAIABgAAAAAAAAAAAAJABgAAAAAAAAAAAAKABgAAAAAAAAAAAALABgAAAAAAAAAAAAMABgAAAAAAAAAAAANABgAAAAAAAAAAAAOABgAAAAAAAAAAAAPABgAAAAAAAAAAAAQABgAAAAAAAAAAAARABgAAAAAAAAAAAARABcAAAAAAAAAAAARABYAAAAAAAAAAAARABUAAAAAAAAAAAARABQAAAAAAAAAAAARABMAAAAAAAAAAAARABIAAAAAAAAAAAARABEAAAAAAAAAAAARABAAAAAAAAAAAAARAA8AAAAAAAAAAAARAA4AAAAAAAAAAAARAA0AAAAAAAAAAAARAAwAAAAAAAAAAAARAAsAAAAAAAAAAAARAAoAAAAAAAAAAAARAAkAAAAAAAAAAAARAAgAAAAAAAAAAAARAAcAAAAAAAAAAAARAAYAAAAAAAAAAAARAAUAAAAAAAAAAAARAAQAAAAAAAAAAAARAAMAAAAAAAAAAAARAAIAAAAAAAAAAAARAAEAAAAAAAAAAAARAAAAAAAAAAAAAAARAP//AAAAAAAAAAARAP7/AAAAAAAAAAARAP3/AAAAAAAAAAARAPz/AAAAAAAAAAARAPv/AAAAAAAAAAARAPr/AAAAAAAAAAD8//n/AAAAAAAAAAD9//n/AAAAAAAAAAD+//n/AAAAAAAAAAD///n/AAAAAAAAAAAAAPn/AAAAAAAAAAABAPn/AAAAAAAAAAACAPn/AAAAAAAAAAADAPn/AAAAAAAAAAAEAPn/AAAAAAAAAAAFAPn/AAAAAAAAAAAGAPn/AAAAAAAAAAAHAPn/AAAAAAAAAAAIAPn/AAAAAAAAAAAJAPn/AAAAAAAAAAAKAPn/AAAAAAAAAAALAPn/AAAAAAAAAAAMAPn/AAAAAAAAAAANAPn/AAAAAAAAAAAOAPn/AAAAAAAAAAAPAPn/AAAAAAAAAAAQAPn/AAAAAAAAAAARAPn/AAAAAAAAAAD7/xgAAAAAAAAAAAD7/xYAAAAAAAAAAAD7/xQAAAAAAAAAAAD7/xIAAAAAAAAAAAD7/xAAAAAAAAAAAAD7/w4AAAAAAAAAAAD7/wwAAAAAAAAAAAD7/woAAAAAAAAAAAD7/wgAAAAAAAAAAAD7/wYAAAAAAAAAAAD7/wQAAAAAAAAAAAD7/wIAAAAAAAAAAAD7/wAAAAAAAAAAAAD7//7/AAAAAAAAAAD7//z/AAAAAAAAAAD7//r/AAAAAAAAAAALAPr/AAAAAAAAAAALAPv/AAAAAAAAAAALAPz/AAAAAAAAAAALAP3/AAAAAAAAAAALAP7/AAAAAAAAAAALAP//AAAAAAAAAAAMAP//AAAAAAAAAAAPAP//AAAAAAAAAAAQAP//AAAAAAAAAAALAAAAAAAAAAAAAAALAAEAAAAAAAAAAAALAAIAAAAAAAAAAAALAAMAAAAAAAAAAAALAAQAAAAAAAAAAAALAAUAAAAAAAAAAAALAAYAAAAAAAAAAAALAAcAAAAAAAAAAAALAAgAAAAAAAAAAAALAAsAAAAAAAAAAAALAAwAAAAAAAAAAAALAA0AAAAAAAAAAAALAA4AAAAAAAAAAAALAA8AAAAAAAAAAAALABAAAAAAAAAAAAALABEAAAAAAAAAAAALABIAAAAAAAAAAAALABMAAAAAAAAAAAALABQAAAAAAAAAAAALABUAAAAAAAAAAAALABYAAAAAAAAAAAALABcAAAAAAAAAAAAMABEAAAAAAAAAAAANABEAAAAAAAAAAAAQABEAAAAAAAAAAAD8/wEAAAAAAAAAAAD9/wEAAAAAAAAAAAD+/wEAAAAAAAAAAAD//wEAAAAAAAAAAAAAAAEAAAAAAAAAAAABAAEAAAAAAAAAAAACAAEAAAAAAAAAAAACAAAAAAAAAAAAAAACAP//AAAAAAAAAAACAPr/AAAAAAAAAAACAPv/AAAAAAAAAAACAPz/AAAAAAAAAAAGAP3/AAAAAAAAAAAGAP7/AAAAAAAAAAAGAP//AAAAAAAAAAAHAP//AAAAAAAAAAAHAP7/AAAAAAAAAAAHAP3/AAAAAAAAAAD+/wQAAAAAAAAAAAD+/wUAAAAAAAAAAAD//wUAAAAAAAAAAAD//wQAAAAAAAAAAAD+/xUAAAAAAAAAAAD+/xQAAAAAAAAAAAD//xQAAAAAAAAAAAD//xUAAAAAAAAAAAAIABUAAAAAAAAAAAAHABUAAAAAAAAAAAAHABQAAAAAAAAAAAAIABQAAAAAAAAAAAAIAAQAAAAAAAAAAAAIAAUAAAAAAAAAAAAHAAUAAAAAAAAAAAAHAAQAAAAAAAAAAAD//wsAAAAAAAAAAAD//wwAAAAAAAAAAAD//w0AAAAAAAAAAAD//w4AAAAAAAAAAAD//w8AAAAAAAAAAAAAABAAAAAAAAAAAAD//xAAAAAAAAAAAAABABAAAAAAAAAAAAACABAAAAAAAAAAAAADABAAAAAAAAAAAAAEABAAAAAAAAAAAAAEAA8AAAAAAAAAAAAEAAwAAAAAAAAAAAAEAAsAAAAAAAAAAAADAAsAAAAAAAAAAAACAAsAAAAAAAAAAAABAAsAAAAAAAAAAAAAAAsAAAAAAAAAAAA=")
@@ -117,3 +42,84 @@ position = Vector2(-85, -133)
 
 [node name="SpawnPoint4" type="Marker2D" parent="SpawnPoints"]
 position = Vector2(175, -94)
+
+[node name="EnemySpawner" type="MultiplayerSpawner" parent="."]
+_spawnable_scenes = PackedStringArray("uid://dg2sqch3jtd3h")
+spawn_path = NodePath("../EnemyContainer")
+
+[node name="EnemyContainer" type="Node2D" parent="."]
+
+[node name="Skeleton1" parent="EnemyContainer" instance=ExtResource("2_2vj2h")]
+position = Vector2(-473, 1428)
+
+[node name="Skeleton2" parent="EnemyContainer" instance=ExtResource("2_2vj2h")]
+position = Vector2(-637, 1429)
+
+[node name="Skeleton3" parent="EnemyContainer" instance=ExtResource("2_2vj2h")]
+position = Vector2(-414, 1294)
+
+[node name="Skeleton4" parent="EnemyContainer" instance=ExtResource("2_2vj2h")]
+position = Vector2(1506, 377)
+
+[node name="Skeleton5" parent="EnemyContainer" instance=ExtResource("2_2vj2h")]
+position = Vector2(1653, 441)
+
+[node name="Skeleton6" parent="EnemyContainer" instance=ExtResource("2_2vj2h")]
+position = Vector2(1295, 450)
+
+[node name="Skeleton7" parent="EnemyContainer" instance=ExtResource("2_2vj2h")]
+position = Vector2(1490, 528)
+
+[node name="Skeleton8" parent="EnemyContainer" instance=ExtResource("2_2vj2h")]
+position = Vector2(1001, 743)
+
+[node name="Skeleton9" parent="EnemyContainer" instance=ExtResource("2_2vj2h")]
+position = Vector2(383, 995)
+
+[node name="Skeleton10" parent="EnemyContainer" instance=ExtResource("2_2vj2h")]
+position = Vector2(-963, 625)
+
+[node name="Skeleton11" parent="EnemyContainer" instance=ExtResource("2_2vj2h")]
+position = Vector2(-741, 663)
+
+[node name="Skeleton12" parent="EnemyContainer" instance=ExtResource("2_2vj2h")]
+position = Vector2(-1496, 934)
+
+[node name="Skeleton13" parent="EnemyContainer" instance=ExtResource("2_2vj2h")]
+position = Vector2(-1204, 1087)
+
+[node name="Skeleton14" parent="EnemyContainer" instance=ExtResource("2_2vj2h")]
+position = Vector2(-1246, 877)
+
+[node name="Skeleton15" parent="EnemyContainer" instance=ExtResource("2_2vj2h")]
+position = Vector2(-1272, 450)
+
+[node name="Skeleton16" parent="EnemyContainer" instance=ExtResource("2_2vj2h")]
+position = Vector2(-895, 294)
+
+[node name="Skeleton17" parent="EnemyContainer" instance=ExtResource("2_2vj2h")]
+position = Vector2(-461, 421)
+
+[node name="Skeleton18" parent="EnemyContainer" instance=ExtResource("2_2vj2h")]
+position = Vector2(-310, 812)
+
+[node name="Skeleton19" parent="EnemyContainer" instance=ExtResource("2_2vj2h")]
+position = Vector2(-147, 491)
+
+[node name="Skeleton20" parent="EnemyContainer" instance=ExtResource("2_2vj2h")]
+position = Vector2(254, 364)
+
+[node name="Skeleton21" parent="EnemyContainer" instance=ExtResource("2_2vj2h")]
+position = Vector2(577, 432)
+
+[node name="Skeleton22" parent="EnemyContainer" instance=ExtResource("2_2vj2h")]
+position = Vector2(1044, 255)
+
+[node name="Skeleton23" parent="EnemyContainer" instance=ExtResource("2_2vj2h")]
+position = Vector2(-71, 300)
+
+[node name="Skeleton24" parent="EnemyContainer" instance=ExtResource("2_2vj2h")]
+position = Vector2(1418, 440)
+
+[node name="Skeleton25" parent="EnemyContainer" instance=ExtResource("2_2vj2h")]
+position = Vector2(1385, 360)
