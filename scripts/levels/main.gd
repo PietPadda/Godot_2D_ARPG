@@ -66,10 +66,12 @@ func _unhandled_input(event: InputEvent) -> void:
 # This function will run when the signal is received.
 # It contains the logic we moved from the NetworkManager.
 func _on_player_spawn_requested(id: int):
+	#  Add a guard clause to prevent spawning duplicates.
+	if player_container.has_node(str(id)):
+		return # This player has already been spawned, so we do nothing.
+	
 	var player_instance = NetworkManager.PLAYER_SCENE.instantiate()
 	player_instance.name = str(id)
-	# REMOVE THIS LINE - The player now does this itself in _enter_tree.
-	# player_instance.set_multiplayer_authority(id)
 	
 	var spawn_pos = Vector2.ZERO # Default in case we have no spawn points
 	# Check if we have any spawn points defined.
