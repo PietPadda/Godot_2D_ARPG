@@ -23,16 +23,20 @@ func _on_aggro_radius_body_entered(body: Node2D) -> void:
 	
 # This function is called when our own StatsComponent emits the "died" signal.
 func _on_death(attacker_id: int) -> void:
+	# DEBUG PRINT: Announce that the signal was received.
+	print("[%d] Skeleton received 'died' signal from attacker %d. Preparing to die." % [multiplayer.get_unique_id(), attacker_id])
+	
 	# Announce the death and pass along our stats data.
 	EventBus.emit_signal("enemy_died", stats_component.stats_data, attacker_id)
-	
 	# Tell the engine to call our new function, but only after the physics step is complete.
 	call_deferred("_spawn_loot_and_die")
 
 # This new function contains the logic that modifies the scene tree.
 func _spawn_loot_and_die():
+	# DEBUG PRINT: Announce the final step.
+	print("[%d] Spawning loot and calling queue_free()." % multiplayer.get_unique_id())
+	
 	# Tell the LootComponent to handle the drop at our current position.
 	loot_component.drop_loot(global_position)
-	
 	# When this enemy dies, it should remove itself from the game.
 	queue_free()

@@ -29,9 +29,8 @@ func cast(skill_data: SkillData, target_position: Vector2) -> bool:
 	# Add the projectile to the main scene FIRST
 	get_tree().current_scene.add_child(projectile)
 	
-	# AFTER Pass the skill data to the projectile so it knows its stats.
-	projectile.initialize(skill_data)
-
-
-
+	# get the caster's network ID
+	var caster_id = get_owner().get_multiplayer_authority()
+	# Pass the skill data AND the caster's network ID to the projectile.
+	projectile.initialize(skill_data, caster_id)
 	return true
