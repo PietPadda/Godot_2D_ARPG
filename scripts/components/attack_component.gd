@@ -55,8 +55,12 @@ func execute(target: Node2D) -> void:
 	 # Find the target's StatsComponent and deal damage.
 	var target_stats: StatsComponent = target.get_node("StatsComponent")
 	if target_stats:
-		# Instead of dealing damage directly, we send a request to the server (peer ID 1).
-		target_stats.server_take_damage.rpc_id(1, total_damage)
+		# Get the ID of the player we're attacking...
+		var target_owner_id = target.get_multiplayer_authority()
+		# Add the attacker's ID to the RPC call
+		var my_id = multiplayer.get_unique_id()
+		# Instead of dealing damage directly, we send a request to the server (peer ID).
+		target_stats.server_take_damage.rpc_id(target_owner_id, total_damage, my_id)
 
 func on_timer_timeout() -> void:
 	# When the timer finishes, we emit the signal.

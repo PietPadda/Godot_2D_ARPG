@@ -129,9 +129,11 @@ func _on_death() -> void:
 	get_tree().current_scene.add_child(game_over_instance)
 
 ## Enemy died function for Player
-func _on_enemy_died(enemy_stats_data: CharacterStats) -> void:
-	# When an enemy dies, add its XP reward to our stats.
-	stats_component.add_xp(enemy_stats_data.xp_reward)
+func _on_enemy_died(enemy_stats_data: CharacterStats, attacker_id: int) -> void:
+	# TOnly award XP if our ID matches the attacker's ID.
+	if attacker_id == multiplayer.get_unique_id():
+		# When an enemy dies, add its XP reward to our stats.
+		stats_component.add_xp(enemy_stats_data.xp_reward)
 
 # This function is called by the EventBus when the game state changes.
 func _on_game_state_changed(new_state: EventBus.GameState) -> void:
