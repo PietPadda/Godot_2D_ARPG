@@ -37,7 +37,6 @@ func host_game():
 	print("Server created successfully. Waiting for players...")
 	
 	# Add the host player to the players dictionary directly.
-	# We REMOVE the call to _on_peer_connected(1).
 	players[1] = { "name": "Host Player" }
 
 # Call this to connect to a server at a given IP address.
