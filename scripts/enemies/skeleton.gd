@@ -22,9 +22,9 @@ func _on_aggro_radius_body_entered(body: Node2D) -> void:
 	state_machine.change_state(States.ENEMY_STATE_NAMES[States.ENEMY.CHASE]) # update state
 	
 # This function is called when our own StatsComponent emits the "died" signal.
-func _on_death() -> void:
+func _on_death(attacker_id: int) -> void:
 	# Announce the death and pass along our stats data.
-	EventBus.emit_signal("enemy_died", stats_component.stats_data)
+	EventBus.emit_signal("enemy_died", stats_component.stats_data, attacker_id)
 	
 	# Tell the engine to call our new function, but only after the physics step is complete.
 	call_deferred("_spawn_loot_and_die")

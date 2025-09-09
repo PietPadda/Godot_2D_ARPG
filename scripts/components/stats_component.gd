@@ -26,6 +26,7 @@ signal gold_changed(total_gold) # Announce when gold total changes.
 @export var current_health: int # entity hp tracker
 @export var current_mana: int # mana tracker
 var is_dead: bool = false # death tracker
+var last_attacker_id: int = 0 # track the last attacker
 
 func _ready() -> void:
 	# Ensure a stats resource has been assigned in the editor.
@@ -61,8 +62,8 @@ func take_damage(damage_amount: int) -> void:
 	if current_health <= 0: # if dead
 		is_dead = true # flag entity as dead
 		current_health = 0 # set dead
-		# Instead of queue_free(), we now emit a signal.
-		emit_signal("died")
+		# Emit the 'died' signal WITH the attacker's ID
+		died.emit(last_attacker_id)
 
 # Public function to attempt to use mana. Returns true on success.
 ## Consume Mana function
@@ -140,6 +141,8 @@ func _level_up() -> void:
 # --- RPCs ---
 # This function can be called by any client, but will only run on the server/owner.
 @rpc("any_peer", "call_local", "reliable")
-func server_take_damage(damage_amount: int):
+func server_take_damage(damage_amount: int, attacker_id: int):
+	# Store the ID of the most recent attacker
+	last_attacker_id = attacker_id
 	# The server, upon receiving the request, runs the actual damage logic.
 	take_damage(damage_amount)
