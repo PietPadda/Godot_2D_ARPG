@@ -54,6 +54,9 @@ func _ready():
 	# If we are the server, call a new function to spawn enemies for everyone.
 	if multiplayer.is_server():
 		_spawn_initial_enemies()
+		
+	# The server will listen for any enemy dying in its world.
+	EventBus.enemy_died.connect(_on_enemy_died)
 
 # This function can now be left empty or used for other inputs.
 func _unhandled_input(event: InputEvent) -> void:
@@ -110,3 +113,17 @@ func _spawn_initial_enemies():
 		
 		# Now, add the fully configured skeleton to the container.
 		enemies_container.add_child(skeleton)
+		
+# Add this new function to handle the signal and send the RPC
+func _on_enemy_died(stats_data: CharacterStats, attacker_id: int):
+	# This function will only ever run on the server, where the signal is emitted.
+	# First, check if the attacker is a valid player (not 0 or another enemy).
+	if attacker_id == 0:
+		return
+
+	# Find the player node associated with the attacker's ID.
+	var player_node = get_node_or_null("PlayerContainer/" + str(attacker_id))
+	
+	if is_instance_valid(player_node):
+		# We found the player! Call the RPC on them to grant the XP award.
+		player_node.award_xp_rpc.rpc_id(attacker_id, stats_data.xp_reward)

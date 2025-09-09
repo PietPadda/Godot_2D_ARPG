@@ -167,3 +167,8 @@ func set_initial_position(pos: Vector2):
 func force_sync_position(pos: Vector2):
 	if not is_multiplayer_authority():
 		global_position = pos
+
+@rpc("call_local")
+func award_xp_rpc(amount: int):
+	# When this RPC is called by the server, award the XP.
+	stats_component.add_xp(amount)
