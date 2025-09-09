@@ -14,30 +14,11 @@ const ShopPanelScene = preload("res://scenes/ui/shop_panel.tscn")
 @onready var character_sheet = $CharacterSheet
 
 func _ready() -> void:
-	# We need a reference to the player to connect to their signals.
-	# Using groups is a clean way to find the player.
-	var player = get_tree().get_first_node_in_group("player")
-	if player:
-		var player_stats = player.get_node("StatsComponent")
-		# Connect our UI update function to the player's signal.
-		player_stats.health_changed.connect(on_player_health_changed)
-		player_stats.mana_changed.connect(on_player_mana_changed)
-		player_stats.xp_changed.connect(on_player_xp_changed)
+	# Instead of trying to find the player, we now just listen for the announcement.
+	EventBus.local_player_spawned.connect(_on_local_player_spawned)
 		
-		# Manually update bars once on startup to get the initial value.
-		on_player_health_changed(player_stats.current_health, player_stats.stats_data.max_health)
-		on_player_mana_changed(player_stats.current_mana, player_stats.stats_data.max_mana)
-		on_player_xp_changed(player_stats.stats_data.level, player_stats.stats_data.current_xp, player_stats.stats_data.xp_to_next_level)
-		
-		# We only need to pass the components to the character sheet now.
-		var player_inventory = player.get_node("InventoryComponent")
-		var player_equipment: EquipmentComponent = player.get_node("EquipmentComponent")
-		
-		# Call the new, explicit initialize function
-		character_sheet.initialize(player_inventory, player_equipment, player_stats)
-		
-		# The HUD now listens for requests to open the shop.
-		EventBus.shop_panel_requested.connect(_on_shop_panel_requested)
+	# The HUD now listens for requests to open the shop.
+	EventBus.shop_panel_requested.connect(_on_shop_panel_requested)
 
 func _unhandled_input(event: InputEvent) -> void:
 	# Toggle the character sheet panel's visibility
@@ -95,3 +76,24 @@ func _on_shop_panel_requested() -> void:
 			var inv_comp = player.get_node("InventoryComponent")
 			var stats_comp = player.get_node("StatsComponent")
 			shop_panel_instance.initialize(inv_comp, stats_comp)
+			
+# This new function runs ONLY when the local_player_spawned signal is received.
+func _on_local_player_spawned(player: Node) -> void:
+	# Now that we have a guaranteed reference to the player, we connect to their stats.
+	var player_stats = player.get_node("StatsComponent")
+	# Connect our UI update function to the player's signal.
+	player_stats.health_changed.connect(on_player_health_changed)
+	player_stats.mana_changed.connect(on_player_mana_changed)
+	player_stats.xp_changed.connect(on_player_xp_changed)
+	
+	# Manually update bars once on startup to get the initial value.
+	on_player_health_changed(player_stats.current_health, player_stats.stats_data.max_health)
+	on_player_mana_changed(player_stats.current_mana, player_stats.stats_data.max_mana)
+	on_player_xp_changed(player_stats.stats_data.level, player_stats.stats_data.current_xp, player_stats.stats_data.xp_to_next_level)
+	
+	# We only need to pass the components to the character sheet now.
+	var player_inventory = player.get_node("InventoryComponent")
+	var player_equipment: EquipmentComponent = player.get_node("EquipmentComponent")
+	
+	# Call the new, explicit initialize function
+	character_sheet.initialize(player_inventory, player_equipment, player_stats)
