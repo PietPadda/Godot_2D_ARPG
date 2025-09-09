@@ -97,6 +97,10 @@ func _ready() -> void:
 	EventBus.enemy_died.connect(_on_enemy_died) # enemy died
 	EventBus.game_state_changed.connect(_on_game_state_changed) # game state change
 	
+	# This block only runs for the player we control. This is the perfect place
+	# to announce that the local player is ready.
+	EventBus.emit_signal("local_player_spawned", self)
+	
 	# Manually call the handler on startup to set the initial correct state.
 	_on_game_state_changed(EventBus.current_game_state)
 	

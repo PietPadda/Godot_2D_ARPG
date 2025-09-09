@@ -6,7 +6,7 @@ extends Node
 signal enemy_died(stats_data: CharacterStats)
 signal game_state_changed(new_state) # This signal is emitted whenever the game state changes.
 signal shop_panel_requested # This signal is emitted when any NPC requests a shop panel to be opened.
-
+signal local_player_spawned(player_node) # Player joined annouce with player node reference
 
 # An Enum provides clear, readable names for our states and prevents errors from typos.
 enum GameState {
