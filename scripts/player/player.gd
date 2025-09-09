@@ -94,7 +94,6 @@ func _ready() -> void:
 		
 	# Connect signals only for the local player.
 	stats_component.died.connect(_on_death) # player died
-	# REMOVE THIS LINE: The player no longer needs to listen for this global event.
 	EventBus.game_state_changed.connect(_on_game_state_changed) # game state change
 	
 	# This block only runs for the player we control. This is the perfect place
@@ -127,13 +126,6 @@ func _on_death(_attacker_id: int) -> void:
 	var game_over_instance = GameOverScreen.instantiate()
 	# Add it to the parent (level) scene tree.
 	get_tree().current_scene.add_child(game_over_instance)
-
-# REMOVE THIS ENTIRE FUNCTION: This logic is now handled by main.gd on the server.
-#func _on_enemy_died(enemy_stats_data: CharacterStats, attacker_id: int) -> void:
-#	# TOnly award XP if our ID matches the attacker's ID.
-#	if attacker_id == multiplayer.get_unique_id():
-#		# When an enemy dies, add its XP reward to our stats.
-#		stats_component.add_xp(enemy_stats_data.xp_reward)
 
 # This function is called by the EventBus when the game state changes.
 func _on_game_state_changed(new_state: EventBus.GameState) -> void:
@@ -168,7 +160,7 @@ func force_sync_position(pos: Vector2):
 	if not is_multiplayer_authority():
 		global_position = pos
 
-@rpc("call_local")
+@rpc("any_peer", "call_local")
 func award_xp_rpc(amount: int):
 	# When this RPC is called by the server, award the XP.
 	stats_component.add_xp(amount)
