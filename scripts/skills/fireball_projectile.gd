@@ -26,7 +26,8 @@ func _on_body_entered(body: Node2D) -> void:
 	# Check if the body we hit has a StatsComponent.
 	var stats: StatsComponent = body.get_node_or_null("StatsComponent")
 	if stats:
-		stats.take_damage(damage)
+		# Instead of dealing damage directly, we send a request to the server (peer ID 1).
+		stats.server_take_damage.rpc_id(1, damage)
 
 	# Destroy the projectile on impact.
 	queue_free()
