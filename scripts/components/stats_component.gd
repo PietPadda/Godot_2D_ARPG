@@ -56,12 +56,18 @@ func take_damage(damage_amount: int) -> void:
 		return # early exit
 
 	current_health -= damage_amount # decr life
+	
+	# DEBUG PRINT: Announce the health change
+	print("[%d] Health is now %d / %d" % [multiplayer.get_unique_id(), current_health, stats_data.max_health])
 	# Emit the signal every time damage is taken.
 	emit_signal("health_changed", current_health, stats_data.max_health)
 
 	if current_health <= 0: # if dead
 		is_dead = true # flag entity as dead
 		current_health = 0 # set dead
+		
+		# DEBUG PRINT: Announce that the 'died' signal is being emitted
+		print("[%d] Health is zero. Emitting 'died' signal for attacker %d." % [multiplayer.get_unique_id(), last_attacker_id])
 		# Emit the 'died' signal WITH the attacker's ID
 		died.emit(last_attacker_id)
 
@@ -142,6 +148,9 @@ func _level_up() -> void:
 # This function can be called by any client, but will only run on the server/owner.
 @rpc("any_peer", "call_local", "reliable")
 func server_take_damage(damage_amount: int, attacker_id: int):
+	# DEBUG PRINT: Announce that the RPC was received
+	print("[%d] RPC received! Attacker: %d, Damage: %d" % [multiplayer.get_unique_id(), attacker_id, damage_amount])
+	
 	# Store the ID of the most recent attacker
 	last_attacker_id = attacker_id
 	# The server, upon receiving the request, runs the actual damage logic.
