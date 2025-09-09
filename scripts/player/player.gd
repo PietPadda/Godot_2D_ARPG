@@ -119,7 +119,7 @@ func _physics_process(delta: float) -> void:
 
 # This function is called when the StatsComponent emits the "died" signal.
 ## Player death function for Player
-func _on_death() -> void:
+func _on_death(_attacker_id: int) -> void:
 	# We tell our state machine to switch to the DeadState.
 	state_machine.change_state(States.PLAYER_STATE_NAMES[States.PLAYER.DEAD])
 	
