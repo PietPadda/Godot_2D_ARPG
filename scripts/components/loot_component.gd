@@ -28,7 +28,12 @@ func drop_loot(position: Vector2) -> void:
 			
 			# Spawn and initialize the loot drop scene.
 			var loot_instance = LootDropScene.instantiate()
-			get_tree().current_scene.add_child(loot_instance)
-			loot_instance.global_position = position
-			loot_instance.initialize(item_to_drop)
+			
+			# We no longer add the child directly.
+			# Find the spawner and tell it to spawn the loot.
+			var loot_spawner = get_tree().get_root().get_node("Main/LootSpawner")
+			if loot_spawner:
+				loot_instance.global_position = position
+				loot_instance.initialize(item_to_drop)
+				loot_spawner.spawn(loot_instance)
 			return # We found our drop, so exit the function.
