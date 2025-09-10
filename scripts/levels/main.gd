@@ -1,6 +1,9 @@
 # main.gd
 extends Node2D
 
+# preloads
+const SKELETON_SCENE = preload("res://scenes/enemies/skeleton.tscn")
+
 # scene nodes
 @onready var tile_map_layer = $TileMapLayer
 # player container used for spawning
@@ -15,7 +18,8 @@ extends Node2D
 @onready var enemy_spawn_points_container: Node2D = $EnemySpawnPoints
 # Add a reference to our enemy spawner.
 @onready var enemy_spawner: MultiplayerSpawner = $EnemySpawner
-const SKELETON_SCENE = preload("res://scenes/enemies/skeleton.tscn")
+# Add a reference to our loot spawner.
+@onready var loot_spawner: MultiplayerSpawner = $LootSpawner
 
 # Expose a slot in the Inspector for the music track.
 @export var level_music: MusicTrackData
@@ -23,7 +27,6 @@ const SKELETON_SCENE = preload("res://scenes/enemies/skeleton.tscn")
 # Consts and vars
 var player_spawn_points: Array = []
 var current_player_spawn_index: int = 0
-
 var enemy_spawn_points: Array = []
 
 # The setup logic MUST be in _ready() to run once at the start.
@@ -31,6 +34,7 @@ func _ready():
 	# CRITICAL: Give the server ownership of the spawners FIRST.
 	player_spawner.set_multiplayer_authority(1)
 	enemy_spawner.set_multiplayer_authority(1)
+	loot_spawner.set_multiplayer_authority(1)
 	
 	# Get all the spawn point children into an array when the level loads.
 	player_spawn_points = spawn_points_container.get_children()

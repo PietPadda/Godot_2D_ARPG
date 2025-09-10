@@ -1,9 +1,14 @@
-[gd_scene load_steps=3 format=3 uid="uid://boxuys3wl2v3p"]
+[gd_scene load_steps=4 format=3 uid="uid://boxuys3wl2v3p"]
 
 [ext_resource type="Script" uid="uid://w15b1362vpsm" path="res://scripts/items/loot_drop.gd" id="1_8qepv"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_s7r7u"]
 radius = 17.1172
+
+[sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_8qepv"]
+properties/0/path = NodePath(".:position")
+properties/0/spawn = false
+properties/0/replication_mode = 1
 
 [node name="LootDrop" type="Area2D"]
 collision_layer = 8
@@ -15,5 +20,8 @@ shape = SubResource("CircleShape2D_s7r7u")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 scale = Vector2(0.5, 0.5)
+
+[node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
+replication_config = SubResource("SceneReplicationConfig_8qepv")
 
 [connection signal="body_entered" from="." to="." method="_on_body_entered"]
