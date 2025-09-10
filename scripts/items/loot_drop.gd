@@ -15,35 +15,9 @@ func _on_body_entered(body: Node2D) -> void:
 	if not body.is_multiplayer_authority():
 		return
 
-	# Instead of running the logic here, we ask the server to do it.
-	# We send the RPC request to the server (peer_id = 1).
-	server_request_pickup.rpc_id(1)
-	'''
-	# This safety check is important because item_data might be null for a split second
-	# before the RPC arrives.
-	if not item_data:
-		return
-		
-	# First, check if the item is currency.
-	if item_data.item_type == ItemData.ItemType.CURRENCY:
-		var stats_component: StatsComponent = body.get_node_or_null("StatsComponent")
-		if stats_component:
-			# If it is, call the add_gold function and disappear.
-			stats_component.add_gold(item_data.value)
-			queue_free()
-		return # Stop further processing for this item.
+	# We send the RPC request to the server (peer_id = 1) and include our own ID.
+	server_request_pickup.rpc_id(1, body.get_multiplayer_authority())
 
-	# If it's not currency, run the original inventory logic.
-	# Check if the body that entered is the player.
-	var inventory_component: InventoryComponent = body.get_node_or_null("InventoryComponent")
-	if inventory_component:
-		#Try to add our item to their inventory.
-		var picked_up = inventory_component.add_item(item_data)
-		#If the item was successfully picked up, destroy the loot drop.
-		if picked_up:
-			queue_free()
-			'''
-			
 # --- RPCs ---
 # This function will be called by the server on all clients to set up the loot.
 ## Generate networked loot for all players
@@ -60,12 +34,35 @@ func setup_loot(item_path: String):
 	if item_data:
 		sprite.texture = item_data.texture
 
-## Clean picked up loot via server
+## Networked loot pickup
 @rpc("any_peer", "call_local", "reliable")
-func server_request_pickup():
-	# This code will ONLY run on the server.
-	# The server will handle giving the item to the player and then destroying this loot drop.
+func server_request_pickup(picker_id: int):
+	# This code ONLY runs on the server.
 	
-	# For now, we'll just fix the crash by having the server destroy the object.
-	# We'll sync the inventory in the next step.
-	queue_free()
+	# This safety check is important because item_data might be null for a split second
+	# before the RPC arrives.
+	if not item_data:
+		return
+		
+	#Find the player node using the ID we received.
+	var player_node = get_tree().get_root().get_node_or_null("Main/PlayerContainer/" + str(picker_id))
+	if not is_instance_valid(player_node):
+		return
+		
+	# First, check if the item is currency.
+	if item_data.item_type == ItemData.ItemType.CURRENCY:
+		var stats_component: StatsComponent = player_node.get_node_or_null("StatsComponent")
+		if stats_component:
+			# If it is, call the add_gold function and disappear.
+			stats_component.add_gold(item_data.value)
+			queue_free() # If it's gold, we're done. The server destroys the item.
+		return # Stop further processing for this item.
+
+	# If it's a regular item, try to add it to the inventory.
+	var inventory_component: InventoryComponent = player_node.get_node_or_null("InventoryComponent")
+	if inventory_component:
+		#Try to add our item to their inventory.
+		var picked_up = inventory_component.add_item(item_data)
+		#If the item was successfully picked up, the server destroys the loot drop.
+		if picked_up:
+			queue_free()
