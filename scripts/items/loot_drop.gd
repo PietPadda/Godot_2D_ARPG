@@ -53,16 +53,21 @@ func server_request_pickup(picker_id: int):
 	if item_data.item_type == ItemData.ItemType.CURRENCY:
 		var stats_component: StatsComponent = player_node.get_node_or_null("StatsComponent")
 		if stats_component:
-			# If it is, call the add_gold function and disappear.
+			# Server updates its master record.
 			stats_component.add_gold(item_data.value)
-			queue_free() # If it's gold, we're done. The server destroys the item.
+			# Server SENDS COMMAND to the client to do the same.
+			stats_component.client_add_gold.rpc_id(picker_id, item_data.value)
+			# Server destroys the loot drop for everyone.
+			queue_free()
 		return # Stop further processing for this item.
 
 	# If it's a regular item, try to add it to the inventory.
 	var inventory_component: InventoryComponent = player_node.get_node_or_null("InventoryComponent")
 	if inventory_component:
-		#Try to add our item to their inventory.
+		# Server updates its master record.
 		var picked_up = inventory_component.add_item(item_data)
-		#If the item was successfully picked up, the server destroys the loot drop.
 		if picked_up:
+			# Server SENDS COMMAND to the client to do the same.
+			inventory_component.client_add_item.rpc_id(picker_id, item_data.resource_path)
+			# Server destroys the loot drop for everyone.
 			queue_free()

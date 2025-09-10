@@ -146,6 +146,7 @@ func _level_up() -> void:
 	
 # --- RPCs ---
 # This function can be called by any client, but will only run on the server/owner.
+## server deals damage
 @rpc("any_peer", "call_local", "reliable")
 func server_take_damage(damage_amount: int, attacker_id: int):
 	# DEBUG PRINT: Announce that the RPC was received
@@ -155,3 +156,8 @@ func server_take_damage(damage_amount: int, attacker_id: int):
 	last_attacker_id = attacker_id
 	# The server, upon receiving the request, runs the actual damage logic.
 	take_damage(damage_amount)
+
+## server add gold
+@rpc("authority", "call_local", "reliable")
+func client_add_gold(amount: int):
+	add_gold(amount)
