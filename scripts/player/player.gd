@@ -147,3 +147,9 @@ func _on_game_state_changed(new_state: EventBus.GameState) -> void:
 func award_xp_rpc(amount: int):
 	# When this RPC is called by the server, award the XP.
 	stats_component.add_xp(amount)
+	
+# Re-add this function. It allows the server to tell an owning client where to start.
+@rpc("any_peer", "call_local")
+func set_initial_position(pos: Vector2):
+	if multiplayer.get_remote_sender_id() == 1:
+		global_position = pos

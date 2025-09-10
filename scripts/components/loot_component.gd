@@ -28,9 +28,12 @@ func drop_loot(position: Vector2) -> void:
 			
 			# Spawn and initialize the loot drop scene.
 			var loot_instance = LootDropScene.instantiate()
+			# Initialize with data first (this is safe now because we use _ready in loot_drop.gd)
+			loot_instance.initialize(item_to_drop)
+			loot_instance.global_position = position
 			
-			# Find the LootContainer and add the child to it.
-			# The LootSpawner will see this action and replicate it.
+			# Find the LootContainer and add the fully-prepared child to it.
+			# The LootSpawner will see this action and replicate it for all clients.
 			var loot_container = get_tree().get_root().get_node("Main/LootContainer")
 			if loot_container:
 				loot_container.add_child(loot_instance)
