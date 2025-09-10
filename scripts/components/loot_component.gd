@@ -36,5 +36,6 @@ func drop_loot(position: Vector2) -> void:
 			# The LootSpawner will see this action and replicate it for all clients.
 			var loot_container = get_tree().get_root().get_node("Main/LootContainer")
 			if loot_container:
-				loot_container.add_child(loot_instance)
+				# Add 'true' to force a network-safe name.
+				loot_container.add_child(loot_instance, true)
 			return # We found our drop, so exit the function.
