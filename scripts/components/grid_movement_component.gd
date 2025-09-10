@@ -105,13 +105,6 @@ func _physics_process(_delta: float) -> void:
 	character_body.velocity = direction * move_speed
 	character_body.move_and_slide()
 	
-	# Multiplayer Sync
-	# First, we check if the object we're moving is actually a Player.
-	if character_body is Player:
-		# If we are in control of this character, broadcast our new position via RPC.
-		if character_body.is_multiplayer_authority():
-			character_body.force_sync_position.rpc(character_body.global_position)
-
 # NEW: This function runs every STUCK_CHECK_INTERVAL seconds
 func _on_stuck_timer_timeout() -> void:
 	# If we haven't moved far enough since the last check...
