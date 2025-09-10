@@ -25,3 +25,11 @@ func remove_item(item_to_remove: ItemData) -> void:
 	if item_index != -1:
 		inventory_data.items.remove_at(item_index)
 		emit_signal("inventory_changed") # Emit without data
+
+# --- RPCs ---
+## request add item to inv
+@rpc("authority", "call_local", "reliable")
+func client_add_item(item_path: String):
+	var item_data = load(item_path) as ItemData
+	if is_instance_valid(item_data):
+		add_item(item_data)
