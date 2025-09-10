@@ -38,9 +38,6 @@ func host_game():
 	
 	# Add the host player to the players dictionary directly.
 	players[1] = { "name": "Host Player" }
-	
-	# Request the host's own spawn immediately.
-	player_spawn_requested.emit(1)
 
 # Call this to connect to a server at a given IP address.
 func join_game(ip_address: String):

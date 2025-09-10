@@ -50,12 +50,11 @@ func _ready():
 	# Connect our listener FIRST, so we are ready to receive requests.
 	NetworkManager.player_spawn_requested.connect(_on_player_spawn_requested)
 	
-	# REMOVE THIS LINE: This function is redundant and has been deleted.
-	# NetworkManager.spawn_existing_players() 
-	
 	# If we are the server, call a new function to spawn enemies for everyone.
 	if multiplayer.is_server():
-		_spawn_initial_enemies()
+		# The server is ready, so it spawns itself.
+		_on_player_spawn_requested(1)
+		_spawn_initial_enemies() # then enemies
 		
 	# The server will listen for any enemy dying in its world.
 	EventBus.enemy_died.connect(_on_enemy_died)
