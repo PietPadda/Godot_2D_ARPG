@@ -38,6 +38,9 @@ func host_game():
 	
 	# Add the host player to the players dictionary directly.
 	players[1] = { "name": "Host Player" }
+	
+	# Request the host's own spawn immediately.
+	player_spawn_requested.emit(1)
 
 # Call this to connect to a server at a given IP address.
 func join_game(ip_address: String):
@@ -54,15 +57,9 @@ func join_game(ip_address: String):
 	multiplayer.multiplayer_peer = peer
 	print("Joining game at %s..." % ip_address)
 	
-# This function is called by the game world when it's ready for players.
-func spawn_existing_players():
-	# Only the server should spawn players.
-	if not multiplayer.is_server():
-		return
-
-	# Go through the list of already-connected players and request their spawn.
-	for player_id in players:
-		player_spawn_requested.emit(player_id)
+# DELETE THE ENTIRE spawn_existing_players() FUNCTION:
+# func spawn_existing_players():
+#	...
 
 # --- Signal Callbacks ---
 func _on_peer_connected(id: int):

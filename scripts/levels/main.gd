@@ -7,11 +7,13 @@ extends Node2D
 @onready var player_container: Node2D = $PlayerContainer
 # Add a reference to our new spawn points container.
 @onready var spawn_points_container: Node2D = $PlayerSpawnPoints
+# Add a reference to our player spawner.
+@onready var player_spawner: MultiplayerSpawner = $PlayerSpawner
 # Add a reference to our bunch of enemies.
 @onready var enemies_container: Node2D = $EnemyContainer
 # Add a reference to our new spawn points container.
 @onready var enemy_spawn_points_container: Node2D = $EnemySpawnPoints
-# Add a reference to our new spawner.
+# Add a reference to our enemy spawner.
 @onready var enemy_spawner: MultiplayerSpawner = $EnemySpawner
 const SKELETON_SCENE = preload("res://scenes/enemies/skeleton.tscn")
 
@@ -26,7 +28,8 @@ var enemy_spawn_points: Array = []
 
 # The setup logic MUST be in _ready() to run once at the start.
 func _ready():
-	# CRITICAL: Give the server ownership of the spawner FIRST.
+	# CRITICAL: Give the server ownership of the spawners FIRST.
+	player_spawner.set_multiplayer_authority(1)
 	enemy_spawner.set_multiplayer_authority(1)
 	
 	# Get all the spawn point children into an array when the level loads.
@@ -47,9 +50,8 @@ func _ready():
 	# Connect our listener FIRST, so we are ready to receive requests.
 	NetworkManager.player_spawn_requested.connect(_on_player_spawn_requested)
 	
-	# Now that we're ready, ask the NetworkManager to spawn everyone
-	# who has already connected (including ourselves if we are the host).
-	NetworkManager.spawn_existing_players()
+	# REMOVE THIS LINE: This function is redundant and has been deleted.
+	# NetworkManager.spawn_existing_players() 
 	
 	# If we are the server, call a new function to spawn enemies for everyone.
 	if multiplayer.is_server():
