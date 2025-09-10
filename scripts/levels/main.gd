@@ -92,10 +92,8 @@ func _on_player_spawn_requested(id: int):
 	# Add the player to the container that the MultiplayerSpawner is watching.
 	player_container.add_child(player_instance)
 	
-	# DELETE THIS LINE
-	#player_instance.set_initial_position.rpc_id(id, spawn_pos)
-	# DELETE THIS LINE TOO
-	#player_instance.force_sync_position.rpc(spawn_pos)
+	# Re-add this line to tell the owning client their starting position.
+	player_instance.set_initial_position.rpc_id(id, spawn_pos)
 
 # This function is ONLY called by the server.
 func _spawn_initial_enemies():
