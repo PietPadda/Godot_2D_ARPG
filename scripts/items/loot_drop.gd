@@ -11,6 +11,14 @@ var item_data: ItemData
 # --- Signal Handlers ---
 ## Player enters the body of loot on the floor
 func _on_body_entered(body: Node2D) -> void:
+	# We only want the player who is in control to send the pickup request.
+	if not body.is_multiplayer_authority():
+		return
+
+	# Instead of running the logic here, we ask the server to do it.
+	# We send the RPC request to the server (peer_id = 1).
+	server_request_pickup.rpc_id(1)
+	'''
 	# This safety check is important because item_data might be null for a split second
 	# before the RPC arrives.
 	if not item_data:
@@ -34,9 +42,11 @@ func _on_body_entered(body: Node2D) -> void:
 		#If the item was successfully picked up, destroy the loot drop.
 		if picked_up:
 			queue_free()
+			'''
 			
 # --- RPCs ---
 # This function will be called by the server on all clients to set up the loot.
+## Generate networked loot for all players
 @rpc("any_peer", "call_local", "reliable")
 func setup_loot(item_path: String):
 	# If the path is empty, do nothing.
@@ -49,3 +59,13 @@ func setup_loot(item_path: String):
 	# If we successfully loaded the item data, apply its texture.
 	if item_data:
 		sprite.texture = item_data.texture
+
+## Clean picked up loot via server
+@rpc("any_peer", "call_local", "reliable")
+func server_request_pickup():
+	# This code will ONLY run on the server.
+	# The server will handle giving the item to the player and then destroying this loot drop.
+	
+	# For now, we'll just fix the crash by having the server destroy the object.
+	# We'll sync the inventory in the next step.
+	queue_free()
