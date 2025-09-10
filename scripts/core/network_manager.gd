@@ -60,13 +60,15 @@ func join_game(ip_address: String):
 
 # --- Signal Callbacks ---
 func _on_peer_connected(id: int):
+	# Only the server should ever spawn new players.
+	if not multiplayer.is_server():
+		return
+		
 	print("Player connected: %d" % id)
 	players[id] = { "name": "Player " + str(id) }
 	player_connected.emit(id)
 	
 	# Request a spawn for the newly connected client.
-	# This is now safe because this function only runs for remote clients,
-	# after the host's game world is already loaded.
 	player_spawn_requested.emit(id)
 
 
