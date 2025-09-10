@@ -5,20 +5,17 @@ extends Area2D
 # scene nodes
 @onready var sprite: Sprite2D = $Sprite2D
 
-# This will store the item data for this specific drop.
+# This will be set via RPC after the node is spawned.
 var item_data: ItemData
 
-# This will run AFTER the node is added to the scene and @onready vars are ready.
-func _ready() -> void:
-	# If we have item data, apply its texture.
-	if item_data:
-		sprite.texture = item_data.texture
-
-# This function will be called by whatever spawns the loot.
-func initialize(data: ItemData) -> void:
-	self.item_data = data
-	
+# --- Signal Handlers ---
+## Player enters the body of loot on the floor
 func _on_body_entered(body: Node2D) -> void:
+	# This safety check is important because item_data might be null for a split second
+	# before the RPC arrives.
+	if not item_data:
+		return
+		
 	# First, check if the item is currency.
 	if item_data.item_type == ItemData.ItemType.CURRENCY:
 		var stats_component: StatsComponent = body.get_node_or_null("StatsComponent")
@@ -37,3 +34,18 @@ func _on_body_entered(body: Node2D) -> void:
 		#If the item was successfully picked up, destroy the loot drop.
 		if picked_up:
 			queue_free()
+			
+# --- RPCs ---
+# This function will be called by the server on all clients to set up the loot.
+@rpc("any_peer", "call_local", "reliable")
+func setup_loot(item_path: String):
+	# If the path is empty, do nothing.
+	if item_path.is_empty():
+		return
+	
+	# Load the resource from the given path.
+	self.item_data = load(item_path)
+	
+	# If we successfully loaded the item data, apply its texture.
+	if item_data:
+		sprite.texture = item_data.texture
