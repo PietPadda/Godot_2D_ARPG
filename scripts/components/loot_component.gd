@@ -26,16 +26,25 @@ func drop_loot(position: Vector2) -> void:
 		if random_roll <= cumulative_weight: # if the roll is above the first, or next item, we go back and try again
 			var item_to_drop = drop.item
 			
+			# Edge case handling
+			if not is_instance_valid(item_to_drop) or item_to_drop.resource_path.is_empty():
+				push_warning("Item in loot table is invalid or not saved!")
+				return
+			
 			# Spawn and initialize the loot drop scene.
 			var loot_instance = LootDropScene.instantiate()
-			# Initialize with data first (this is safe now because we use _ready in loot_drop.gd)
-			loot_instance.initialize(item_to_drop)
+			# Set the loot drops position
 			loot_instance.global_position = position
 			
-			# Find the LootContainer and add the fully-prepared child to it.
-			# The LootSpawner will see this action and replicate it for all clients.
+			# Add the "blank" loot drop to the scene for everyone first.
 			var loot_container = get_tree().get_root().get_node("Main/LootContainer")
+			
+			# The LootSpawner will see this action and replicate it for all clients.
 			if loot_container:
 				# Add 'true' to force a network-safe name.
 				loot_container.add_child(loot_instance, true)
+				
+				# After spawning, call the RPC on the new instance to tell everyone
+				# what item it contains by sending its resource path.
+				loot_instance.setup_loot.rpc(item_to_drop.resource_path)
 			return # We found our drop, so exit the function.
