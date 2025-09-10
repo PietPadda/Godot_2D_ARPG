@@ -92,8 +92,11 @@ func _on_player_spawn_requested(id: int):
 	# Add the player to the container that the MultiplayerSpawner is watching.
 	player_container.add_child(player_instance)
 	
-	# Call the RPC on the client who owns this new player.
+	# This RPC tells the OWNER where their camera should start.
 	player_instance.set_initial_position.rpc_id(id, spawn_pos)
+	
+	# his RPC tells EVERYONE ELSE where to place the new puppet, reusing our existing function.
+	player_instance.force_sync_position.rpc(spawn_pos)
 
 # This function is ONLY called by the server.
 func _spawn_initial_enemies():

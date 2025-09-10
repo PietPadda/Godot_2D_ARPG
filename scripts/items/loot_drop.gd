@@ -8,11 +8,16 @@ extends Area2D
 # This will store the item data for this specific drop.
 var item_data: ItemData
 
+# This will run AFTER the node is added to the scene and @onready vars are ready.
+func _ready() -> void:
+	# If we have item data, apply its texture.
+	if item_data:
+		sprite.texture = item_data.texture
+
 # This function will be called by whatever spawns the loot.
 func initialize(data: ItemData) -> void:
 	self.item_data = data
-	sprite.texture = data.texture
-
+	
 func _on_body_entered(body: Node2D) -> void:
 	# First, check if the item is currency.
 	if item_data.item_type == ItemData.ItemType.CURRENCY:
