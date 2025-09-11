@@ -46,6 +46,11 @@ func server_request_cast(skill_path: String, target_position: Vector2):
 
 	# Instantiate and configure the projectile on the server
 	var projectile = projectile_scene.instantiate()
+	
+	# Add the projectile to the scene tree FIRST. This ensures all its @onready variables will be ready.
+	# Add it to the container, which the spawner will replicate for everyone
+	projectile_container.add_child(projectile, true) # Force a network-safe name
+	
 	# The projectile needs to know where it's going.
 	projectile.global_position = get_owner().global_position # get caster position
 	projectile.look_at(target_position) # get target position
@@ -55,5 +60,3 @@ func server_request_cast(skill_path: String, target_position: Vector2):
 	# Pass the skill data AND the caster's network ID to the projectile.
 	projectile.initialize(skill_data, caster_id)
 	
-	# Add it to the container, which the spawner will replicate for everyone
-	projectile_container.add_child(projectile, true) # Force a network-safe name
