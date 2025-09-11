@@ -55,8 +55,12 @@ func server_request_pickup(picker_id: int):
 		if stats_component:
 			# Server updates its master record.
 			stats_component.add_gold(item_data.value)
-			# Server SENDS COMMAND to the client to do the same.
-			stats_component.client_add_gold.rpc_id(picker_id, item_data.value)
+			
+			# Only send the RPC if the picker is NOT the server.
+			if picker_id != 1:
+				# Server SENDS COMMAND to the client to do the same.
+				stats_component.client_add_gold.rpc_id(picker_id, item_data.value)
+			
 			# Server destroys the loot drop for everyone.
 			queue_free()
 		return # Stop further processing for this item.
@@ -67,7 +71,10 @@ func server_request_pickup(picker_id: int):
 		# Server updates its master record.
 		var picked_up = inventory_component.add_item(item_data)
 		if picked_up:
-			# Server SENDS COMMAND to the client to do the same.
-			inventory_component.client_add_item.rpc_id(picker_id, item_data.resource_path)
+			# Only send the RPC if the picker is NOT the server.
+			if picker_id != 1:
+				# Server SENDS COMMAND to the client to do the same.
+				inventory_component.client_add_item.rpc_id(picker_id, item_data.resource_path)
+			
 			# Server destroys the loot drop for everyone.
 			queue_free()
