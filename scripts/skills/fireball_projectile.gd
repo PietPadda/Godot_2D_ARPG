@@ -11,7 +11,8 @@ var owner_id: int # store the ID of the player who fired the projectile.
 
 func _ready() -> void:
 	# Connect the timer to self-destruct after a few seconds.
-	timer.timeout.connect(queue_free)
+	# Connect the timer to our new safe despawn method.
+	timer.timeout.connect(despawn)
 
 # A new initialize function to set up the projectile from data.
 func initialize(skill_data: SkillData, _owner_id: int) -> void:
@@ -32,4 +33,20 @@ func _on_body_entered(body: Node2D) -> void:
 		stats.server_take_damage.rpc_id(1, damage, owner_id)
 
 	# Destroy the projectile on impact.
+	despawn() # Use our new safe despawn method on impact.
+
+# This function safely despawns the projectile.
+func despawn():
+	# If we are the authority (the server), we can destroy the node.
+	if is_multiplayer_authority():
+		queue_free()
+	# If we are a client, we must ask the server to destroy it.
+	else:
+		server_request_despawn.rpc_id(1)
+
+# --- RPCs ---
+# This RPC receives the client's request.
+@rpc("any_peer", "call_local", "reliable")
+func server_request_despawn():
+	# This code only runs on the server.
 	queue_free()
