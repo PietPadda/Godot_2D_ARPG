@@ -26,6 +26,10 @@ func _physics_process(delta: float) -> void:
 	position += transform.x * speed * delta
 
 func _on_body_entered(body: Node2D) -> void:
+	# SAFETY CHECK: Make sure the body we hit still exists.
+	if not is_instance_valid(body):
+		return # do nothing to prevent race conditions
+		
 	# Check if the body we hit has a StatsComponent.
 	var stats: StatsComponent = body.get_node_or_null("StatsComponent")
 	if stats:
@@ -37,6 +41,10 @@ func _on_body_entered(body: Node2D) -> void:
 
 # This function safely despawns the projectile.
 func despawn():
+	# SAFETY CHECK: If we're already set to be deleted, don't do it again.
+	if is_queued_for_deletion():
+		return # do nothing to prevent race conditions
+		
 	# If we are the authority (the server), we can destroy the node.
 	if is_multiplayer_authority():
 		queue_free()
