@@ -10,26 +10,50 @@ extends Node
 
 # Tries to cast a skill. Returns true on success.
 func cast(skill_data: SkillData, target_position: Vector2) -> bool:
-	# if out of mana, do not cast!
+	# We perform a mana check on the client first to provide instant feedback.
 	if not stats_component.use_mana(skill_data.mana_cost):
-		return false # use mana returns false
+		print("Not enough mana!")
+		return false # insufficient mana returns false
 
-	# if no scene, do not cast!
-	if not skill_data.projectile_scene:
+	# Instead of spawning, we call the RPC on the server (peer 1).
+	server_request_cast.rpc_id(1, skill_data.resource_path, target_position)
+	return true
+
+# --- RPCs ---
+# This new RPC function will only run on the server.
+@rpc("any_peer", "call_local", "reliable")
+func server_request_cast(skill_path: String, target_position: Vector2):
+	# The server re-validates the mana cost as a security check.
+	# Note: get_owner() here is the server's puppet of the casting player.
+	var caster_stats = get_owner().get_node("StatsComponent")
+	var skill_data = load(skill_path) as SkillData
+	
+	# Server-side validation (prevents cheating)
+	if not stats_component.use_mana(skill_data.mana_cost):
+		return # The server determined they couldn't cast.
+	
+	# Find the projectile scene
+	var projectile_scene = skill_data.projectile_scene
+	# if no projectile scene, do not cast!
+	if not projectile_scene:
 		push_error("SkillData is missing a projectile scene!")
-		return false # false if no scene
+		return # do not cast
+		
+	# Find the spawner and container
+	var projectile_container = get_tree().get_root().get_node_or_null("Main/ProjectileContainer")
+	if not projectile_container:
+		return
 
-	var projectile = skill_data.projectile_scene.instantiate()
-
+	# Instantiate and configure the projectile on the server
+	var projectile = projectile_scene.instantiate()
 	# The projectile needs to know where it's going.
 	projectile.global_position = get_owner().global_position # get caster position
 	projectile.look_at(target_position) # get target position
-	
-	# Add the projectile to the main scene FIRST
-	get_tree().current_scene.add_child(projectile)
-	
+		
 	# get the caster's network ID
 	var caster_id = get_owner().get_multiplayer_authority()
 	# Pass the skill data AND the caster's network ID to the projectile.
 	projectile.initialize(skill_data, caster_id)
-	return true
+	
+	# Add it to the container, which the spawner will replicate for everyone
+	projectile_container.add_child(projectile, true) # Force a network-safe name
