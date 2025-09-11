@@ -160,3 +160,9 @@ position = Vector2(-581, 398)
 [node name="LootSpawner" type="MultiplayerSpawner" parent="."]
 _spawnable_scenes = PackedStringArray("uid://boxuys3wl2v3p")
 spawn_path = NodePath("../LootContainer")
+
+[node name="ProjectileContainer" type="Node2D" parent="."]
+
+[node name="ProjectileSpawner" type="MultiplayerSpawner" parent="."]
+_spawnable_scenes = PackedStringArray("uid://dfce8t7pklgpr")
+spawn_path = NodePath("../ProjectileContainer")

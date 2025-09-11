@@ -20,6 +20,8 @@ const SKELETON_SCENE = preload("res://scenes/enemies/skeleton.tscn")
 @onready var enemy_spawner: MultiplayerSpawner = $EnemySpawner
 # Add a reference to our loot spawner.
 @onready var loot_spawner: MultiplayerSpawner = $LootSpawner
+# Add a reference to our projectile spawner.
+@onready var projectile_spawner: MultiplayerSpawner = $ProjectileSpawner
 
 # Expose a slot in the Inspector for the music track.
 @export var level_music: MusicTrackData
@@ -35,6 +37,7 @@ func _ready():
 	player_spawner.set_multiplayer_authority(1)
 	enemy_spawner.set_multiplayer_authority(1)
 	loot_spawner.set_multiplayer_authority(1)
+	projectile_spawner.set_multiplayer_authority(1)
 	
 	# Get all the spawn point children into an array when the level loads.
 	player_spawn_points = spawn_points_container.get_children()
