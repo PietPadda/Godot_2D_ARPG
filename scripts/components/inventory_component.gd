@@ -28,7 +28,7 @@ func remove_item(item_to_remove: ItemData) -> void:
 
 # --- RPCs ---
 ## request add item to inv
-@rpc("authority", "call_local", "reliable")
+@rpc("any_peer", "call_local", "reliable")
 func client_add_item(item_path: String):
 	var item_data = load(item_path) as ItemData
 	if is_instance_valid(item_data):

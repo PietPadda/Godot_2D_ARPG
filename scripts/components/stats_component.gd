@@ -152,12 +152,12 @@ func server_take_damage(damage_amount: int, attacker_id: int):
 	# DEBUG PRINT: Announce that the RPC was received
 	print("[%d] RPC received! Attacker: %d, Damage: %d" % [multiplayer.get_unique_id(), attacker_id, damage_amount])
 	
-	# Store the ID of the most recent attacker
+	# Store the ID of the miost recent attacker
 	last_attacker_id = attacker_id
 	# The server, upon receiving the request, runs the actual damage logic.
 	take_damage(damage_amount)
 
 ## server add gold
-@rpc("authority", "call_local", "reliable")
+@rpc("any_peer", "call_local", "reliable")
 func client_add_gold(amount: int):
 	add_gold(amount)
