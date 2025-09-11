@@ -16,7 +16,6 @@ func add_item(item_data: ItemData) -> bool:
 		emit_signal("inventory_changed") # Emit without data
 		return true
 	else:
-		print("Inventory is full!")
 		return false
 
 ## remove an item to the inventory
