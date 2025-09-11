@@ -6,10 +6,19 @@ extends CharacterBody2D
 @onready var loot_component: LootComponent = $LootComponent
 @onready var health_bar = $HealthBar
 
+# A synced property for health. The setter will update the UI.
+@export var synced_health: int = 100:
+	set(value):
+		synced_health = value
+		if stats_component and health_bar:
+			stats_component.current_health = value
+			health_bar.update_health(value, stats_component.stats_data.max_health)
+
 func _ready() -> void:
 	# connect signals to functions
 	stats_component.health_changed.connect(health_bar.update_health)
 	stats_component.died.connect(_on_death)
+	synced_health = stats_component.stats_data.max_health # We also set the initial health here.
 
 func _on_aggro_radius_body_entered(body: Node2D) -> void:
 	# Don't re-aggro if we're already chasing or attacking.
