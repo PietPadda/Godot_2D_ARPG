@@ -32,7 +32,6 @@ func execute(target: Node2D) -> void:
 		return # early exit
 		
 	if not is_instance_valid(target):
-		print("Invalid target.")
 		emit_signal("attack_finished") # Faiil safely
 		return
 		
@@ -60,8 +59,6 @@ func execute(target: Node2D) -> void:
 		# Add the attacker's ID to the RPC call
 		var my_id = multiplayer.get_unique_id()
 		
-		# DEBUG PRINT: Announce that we are sending the RPC
-		print("[%d] sending damage RPC to peer %d" % [my_id, target_owner_id])
 		# Instead of dealing damage directly, we send a request to the server (peer ID).
 		target_stats.server_take_damage.rpc_id(target_owner_id, total_damage, my_id)
 

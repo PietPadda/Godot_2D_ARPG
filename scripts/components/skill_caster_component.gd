@@ -12,7 +12,6 @@ extends Node
 func cast(skill_data: SkillData, target_position: Vector2) -> bool:
 	# if out of mana, do not cast!
 	if not stats_component.use_mana(skill_data.mana_cost):
-		print("Not enough mana!")
 		return false # use mana returns false
 
 	# if no scene, do not cast!

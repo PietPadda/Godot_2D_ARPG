@@ -9,8 +9,6 @@ extends Node
 # Convert the variable into a property with a setter.
 var tile_map_layer: TileMapLayer:
 	set(value):
-		# DEBUG: Announce when this setter is called and what it's receiving.
-		print("GridManager: tile_map_layer.set() called with: ", value)
 		tile_map_layer = value
 		# If the new value is valid, automatically rebuild the graph.
 		if is_instance_valid(tile_map_layer):
