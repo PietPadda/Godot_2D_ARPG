@@ -7,9 +7,9 @@
 [resource]
 script = ExtResource("3_lcxmc")
 skill_name = "Fireball"
-mana_cost = 10
-damage = 50
-cast_time = 0.3
+mana_cost = 5
+damage = 25
+cast_time = 0.4
 projectile_scene = ExtResource("2_3ht3f")
 projectile_data = ExtResource("1_fd0oi")
 metadata/_custom_type_script = "uid://cmob1afavc4dc"
