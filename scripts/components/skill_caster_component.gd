@@ -33,9 +33,12 @@ func server_request_cast(target_position: Vector2):
 	# Note: get_owner() here is the server's puppet of the casting player.
 	var caster_stats = get_owner().get_node("StatsComponent")
 	
-	# Server-side validation (prevents cheating)
-	if not stats_component.use_mana(skill_data.mana_cost):
-		return # The server determined they couldn't cast.
+	# Only the server validates mana for remote players.
+	# The host (server, ID 1) already paid mana locally in the 'cast' function.
+	if get_owner().get_multiplayer_authority() != 1:
+		# Server-side validation (prevents cheating)
+		if not stats_component.use_mana(skill_data.mana_cost):
+			return # The server determined they couldn't cast.
 	
 	# Find the projectile scene
 	var projectile_scene = skill_data.projectile_scene
