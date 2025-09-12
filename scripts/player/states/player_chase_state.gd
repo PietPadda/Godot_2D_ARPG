@@ -8,6 +8,7 @@ var target: Node2D
 var last_target_tile: Vector2i
 
 func enter() -> void:
+	print("ENTERING CHASE STATE!")
 	# On entering, immediately start moving towards the target.
 	if not is_instance_valid(target):
 		state_machine.change_state(States.PLAYER_STATE_NAMES[States.PLAYER.IDLE]) # just idle if invalid target
@@ -24,6 +25,7 @@ func enter() -> void:
 	_recalculate_path() # Start the chase
 
 func exit() -> void:
+	print("EXITING CHASE STATE!")
 	# Disconnect from all signals for clean state transitions
 	if grid_movement_component.path_stuck.is_connected(_recalculate_path):
 		grid_movement_component.path_stuck.disconnect(_recalculate_path)
@@ -43,6 +45,11 @@ func _process_physics(delta: float) -> void:
 	# First, always check if we've arrived in attack range.
 	var distance = player.global_position.distance_to(target.global_position) 
 	var attack_range = stats_component.get_total_stat("range")
+	
+	# --- NEW DEBUG PRINTS ---
+	# Let's see what the actual values are every frame.
+	print("Distance to Target: ", distance, " | Attack Range: ", attack_range)
+	# --- END DEBUG PRINTS ---
 
 	if distance <= attack_range:
 		var attack_state: PlayerAttackState = state_machine.get_state(States.PLAYER.ATTACK)
