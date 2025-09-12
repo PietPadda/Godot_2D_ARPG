@@ -15,7 +15,7 @@ level_music = ExtResource("2_b6bv0")
 
 [node name="TileMapLayer" type="TileMapLayer" parent="."]
 position = Vector2(-10, -10)
-tile_map_data = PackedByteArray("AAD7//n/AAAAAAAAAAD7//v/AAAAAAAAAAD7//3/AAAAAAAAAAD7////AAAAAAAAAAD7/wEAAAAAAAAAAAD7/wMAAAAAAAAAAAD7/wUAAAAAAAAAAAD7/wcAAAAAAAAAAAD7/wkAAAAAAAAAAAD7/wsAAAAAAAAAAAD7/w0AAAAAAAAAAAD7/w8AAAAAAAAAAAD7/xEAAAAAAAAAAAD7/xMAAAAAAAAAAAD7/xUAAAAAAAAAAAD7/xcAAAAAAAAAAAD8/xgAAAAAAAAAAAD9/xgAAAAAAAAAAAD+/xgAAAAAAAAAAAD//xgAAAAAAAAAAAAAABgAAAAAAAAAAAABABgAAAAAAAAAAAACABgAAAAAAAAAAAADABgAAAAAAAAAAAAEABgAAAAAAAAAAAAFABgAAAAAAAAAAAAGABgAAAAAAAAAAAAHABgAAAAAAAAAAAAIABgAAAAAAAAAAAAJABgAAAAAAAAAAAAKABgAAAAAAAAAAAALABgAAAAAAAAAAAAMABgAAAAAAAAAAAANABgAAAAAAAAAAAAOABgAAAAAAAAAAAAPABgAAAAAAAAAAAAQABgAAAAAAAAAAAARABgAAAAAAAAAAAARABcAAAAAAAAAAAARABYAAAAAAAAAAAARABUAAAAAAAAAAAARABQAAAAAAAAAAAARABMAAAAAAAAAAAARABIAAAAAAAAAAAARABEAAAAAAAAAAAARABAAAAAAAAAAAAARAA8AAAAAAAAAAAARAA4AAAAAAAAAAAARAA0AAAAAAAAAAAARAAwAAAAAAAAAAAARAAsAAAAAAAAAAAARAAoAAAAAAAAAAAARAAkAAAAAAAAAAAARAAgAAAAAAAAAAAARAAcAAAAAAAAAAAARAAYAAAAAAAAAAAARAAUAAAAAAAAAAAARAAQAAAAAAAAAAAARAAMAAAAAAAAAAAARAAIAAAAAAAAAAAARAAEAAAAAAAAAAAARAAAAAAAAAAAAAAARAP//AAAAAAAAAAARAP7/AAAAAAAAAAARAP3/AAAAAAAAAAARAPz/AAAAAAAAAAARAPv/AAAAAAAAAAARAPr/AAAAAAAAAAD8//n/AAAAAAAAAAD9//n/AAAAAAAAAAD+//n/AAAAAAAAAAD///n/AAAAAAAAAAAAAPn/AAAAAAAAAAABAPn/AAAAAAAAAAACAPn/AAAAAAAAAAADAPn/AAAAAAAAAAAEAPn/AAAAAAAAAAAFAPn/AAAAAAAAAAAGAPn/AAAAAAAAAAAHAPn/AAAAAAAAAAAIAPn/AAAAAAAAAAAJAPn/AAAAAAAAAAAKAPn/AAAAAAAAAAALAPn/AAAAAAAAAAAMAPn/AAAAAAAAAAANAPn/AAAAAAAAAAAOAPn/AAAAAAAAAAAPAPn/AAAAAAAAAAAQAPn/AAAAAAAAAAARAPn/AAAAAAAAAAD7/xgAAAAAAAAAAAD7/xYAAAAAAAAAAAD7/xQAAAAAAAAAAAD7/xIAAAAAAAAAAAD7/xAAAAAAAAAAAAD7/w4AAAAAAAAAAAD7/wwAAAAAAAAAAAD7/woAAAAAAAAAAAD7/wgAAAAAAAAAAAD7/wYAAAAAAAAAAAD7/wQAAAAAAAAAAAD7/wIAAAAAAAAAAAD7/wAAAAAAAAAAAAD7//7/AAAAAAAAAAD7//z/AAAAAAAAAAD7//r/AAAAAAAAAAALAPr/AAAAAAAAAAALAPv/AAAAAAAAAAALAPz/AAAAAAAAAAALAP3/AAAAAAAAAAALAP7/AAAAAAAAAAALAP//AAAAAAAAAAAMAP//AAAAAAAAAAAPAP//AAAAAAAAAAAQAP//AAAAAAAAAAALAAAAAAAAAAAAAAALAAEAAAAAAAAAAAALAAIAAAAAAAAAAAALAAMAAAAAAAAAAAALAAQAAAAAAAAAAAALAAUAAAAAAAAAAAALAAYAAAAAAAAAAAALAAcAAAAAAAAAAAALAAgAAAAAAAAAAAALAAsAAAAAAAAAAAALAAwAAAAAAAAAAAALAA0AAAAAAAAAAAALAA4AAAAAAAAAAAALAA8AAAAAAAAAAAALABAAAAAAAAAAAAALABEAAAAAAAAAAAALABIAAAAAAAAAAAALABMAAAAAAAAAAAALABQAAAAAAAAAAAALABUAAAAAAAAAAAALABYAAAAAAAAAAAALABcAAAAAAAAAAAAMABEAAAAAAAAAAAANABEAAAAAAAAAAAAQABEAAAAAAAAAAAD8/wEAAAAAAAAAAAD9/wEAAAAAAAAAAAD+/wEAAAAAAAAAAAD//wEAAAAAAAAAAAAAAAEAAAAAAAAAAAABAAEAAAAAAAAAAAACAAEAAAAAAAAAAAACAAAAAAAAAAAAAAACAP//AAAAAAAAAAACAPr/AAAAAAAAAAACAPv/AAAAAAAAAAACAPz/AAAAAAAAAAAGAP3/AAAAAAAAAAAGAP7/AAAAAAAAAAAGAP//AAAAAAAAAAAHAP//AAAAAAAAAAAHAP7/AAAAAAAAAAAHAP3/AAAAAAAAAAD+/wQAAAAAAAAAAAD+/wUAAAAAAAAAAAD//wUAAAAAAAAAAAD//wQAAAAAAAAAAAD+/xUAAAAAAAAAAAD+/xQAAAAAAAAAAAD//xQAAAAAAAAAAAD//xUAAAAAAAAAAAAIABUAAAAAAAAAAAAHABUAAAAAAAAAAAAHABQAAAAAAAAAAAAIABQAAAAAAAAAAAAIAAQAAAAAAAAAAAAIAAUAAAAAAAAAAAAHAAUAAAAAAAAAAAAHAAQAAAAAAAAAAAD//wsAAAAAAAAAAAD//wwAAAAAAAAAAAD//w0AAAAAAAAAAAD//w4AAAAAAAAAAAD//w8AAAAAAAAAAAAAABAAAAAAAAAAAAD//xAAAAAAAAAAAAABABAAAAAAAAAAAAACABAAAAAAAAAAAAADABAAAAAAAAAAAAAEABAAAAAAAAAAAAAEAA8AAAAAAAAAAAAEAAwAAAAAAAAAAAAEAAsAAAAAAAAAAAADAAsAAAAAAAAAAAACAAsAAAAAAAAAAAABAAsAAAAAAAAAAAAAAAsAAAAAAAAAAAA=")
+tile_map_data = PackedByteArray("AAD7//n/AAAAAAAAAAD7//v/AAAAAAAAAAD7//3/AAAAAAAAAAD7////AAAAAAAAAAD7/wEAAAAAAAAAAAD7/wMAAAAAAAAAAAD7/wUAAAAAAAAAAAD7/wcAAAAAAAAAAAD7/wkAAAAAAAAAAAD7/wsAAAAAAAAAAAD7/w0AAAAAAAAAAAD7/w8AAAAAAAAAAAD7/xEAAAAAAAAAAAD7/xMAAAAAAAAAAAD7/xUAAAAAAAAAAAD7/xcAAAAAAAAAAAD8/xgAAAAAAAAAAAD9/xgAAAAAAAAAAAD+/xgAAAAAAAAAAAD//xgAAAAAAAAAAAAAABgAAAAAAAAAAAABABgAAAAAAAAAAAACABgAAAAAAAAAAAAGABgAAAAAAAAAAAAHABgAAAAAAAAAAAAIABgAAAAAAAAAAAAJABgAAAAAAAAAAAAKABgAAAAAAAAAAAALABgAAAAAAAAAAAAMABgAAAAAAAAAAAANABgAAAAAAAAAAAAOABgAAAAAAAAAAAAPABgAAAAAAAAAAAAQABgAAAAAAAAAAAARABgAAAAAAAAAAAARABcAAAAAAAAAAAARABYAAAAAAAAAAAARABUAAAAAAAAAAAARABQAAAAAAAAAAAARABMAAAAAAAAAAAARABIAAAAAAAAAAAARABEAAAAAAAAAAAARABAAAAAAAAAAAAARAA8AAAAAAAAAAAARAA4AAAAAAAAAAAARAA0AAAAAAAAAAAARAAwAAAAAAAAAAAARAAsAAAAAAAAAAAARAAoAAAAAAAAAAAARAAkAAAAAAAAAAAARAAgAAAAAAAAAAAARAAcAAAAAAAAAAAARAAYAAAAAAAAAAAARAAUAAAAAAAAAAAARAAQAAAAAAAAAAAARAAMAAAAAAAAAAAARAAIAAAAAAAAAAAARAAEAAAAAAAAAAAARAAAAAAAAAAAAAAARAP//AAAAAAAAAAARAP7/AAAAAAAAAAARAP3/AAAAAAAAAAARAPz/AAAAAAAAAAARAPv/AAAAAAAAAAARAPr/AAAAAAAAAAD8//n/AAAAAAAAAAD9//n/AAAAAAAAAAD+//n/AAAAAAAAAAD///n/AAAAAAAAAAAAAPn/AAAAAAAAAAABAPn/AAAAAAAAAAACAPn/AAAAAAAAAAADAPn/AAAAAAAAAAAEAPn/AAAAAAAAAAAFAPn/AAAAAAAAAAAGAPn/AAAAAAAAAAAHAPn/AAAAAAAAAAAIAPn/AAAAAAAAAAAJAPn/AAAAAAAAAAAKAPn/AAAAAAAAAAALAPn/AAAAAAAAAAAMAPn/AAAAAAAAAAANAPn/AAAAAAAAAAAOAPn/AAAAAAAAAAAPAPn/AAAAAAAAAAAQAPn/AAAAAAAAAAARAPn/AAAAAAAAAAD7/xgAAAAAAAAAAAD7/xYAAAAAAAAAAAD7/xQAAAAAAAAAAAD7/xIAAAAAAAAAAAD7/xAAAAAAAAAAAAD7/w4AAAAAAAAAAAD7/wwAAAAAAAAAAAD7/woAAAAAAAAAAAD7/wgAAAAAAAAAAAD7/wYAAAAAAAAAAAD7/wQAAAAAAAAAAAD7/wIAAAAAAAAAAAD7/wAAAAAAAAAAAAD7//7/AAAAAAAAAAD7//z/AAAAAAAAAAD7//r/AAAAAAAAAAALAPr/AAAAAAAAAAALAPv/AAAAAAAAAAALAPz/AAAAAAAAAAALAP3/AAAAAAAAAAALAP7/AAAAAAAAAAALAP//AAAAAAAAAAAMAP//AAAAAAAAAAAPAP//AAAAAAAAAAAQAP//AAAAAAAAAAALAAAAAAAAAAAAAAALAAEAAAAAAAAAAAALAAIAAAAAAAAAAAALAAMAAAAAAAAAAAALAAQAAAAAAAAAAAALAAUAAAAAAAAAAAALAAYAAAAAAAAAAAALAAcAAAAAAAAAAAALAAgAAAAAAAAAAAALAAsAAAAAAAAAAAALAAwAAAAAAAAAAAALAA0AAAAAAAAAAAALAA4AAAAAAAAAAAALAA8AAAAAAAAAAAALABAAAAAAAAAAAAALABEAAAAAAAAAAAALABIAAAAAAAAAAAALABMAAAAAAAAAAAALABQAAAAAAAAAAAALABUAAAAAAAAAAAALABYAAAAAAAAAAAALABcAAAAAAAAAAAAMABEAAAAAAAAAAAANABEAAAAAAAAAAAAQABEAAAAAAAAAAAD8/wEAAAAAAAAAAAD9/wEAAAAAAAAAAAD+/wEAAAAAAAAAAAD//wEAAAAAAAAAAAAAAAEAAAAAAAAAAAABAAEAAAAAAAAAAAACAAEAAAAAAAAAAAACAAAAAAAAAAAAAAACAP//AAAAAAAAAAACAPr/AAAAAAAAAAACAPv/AAAAAAAAAAACAPz/AAAAAAAAAAAGAP3/AAAAAAAAAAAGAP7/AAAAAAAAAAAGAP//AAAAAAAAAAAHAP//AAAAAAAAAAAHAP7/AAAAAAAAAAAHAP3/AAAAAAAAAAD+/wQAAAAAAAAAAAD+/wUAAAAAAAAAAAD//wUAAAAAAAAAAAD//wQAAAAAAAAAAAD+/xUAAAAAAAAAAAD+/xQAAAAAAAAAAAD//xQAAAAAAAAAAAD//xUAAAAAAAAAAAAIABUAAAAAAAAAAAAHABUAAAAAAAAAAAAHABQAAAAAAAAAAAAIABQAAAAAAAAAAAAIAAQAAAAAAAAAAAAIAAUAAAAAAAAAAAAHAAUAAAAAAAAAAAAHAAQAAAAAAAAAAAD//wsAAAAAAAAAAAD//wwAAAAAAAAAAAD//w0AAAAAAAAAAAD//w4AAAAAAAAAAAD//w8AAAAAAAAAAAAAABAAAAAAAAAAAAD//xAAAAAAAAAAAAABABAAAAAAAAAAAAACABAAAAAAAAAAAAADABAAAAAAAAAAAAAEABAAAAAAAAAAAAAEAA8AAAAAAAAAAAAEAAwAAAAAAAAAAAAEAAsAAAAAAAAAAAADAAsAAAAAAAAAAAACAAsAAAAAAAAAAAABAAsAAAAAAAAAAAAAAAsAAAAAAAAAAAARABkAAAAAAAAAAAARABoAAAAAAAAAAAARABsAAAAAAAAAAAARABwAAAAAAAAAAAARAB0AAAAAAAAAAAARAB4AAAAAAAAAAAARAB8AAAAAAAAAAAARACAAAAAAAAAAAAARACEAAAAAAAAAAAARACIAAAAAAAAAAAARACMAAAAAAAAAAAARACQAAAAAAAAAAAARACUAAAAAAAAAAAARACYAAAAAAAAAAAARACcAAAAAAAAAAAARACgAAAAAAAAAAAARACkAAAAAAAAAAAARACoAAAAAAAAAAAARACsAAAAAAAAAAAARACwAAAAAAAAAAAARAC0AAAAAAAAAAAARAC4AAAAAAAAAAAARAC8AAAAAAAAAAAARADAAAAAAAAAAAAARADEAAAAAAAAAAAD7/xkAAAAAAAAAAAD7/xoAAAAAAAAAAAD7/xsAAAAAAAAAAAD7/xwAAAAAAAAAAAD7/x0AAAAAAAAAAAD7/x4AAAAAAAAAAAD7/x8AAAAAAAAAAAD7/yAAAAAAAAAAAAD7/yEAAAAAAAAAAAD7/yIAAAAAAAAAAAD7/yMAAAAAAAAAAAD7/yQAAAAAAAAAAAD7/yUAAAAAAAAAAAD7/yYAAAAAAAAAAAD7/ycAAAAAAAAAAAD7/ygAAAAAAAAAAAD7/ywAAAAAAAAAAAD7/y0AAAAAAAAAAAD7/y4AAAAAAAAAAAD7/y8AAAAAAAAAAAD7/zAAAAAAAAAAAAAQADEAAAAAAAAAAAAPADEAAAAAAAAAAAAOADEAAAAAAAAAAAANADEAAAAAAAAAAAAMADEAAAAAAAAAAAALADEAAAAAAAAAAAAKADEAAAAAAAAAAAAJADEAAAAAAAAAAAAIADEAAAAAAAAAAAAHADEAAAAAAAAAAAAGADEAAAAAAAAAAAAFADEAAAAAAAAAAAAEADEAAAAAAAAAAAADADEAAAAAAAAAAAACADEAAAAAAAAAAAABADEAAAAAAAAAAAAAADEAAAAAAAAAAAD//zEAAAAAAAAAAAD+/zEAAAAAAAAAAAD9/zEAAAAAAAAAAAD8/zEAAAAAAAAAAAD7/zEAAAAAAAAAAAD6/zEAAAAAAAAAAAD5/zEAAAAAAAAAAAD4/zEAAAAAAAAAAAD3/zEAAAAAAAAAAAD2/zEAAAAAAAAAAAD1/zEAAAAAAAAAAAD0/zEAAAAAAAAAAADz/zEAAAAAAAAAAADy/zEAAAAAAAAAAADx/zEAAAAAAAAAAADw/zEAAAAAAAAAAADv/zEAAAAAAAAAAADu/zEAAAAAAAAAAADt/zEAAAAAAAAAAADs/zEAAAAAAAAAAADr/zEAAAAAAAAAAADq/zEAAAAAAAAAAADp/zEAAAAAAAAAAADo/zEAAAAAAAAAAADn/zEAAAAAAAAAAADm/zEAAAAAAAAAAADl/zEAAAAAAAAAAADk/zEAAAAAAAAAAADj/zEAAAAAAAAAAADi/zEAAAAAAAAAAADh/zEAAAAAAAAAAADg/zEAAAAAAAAAAADf/zEAAAAAAAAAAADe/zEAAAAAAAAAAADd/zEAAAAAAAAAAAD6/xgAAAAAAAAAAAD5/xgAAAAAAAAAAAD4/xgAAAAAAAAAAAD3/xgAAAAAAAAAAAD2/xgAAAAAAAAAAAD1/xgAAAAAAAAAAAD0/xgAAAAAAAAAAADz/xgAAAAAAAAAAADy/xgAAAAAAAAAAADx/xgAAAAAAAAAAADw/xgAAAAAAAAAAADv/xgAAAAAAAAAAADu/xgAAAAAAAAAAADt/xgAAAAAAAAAAADs/xgAAAAAAAAAAADr/xgAAAAAAAAAAADq/xgAAAAAAAAAAADp/xgAAAAAAAAAAADo/xgAAAAAAAAAAADn/xgAAAAAAAAAAADm/xgAAAAAAAAAAADl/xgAAAAAAAAAAADk/xgAAAAAAAAAAADj/xgAAAAAAAAAAADi/xgAAAAAAAAAAADh/xgAAAAAAAAAAADg/xgAAAAAAAAAAADf/xgAAAAAAAAAAADe/xgAAAAAAAAAAADd/xgAAAAAAAAAAADc/xgAAAAAAAAAAADc/xkAAAAAAAAAAADc/xoAAAAAAAAAAADc/xsAAAAAAAAAAADc/xwAAAAAAAAAAADc/x0AAAAAAAAAAADc/x4AAAAAAAAAAADc/x8AAAAAAAAAAADc/yAAAAAAAAAAAADc/yEAAAAAAAAAAADc/yIAAAAAAAAAAADc/yMAAAAAAAAAAADc/yQAAAAAAAAAAADc/yUAAAAAAAAAAADc/yYAAAAAAAAAAADc/ycAAAAAAAAAAADc/ygAAAAAAAAAAADc/ykAAAAAAAAAAADc/yoAAAAAAAAAAADc/ysAAAAAAAAAAADc/ywAAAAAAAAAAADc/y0AAAAAAAAAAADc/y4AAAAAAAAAAADc/y8AAAAAAAAAAADc/zAAAAAAAAAAAADc/zEAAAAAAAAAAAA=")
 tile_set = ExtResource("5_u81e1")
 
 [node name="Portal" parent="." instance=ExtResource("7_ubwgw")]
@@ -154,6 +154,444 @@ position = Vector2(-843, 252)
 
 [node name="EnemySpawnPoint35" type="Marker2D" parent="EnemySpawnPoints"]
 position = Vector2(-581, 398)
+
+[node name="EnemySpawnPoint36" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-2411, 1375)
+
+[node name="EnemySpawnPoint37" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-2232, 1321)
+
+[node name="EnemySpawnPoint38" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-2242, 1484)
+
+[node name="EnemySpawnPoint39" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-2424, 1507)
+
+[node name="EnemySpawnPoint40" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-2045, 1421)
+
+[node name="EnemySpawnPoint41" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-2263, 1623)
+
+[node name="EnemySpawnPoint42" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-2066, 1535)
+
+[node name="EnemySpawnPoint43" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-2063, 1683)
+
+[node name="EnemySpawnPoint44" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-2447, 1704)
+
+[node name="EnemySpawnPoint45" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-2258, 1756)
+
+[node name="EnemySpawnPoint46" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-2414, 1836)
+
+[node name="EnemySpawnPoint47" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-2266, 1927)
+
+[node name="EnemySpawnPoint48" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-2095, 1823)
+
+[node name="EnemySpawnPoint49" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-2108, 1960)
+
+[node name="EnemySpawnPoint50" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-2411, 1955)
+
+[node name="EnemySpawnPoint51" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-2255, 2033)
+
+[node name="EnemySpawnPoint52" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-2444, 2080)
+
+[node name="EnemySpawnPoint53" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-2294, 2212)
+
+[node name="EnemySpawnPoint54" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-2097, 2082)
+
+[node name="EnemySpawnPoint55" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-2665, 1389)
+
+[node name="EnemySpawnPoint56" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-2834, 1511)
+
+[node name="EnemySpawnPoint57" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-2639, 1511)
+
+[node name="EnemySpawnPoint58" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-2815, 1646)
+
+[node name="EnemySpawnPoint59" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-2613, 1659)
+
+[node name="EnemySpawnPoint60" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-2802, 1781)
+
+[node name="EnemySpawnPoint61" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-2602, 1802)
+
+[node name="EnemySpawnPoint62" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-2789, 1911)
+
+[node name="EnemySpawnPoint63" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-2563, 1929)
+
+[node name="EnemySpawnPoint64" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-2755, 2041)
+
+[node name="EnemySpawnPoint65" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-2643, 2158)
+
+[node name="EnemySpawnPoint66" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-2848, 2228)
+
+[node name="EnemySpawnPoint67" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-3027, 1517)
+
+[node name="EnemySpawnPoint68" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-3206, 1654)
+
+[node name="EnemySpawnPoint69" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-2960, 1651)
+
+[node name="EnemySpawnPoint70" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-3136, 1804)
+
+[node name="EnemySpawnPoint71" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-2960, 1877)
+
+[node name="EnemySpawnPoint72" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-3129, 2004)
+
+[node name="EnemySpawnPoint73" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-3388, 1742)
+
+[node name="EnemySpawnPoint74" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-3362, 1921)
+
+[node name="EnemySpawnPoint75" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-3606, 1900)
+
+[node name="EnemySpawnPoint76" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-3370, 1578)
+
+[node name="EnemySpawnPoint77" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-3590, 1604)
+
+[node name="EnemySpawnPoint78" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-3624, 1734)
+
+[node name="EnemySpawnPoint79" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-3821, 1768)
+
+[node name="EnemySpawnPoint80" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-4432, 83)
+
+[node name="EnemySpawnPoint81" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-4038, 252)
+
+[node name="EnemySpawnPoint82" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-3662, 404)
+
+[node name="EnemySpawnPoint83" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-3141, 677)
+
+[node name="EnemySpawnPoint84" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-3486, 822)
+
+[node name="EnemySpawnPoint85" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-3773, 1026)
+
+[node name="EnemySpawnPoint86" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-4091, 1209)
+
+[node name="EnemySpawnPoint87" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-4405, 1437)
+
+[node name="EnemySpawnPoint88" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-4657, 1247)
+
+[node name="EnemySpawnPoint89" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-4978, 1116)
+
+[node name="EnemySpawnPoint90" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-5323, 1006)
+
+[node name="EnemySpawnPoint91" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-5582, 830)
+
+[node name="EnemySpawnPoint92" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-5765, 726)
+
+[node name="EnemySpawnPoint93" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-6103, 567)
+
+[node name="EnemySpawnPoint94" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-5830, 419)
+
+[node name="EnemySpawnPoint95" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-5578, 274)
+
+[node name="EnemySpawnPoint96" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-5333, 157)
+
+[node name="EnemySpawnPoint97" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-5098, 2)
+
+[node name="EnemySpawnPoint98" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-4818, -181)
+
+[node name="EnemySpawnPoint99" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-4594, -53)
+
+[node name="EnemySpawnPoint100" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-4870, 85)
+
+[node name="EnemySpawnPoint101" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-5177, 309)
+
+[node name="EnemySpawnPoint102" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-4487, 233)
+
+[node name="EnemySpawnPoint103" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-4808, 371)
+
+[node name="EnemySpawnPoint104" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-5405, 488)
+
+[node name="EnemySpawnPoint105" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-5039, 567)
+
+[node name="EnemySpawnPoint106" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-5288, 715)
+
+[node name="EnemySpawnPoint107" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-4270, 384)
+
+[node name="EnemySpawnPoint108" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-4536, 570)
+
+[node name="EnemySpawnPoint109" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-4826, 712)
+
+[node name="EnemySpawnPoint110" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-5039, 852)
+
+[node name="EnemySpawnPoint111" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-4670, 966)
+
+[node name="EnemySpawnPoint112" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-4459, 769)
+
+[node name="EnemySpawnPoint113" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-4128, 614)
+
+[node name="EnemySpawnPoint114" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-3900, 538)
+
+[node name="EnemySpawnPoint115" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-3641, 617)
+
+[node name="EnemySpawnPoint116" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-3917, 762)
+
+[node name="EnemySpawnPoint117" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-4166, 907)
+
+[node name="EnemySpawnPoint118" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-4405, 1058)
+
+[node name="EnemySpawnPoint119" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-4115, 1472)
+
+[node name="EnemySpawnPoint120" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-3797, 1268)
+
+[node name="EnemySpawnPoint121" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-3500, 1133)
+
+[node name="EnemySpawnPoint122" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-3352, 998)
+
+[node name="EnemySpawnPoint123" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-3093, 884)
+
+[node name="EnemySpawnPoint124" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-2810, 787)
+
+[node name="EnemySpawnPoint125" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-3366, 494)
+
+[node name="EnemySpawnPoint126" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-3825, 201)
+
+[node name="EnemySpawnPoint127" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-4163, 77)
+
+[node name="EnemySpawnPoint128" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-4418, -68)
+
+[node name="EnemySpawnPoint129" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-5398, 288)
+
+[node name="EnemySpawnPoint130" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-5650, 450)
+
+[node name="EnemySpawnPoint131" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-5571, 630)
+
+[node name="EnemySpawnPoint132" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-1846, 1593)
+
+[node name="EnemySpawnPoint133" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-1853, 1783)
+
+[node name="EnemySpawnPoint134" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-1860, 1980)
+
+[node name="EnemySpawnPoint135" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-1535, 1866)
+
+[node name="EnemySpawnPoint136" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-1649, 1649)
+
+[node name="EnemySpawnPoint137" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-1366, 1590)
+
+[node name="EnemySpawnPoint138" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-1407, 1738)
+
+[node name="EnemySpawnPoint139" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-1141, 1762)
+
+[node name="EnemySpawnPoint140" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-1058, 1652)
+
+[node name="EnemySpawnPoint141" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-1541, 1452)
+
+[node name="EnemySpawnPoint142" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-1862, 1310)
+
+[node name="EnemySpawnPoint143" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-1962, 1155)
+
+[node name="EnemySpawnPoint144" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-2169, 1045)
+
+[node name="EnemySpawnPoint145" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-2480, 1090)
+
+[node name="EnemySpawnPoint146" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-2694, 1221)
+
+[node name="EnemySpawnPoint147" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-2880, 1325)
+
+[node name="EnemySpawnPoint148" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-3740, 1442)
+
+[node name="EnemySpawnPoint149" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-3125, 2170)
+
+[node name="EnemySpawnPoint150" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-2545, 2381)
+
+[node name="EnemySpawnPoint151" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-2476, 2222)
+
+[node name="EnemySpawnPoint152" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-2324, 2346)
+
+[node name="EnemySpawnPoint153" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-2041, 2222)
+
+[node name="EnemySpawnPoint154" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-1855, 2125)
+
+[node name="EnemySpawnPoint155" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-1672, 2008)
+
+[node name="EnemySpawnPoint156" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-1372, 1877)
+
+[node name="EnemySpawnPoint157" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-1776, 1452)
+
+[node name="EnemySpawnPoint158" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-3720, 813)
+
+[node name="EnemySpawnPoint159" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-3959, 965)
+
+[node name="EnemySpawnPoint160" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-4253, 1103)
+
+[node name="EnemySpawnPoint161" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-4400, 1278)
+
+[node name="EnemySpawnPoint162" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-4717, 1076)
+
+[node name="EnemySpawnPoint163" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-4602, 685)
+
+[node name="EnemySpawnPoint164" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-4712, 570)
+
+[node name="EnemySpawnPoint165" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-4524, 359)
+
+[node name="EnemySpawnPoint166" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-4717, 194)
+
+[node name="EnemySpawnPoint167" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-4974, 194)
+
+[node name="EnemySpawnPoint168" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-5006, 392)
+
+[node name="EnemySpawnPoint169" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-5240, 498)
+
+[node name="EnemySpawnPoint170" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-5047, 682)
+
+[node name="EnemySpawnPoint171" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-5185, 1022)
+
+[node name="EnemySpawnPoint172" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-4220, 742)
+
+[node name="EnemySpawnPoint173" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-4477, 894)
+
+[node name="EnemySpawnPoint174" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-4330, 540)
+
+[node name="EnemySpawnPoint175" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-4284, 209)
+
+[node name="EnemySpawnPoint176" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-4036, 388)
+
+[node name="EnemySpawnPoint177" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-3402, 627)
+
+[node name="EnemySpawnPoint178" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-3287, 825)
+
+[node name="EnemySpawnPoint179" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-3604, 990)
+
+[node name="EnemySpawnPoint180" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-3135, 995)
+
+[node name="EnemySpawnPoint181" type="Marker2D" parent="EnemySpawnPoints"]
+position = Vector2(-2887, 899)
 
 [node name="LootContainer" type="Node2D" parent="."]
 

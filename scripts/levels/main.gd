@@ -148,3 +148,24 @@ func _on_enemy_died(stats_data: CharacterStats, attacker_id: int):
 	else:
 		# DEBUG: This will tell us if the lookup is failing.
 		print("[SERVER] FAILED to find player node at path: ", player_path)
+
+# --- RPCs ---
+@rpc("any_peer", "call_local", "reliable")
+func server_process_projectile_hit(projectile_path: NodePath, target_path: NodePath):
+	# This function runs only on the server.
+	var projectile = get_node_or_null(projectile_path)
+	var target = get_node_or_null(target_path)
+	
+	# This is the critical safety check. If either the projectile or the target
+	# has already been destroyed by another event, we simply do nothing.
+	if not is_instance_valid(projectile) or not is_instance_valid(target):
+		return # do nothing to prevent RPC race condition
+
+	# If both are valid, proceed with dealing damage.
+	var stats: StatsComponent = target.get_node_or_null("StatsComponent")
+	if stats:
+		# We deal damage directly because this is all happening on the server. No RPC needed.
+		stats.take_damage(projectile.damage)
+	
+	# The server authoritatively destroys the projectile after the hit is processed.
+	projectile.queue_free()
