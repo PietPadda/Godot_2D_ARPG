@@ -10,11 +10,9 @@ var _is_processing_impact = false # flag to prevent multiple impacts
 # scene nodes
 @onready var timer: Timer = $Timer
 
-
 func _ready() -> void:
-	# Connect the timer to self-destruct after a few seconds.
-	# Connect the timer to our new safe despawn method.
-	timer.timeout.connect(despawn)
+	# The timer should also report to the server to despawn itself.
+	timer.timeout.connect(on_timeout)
 
 # A new initialize function to set up the projectile from data.
 func initialize(skill_data: SkillData, _owner_id: int) -> void:
@@ -33,36 +31,17 @@ func _on_body_entered(body: Node2D) -> void:
 		return # do nothing
 	_is_processing_impact = true # otherwise, we are handling an impact
 
-	# SAFETY CHECK: Make sure the body we hit still exists.
-	if not is_instance_valid(body):
-		despawn() # Despawn if we hit an invalid body
-		return # do nothing to prevent race conditions
+	# Instead of dealing damage, we report the hit to the server.
+	# The server's Main node will handle the rest.
+	var main_node = get_tree().get_root().get_node("Main")
+	if main_node:
+		main_node.server_process_projectile_hit.rpc_id(1, get_path(), body.get_path())
 		
-	# Check if the body we hit has a StatsComponent.
-	var stats: StatsComponent = body.get_node_or_null("StatsComponent")
-	if stats:
-		# Instead of dealing damage directly, we send a request to the server (peer ID 1).
-		stats.server_take_damage.rpc_id(1, damage, owner_id)
-
-	# Destroy the projectile on impact.
-	despawn() # Use our new safe despawn method on impact.
-
-# This function safely despawns the projectile.
-func despawn():
-	# SAFETY CHECK: If we're already set to be deleted, don't do it again.
-	if is_queued_for_deletion():
-		return # do nothing to prevent race conditions
-		
-	# If we are the authority (the server), we can destroy the node.
+# function to handle projecile timeout
+func on_timeout():
+	# If we are the server, we can just free ourselves.
 	if is_multiplayer_authority():
 		queue_free()
-	# If we are a client, we must ask the server to destroy it.
-	else:
-		server_request_despawn.rpc_id(1)
+	# Clients don't need to do anything, the server will replicate the deletion.
 
-# --- RPCs ---
-# This RPC receives the client's request.
-@rpc("any_peer", "call_local", "reliable")
-func server_request_despawn():
-	# This code only runs on the server.
-	queue_free()
+# DELETE the old despawn() and server_request_despawn() functions. They are no longer needed.
