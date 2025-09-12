@@ -57,10 +57,9 @@ func take_damage(damage_amount: int) -> void:
 
 	current_health -= damage_amount # decr life
 	
-	# If our owner has a synced_health property, update it.
-	# This triggers the replication to all clients.
-	if get_owner().has_method("set_synced_health"):
-		get_owner().set_synced_health(current_health)
+	# REMOVE THIS BLOCK: We are now syncing current_health directly.
+	# if get_owner().has_method("set_synced_health"):
+	# 	get_owner().set_synced_health(current_health)
 	
 	# Emit the signal every time damage is taken.
 	emit_signal("health_changed", current_health, stats_data.max_health)

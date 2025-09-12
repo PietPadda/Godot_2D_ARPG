@@ -6,20 +6,13 @@ extends CharacterBody2D
 @onready var loot_component: LootComponent = $LootComponent
 @onready var health_bar = $HealthBar
 
-# A synced property for health. The setter will update the UI.
-@export var synced_health: int = 100:
-	set(value):
-		synced_health = value
-		if stats_component and health_bar:
-			stats_component.current_health = value
-			health_bar.update_health(value, stats_component.stats_data.max_health)
+# REMOVE the entire synced_health property. We don't need it anymore.
+# @export var synced_health: int = 100:
+# 	...
 
 func _ready() -> void:
 	# connect signals to functions
-	# REMOVE THIS LINE: We will now rely only on the synced property.
-	# stats_component.health_changed.connect(health_bar.update_health)
 	stats_component.died.connect(_on_death)
-	synced_health = stats_component.stats_data.max_health # We also set the initial health here.
 
 func _on_aggro_radius_body_entered(body: Node2D) -> void:
 	# Don't re-aggro if we're already chasing or attacking.
@@ -32,10 +25,15 @@ func _on_aggro_radius_body_entered(body: Node2D) -> void:
 	state_machine.change_state(States.ENEMY_STATE_NAMES[States.ENEMY.CHASE]) # update state
 	
 # We will use _physics_process to keep the UI in sync with the data.
+# This is now the ONLY logic that controls the health bar.
 func _physics_process(_delta):
 	# Constantly update the health bar with the latest synced value.
 	if stats_component and health_bar:
-		health_bar.update_health(synced_health, stats_component.stats_data.max_health)
+		# Read directly from the now-synced StatsComponent.
+		var current = stats_component.current_health
+		var max_val = stats_component.stats_data.max_health
+		health_bar.update_health(current, max_val)
+		health_bar.visible = (current < max_val)
 	
 # This function is called when our own StatsComponent emits the "died" signal.
 func _on_death(attacker_id: int) -> void:
