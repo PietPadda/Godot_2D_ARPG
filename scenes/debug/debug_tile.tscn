@@ -1,5 +1,11 @@
 [gd_scene format=3 uid="uid://bqwmbhdbdr7sf"]
 
-[node name="DebugTile" type="Polygon2D"]
+[node name="DebugTile" type="Control"]
+z_index = -4096
+layout_mode = 3
+anchors_preset = 0
+mouse_filter = 2
+
+[node name="Polygon2D" type="Polygon2D" parent="."]
 color = Color(0.333333, 0.333333, 1, 0.392157)
 polygon = PackedVector2Array(80, 0, 160, 40, 80, 80, 0, 40)
