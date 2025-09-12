@@ -16,7 +16,8 @@ extends CharacterBody2D
 
 func _ready() -> void:
 	# connect signals to functions
-	stats_component.health_changed.connect(health_bar.update_health)
+	# REMOVE THIS LINE: We will now rely only on the synced property.
+	# stats_component.health_changed.connect(health_bar.update_health)
 	stats_component.died.connect(_on_death)
 	synced_health = stats_component.stats_data.max_health # We also set the initial health here.
 
