@@ -5,9 +5,11 @@ extends Area2D
 var damage: int
 var speed: float
 var owner_id: int # store the ID of the player who fired the projectile.
+var _is_processing_impact = false # flag to prevent multiple impacts
 
 # scene nodes
 @onready var timer: Timer = $Timer
+
 
 func _ready() -> void:
 	# Connect the timer to self-destruct after a few seconds.
@@ -26,8 +28,14 @@ func _physics_process(delta: float) -> void:
 	position += transform.x * speed * delta
 
 func _on_body_entered(body: Node2D) -> void:
+	# If we are already handling an impact, do nothing.
+	if _is_processing_impact:
+		return # do nothing
+	_is_processing_impact = true # otherwise, we are handling an impact
+
 	# SAFETY CHECK: Make sure the body we hit still exists.
 	if not is_instance_valid(body):
+		despawn() # Despawn if we hit an invalid body
 		return # do nothing to prevent race conditions
 		
 	# Check if the body we hit has a StatsComponent.
