@@ -57,6 +57,11 @@ func _physics_process(_delta: float) -> void:
 
 	# If the move action is held down, continuously broadcast the intention to move.
 	if Input.is_action_pressed("move_click"):
-		# Since this is a Node, we ask our parent (the Player, a Node2D)
-		# for the global mouse position.
-		move_to_requested.emit(get_parent().get_global_mouse_position())
+		# Check for a target first, just like in _unhandled_input.
+		var target = targeting_component.get_target_under_mouse()
+		if is_instance_valid(target):
+			# If holding on a target, keep emitting the target request.
+			target_requested.emit(target)
+		else:
+			# If holding on the ground, emit a move request.
+			move_to_requested.emit(get_parent().get_global_mouse_position())
