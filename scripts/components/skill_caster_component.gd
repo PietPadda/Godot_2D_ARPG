@@ -16,17 +16,22 @@ func cast(skill_data: SkillData, target_position: Vector2) -> bool:
 		return false # insufficient mana returns false
 
 	# Instead of spawning, we call the RPC on the server (peer 1).
-	server_request_cast.rpc_id(1, skill_data.resource_path, target_position)
+	# We no longer need to send the skill_path. The server knows what skill we have equipped.
+	server_request_cast.rpc_id(1, target_position)
 	return true
 
 # --- RPCs ---
 # This new RPC function will only run on the server.
 @rpc("any_peer", "call_local", "reliable")
-func server_request_cast(skill_path: String, target_position: Vector2):
+func server_request_cast(target_position: Vector2):
+	# Use the skill data already on this component, don't load from a path.
+	var skill_data = secondary_attack_skill
+	if not skill_data: 
+		return
+		
 	# The server re-validates the mana cost as a security check.
 	# Note: get_owner() here is the server's puppet of the casting player.
 	var caster_stats = get_owner().get_node("StatsComponent")
-	var skill_data = load(skill_path) as SkillData
 	
 	# Server-side validation (prevents cheating)
 	if not stats_component.use_mana(skill_data.mana_cost):
