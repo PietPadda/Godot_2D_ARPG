@@ -30,6 +30,12 @@ func _on_aggro_radius_body_entered(body: Node2D) -> void:
 	chase_state.target = body # set state target
 	state_machine.change_state(States.ENEMY_STATE_NAMES[States.ENEMY.CHASE]) # update state
 	
+# We will use _physics_process to keep the UI in sync with the data.
+func _physics_process(_delta):
+	# Constantly update the health bar with the latest synced value.
+	if stats_component and health_bar:
+		health_bar.update_health(synced_health, stats_component.stats_data.max_health)
+	
 # This function is called when our own StatsComponent emits the "died" signal.
 func _on_death(attacker_id: int) -> void:
 	# Announce the death and pass along our stats data.
