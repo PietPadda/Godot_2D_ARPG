@@ -164,8 +164,10 @@ func server_process_projectile_hit(projectile_path: NodePath, target_path: NodeP
 	# If both are valid, proceed with dealing damage.
 	var stats: StatsComponent = target.get_node_or_null("StatsComponent")
 	if stats:
+		# Get the attacker's ID from the projectile
+		var attacker_id = projectile.owner_id
 		# We deal damage directly because this is all happening on the server. No RPC needed.
-		stats.take_damage(projectile.damage)
+		stats.take_damage(projectile.damage, attacker_id)
 	
 	# The server authoritatively destroys the projectile after the hit is processed.
 	projectile.queue_free()

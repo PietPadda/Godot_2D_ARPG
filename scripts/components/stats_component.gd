@@ -26,7 +26,8 @@ signal gold_changed(total_gold) # Announce when gold total changes.
 @export var current_health: int # entity hp tracker
 @export var current_mana: int # mana tracker
 var is_dead: bool = false # death tracker
-var last_attacker_id: int = 0 # track the last attacker
+# REMOVE this variable, it's no longer needed.
+# var last_attacker_id: int = 0 # track the last attacker
 
 func _ready() -> void:
 	# Ensure a stats resource has been assigned in the editor.
@@ -44,8 +45,9 @@ func _ready() -> void:
 	emit_signal("gold_changed", stats_data.gold) # ready the UI value
 
 # Public function to apply damage to this entity.
+# UPDATE the take_damage function to accept the attacker's ID.
 ## Lose life function
-func take_damage(damage_amount: int) -> void:
+func take_damage(damage_amount: int, attacker_id: int) -> void:
 	# This is a "guard clause". If the entity is already dead,
 	# we stop the function immediately.
 	if is_dead:
@@ -56,11 +58,7 @@ func take_damage(damage_amount: int) -> void:
 		return # early exit
 
 	current_health -= damage_amount # decr life
-	
-	# REMOVE THIS BLOCK: We are now syncing current_health directly.
-	# if get_owner().has_method("set_synced_health"):
-	# 	get_owner().set_synced_health(current_health)
-	
+
 	# Emit the signal every time damage is taken.
 	emit_signal("health_changed", current_health, stats_data.max_health)
 
@@ -69,7 +67,7 @@ func take_damage(damage_amount: int) -> void:
 		current_health = 0 # set dead
 		
 		# Emit the 'died' signal WITH the attacker's ID
-		died.emit(last_attacker_id)
+		emit_signal("died", attacker_id)
 
 # Public function to attempt to use mana. Returns true on success.
 ## Consume Mana function
@@ -146,13 +144,12 @@ func _level_up() -> void:
 	
 # --- RPCs ---
 # This function can be called by any client, but will only run on the server/owner.
+# UPDATE the server_take_damage RPC to pass the ID along.
 ## server deals damage
 @rpc("any_peer", "call_local", "reliable")
 func server_take_damage(damage_amount: int, attacker_id: int):
-	# Store the ID of the miost recent attacker
-	last_attacker_id = attacker_id
-	# The server, upon receiving the request, runs the actual damage logic.
-	take_damage(damage_amount)
+	# This function now just passes the information to the main damage function.
+	take_damage(damage_amount, attacker_id)
 
 ## server add gold
 @rpc("any_peer", "call_local", "reliable")
