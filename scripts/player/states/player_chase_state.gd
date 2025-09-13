@@ -6,8 +6,6 @@ extends PlayerState # Make sure it extends PlayerState
 var target: Node2D
 # We need to track the target's last known tile to avoid spamming the pathfinder.
 var last_target_tile: Vector2i
-# Stack trace counter
-var recalculate_counter = 0
 
 func enter() -> void:
 	print("[ChaseState] ==> ENTER")
@@ -68,22 +66,31 @@ func _process_physics(delta: float) -> void:
 # Gets a new path and starts the movement process.
 func _recalculate_path() -> void:
 	print("[ChaseState] ==> _recalculate_path")
-	# Add a counter to prevent the game from freezing from too many prints.
-	if recalculate_counter > 5:
-		return
-	recalculate_counter += 1
 	
 	if not is_instance_valid(target): 
 		return
 	var start_pos = Grid.world_to_map(player.global_position)
 	var end_pos = Grid.world_to_map(target.global_position)
 	
-	last_target_tile = end_pos
-	var path = Grid.find_path(start_pos, end_pos)
+	# Find a valid, unoccupied adjacent tile to the target
+	var destination_found = false
+	var valid_destination: Vector2i
 	
-	# The state simply tells the component what path to follow.
-	if not path.is_empty():
-		grid_movement_component.move_along_path(path)
+	for tile in Grid.get_adjacent_tiles(end_pos):
+		if Grid.is_tile_vacant(tile):
+			valid_destination = tile
+			destination_found = true
+			break
+			
+	# If we found a valid destination, move there
+	if destination_found:
+		# generate the path
+		last_target_tile = valid_destination
+		var path = Grid.find_path(start_pos, valid_destination)
+		
+		# The state simply tells the component what path to follow.
+		if not path.is_empty():
+			grid_movement_component.move_along_path(path)
 
 # --- Signal Handlers ---
 func _on_move_to_requested(target_position: Vector2) -> void:

@@ -82,6 +82,28 @@ func find_path(start_coord: Vector2i, end_coord: Vector2i) -> PackedVector2Array
 		world_path.append(map_to_world(map_coord as Vector2i))
 		
 	return world_path
+	
+# Returns an array of the four tiles adjacent to the given tile
+func get_adjacent_tiles(tile: Vector2i) -> Array[Vector2i]:
+	var adjacent_tiles: Array[Vector2i] = [] # init
+	adjacent_tiles.append(tile + Vector2i.LEFT)
+	adjacent_tiles.append(tile + Vector2i.RIGHT)
+	adjacent_tiles.append(tile + Vector2i.UP)
+	adjacent_tiles.append(tile + Vector2i.UP + Vector2i.LEFT)
+	adjacent_tiles.append(tile + Vector2i.UP + Vector2i.RIGHT)
+	adjacent_tiles.append(tile + Vector2i.DOWN)
+	adjacent_tiles.append(tile + Vector2i.DOWN + Vector2i.LEFT)
+	adjacent_tiles.append(tile + Vector2i.DOWN + Vector2i.RIGHT)
+	return adjacent_tiles # returns all adjacent tiles
+
+# Checks if a given tile is currently occupied by a character
+func is_tile_vacant(tile: Vector2i) -> bool:
+	# This is a simplified check. In a real game, you'd want to have a more
+	# robust system for tracking occupied tiles.
+	for body in get_tree().get_nodes_in_group("characters"):
+		if Grid.world_to_map(body.global_position) == tile:
+			return false
+	return true
 
 # Converts a world position (like a mouse click) to a map grid coordinate.
 func world_to_map(world_position: Vector2) -> Vector2i:
