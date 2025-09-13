@@ -135,6 +135,10 @@ func _on_game_state_changed(new_state: EventBus.GameState) -> void:
 		if movement_component:
 			movement_component.stop()
 			
+func check_fsm_status():
+	print("--- FSM STATUS CHECK ---")
+	print("Is StateMachine processing physics? ", state_machine.is_physics_processing())
+			
 # -- Remote Procedure Calls (RPCs) ---
 @rpc("any_peer", "call_local")
 func award_xp_rpc(amount: int):

@@ -34,7 +34,8 @@ func _ready() -> void:
 	# Create the timer in code to keep the component self-contained
 	stuck_timer = Timer.new()
 	stuck_timer.wait_time = STUCK_CHECK_INTERVAL
-	stuck_timer.one_shot = false # The timer will run repeatedly
+	# Make the timer a one-shot. It will only fire once unless we restart it.
+	stuck_timer.one_shot = true
 	stuck_timer.timeout.connect(_on_stuck_timer_timeout)
 	add_child(stuck_timer)
 
@@ -115,3 +116,5 @@ func _on_stuck_timer_timeout() -> void:
 	else:
 		# If we have moved, update our last known position for the next check.
 		last_position = character_body.global_position
+		# and retart the one-shot timer for the next check.
+		stuck_timer.start()
