@@ -21,8 +21,7 @@ func enter() -> void:
 	player.get_node("AnimationComponent").play_animation("Move")
 	
 	# Connect to signals for interruption and movement logic
-	# REMOVE THIS LINE: The chase state doesn't need to handle being stuck.
-	# grid_movement_component.path_stuck.connect(_recalculate_path) 
+	grid_movement_component.path_stuck.connect(_recalculate_path) # Calculate the initial path to start the chase.
 	input_component.move_to_requested.connect(_on_move_to_requested)
 	input_component.target_requested.connect(_on_target_requested)
 	input_component.cast_requested.connect(_on_cast_requested)
@@ -31,9 +30,9 @@ func enter() -> void:
 
 func exit() -> void:
 	print("EXITING CHASE STATE!")
-	# REMOVE THIS BLOCK: We no longer need to disconnect from a signal we're not connected to.
-	# if grid_movement_component.path_stuck.is_connected(_recalculate_path):
-	# 	grid_movement_component.path_stuck.disconnect(_recalculate_path)
+	# Disconnect from all signals for clean state transitions
+	if grid_movement_component.path_stuck.is_connected(_recalculate_path):
+		grid_movement_component.path_stuck.disconnect(_recalculate_path)
 	input_component.move_to_requested.disconnect(_on_move_to_requested)
 	input_component.target_requested.disconnect(_on_target_requested)
 	input_component.cast_requested.disconnect(_on_cast_requested)
