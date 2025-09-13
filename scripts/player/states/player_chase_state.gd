@@ -22,7 +22,8 @@ func enter() -> void:
 	
 	# Connect to signals for interruption and movement logic
 	grid_movement_component.path_stuck.connect(_recalculate_path) # Calculate the initial path to start the chase.
-	input_component.move_to_requested.connect(_on_move_to_requested)
+	# THE FIX: REMOVE THIS LINE. The Chase state should not be interrupted by clicks on the ground.
+	# input_component.move_to_requested.connect(_on_move_to_requested)
 	input_component.target_requested.connect(_on_target_requested)
 	input_component.cast_requested.connect(_on_cast_requested)
 	print("RECALC CHASE PATH!")
@@ -33,7 +34,8 @@ func exit() -> void:
 	# Disconnect from all signals for clean state transitions
 	if grid_movement_component.path_stuck.is_connected(_recalculate_path):
 		grid_movement_component.path_stuck.disconnect(_recalculate_path)
-	input_component.move_to_requested.disconnect(_on_move_to_requested)
+	# Also remove the corresponding disconnect.
+	# input_component.move_to_requested.disconnect(_on_move_to_requested)
 	input_component.target_requested.disconnect(_on_target_requested)
 	input_component.cast_requested.disconnect(_on_cast_requested)
 	

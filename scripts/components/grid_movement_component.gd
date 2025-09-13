@@ -106,7 +106,7 @@ func _physics_process(_delta: float) -> void:
 	character_body.velocity = direction * move_speed
 	character_body.move_and_slide()
 	
-# NEW: This function runs every STUCK_CHECK_INTERVAL seconds
+# This function runs every STUCK_CHECK_INTERVAL seconds
 func _on_stuck_timer_timeout() -> void:
 	# If we haven't moved far enough since the last check...
 	if character_body.global_position.distance_to(last_position) < STUCK_DISTANCE_THRESHOLD:
