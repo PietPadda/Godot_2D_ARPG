@@ -83,17 +83,14 @@ func find_path(start_coord: Vector2i, end_coord: Vector2i) -> PackedVector2Array
 		
 	return world_path
 	
-# Returns an array of the four tiles adjacent to the given tile
+# Returns an array of the four cardinal tiles adjacent to the given tile.
+# Using 4 directions is more stable for grid pathfinding than 8.
 func get_adjacent_tiles(tile: Vector2i) -> Array[Vector2i]:
 	var adjacent_tiles: Array[Vector2i] = [] # init
+	adjacent_tiles.append(tile + Vector2i.UP)
+	adjacent_tiles.append(tile + Vector2i.DOWN)
 	adjacent_tiles.append(tile + Vector2i.LEFT)
 	adjacent_tiles.append(tile + Vector2i.RIGHT)
-	adjacent_tiles.append(tile + Vector2i.UP)
-	adjacent_tiles.append(tile + Vector2i.UP + Vector2i.LEFT)
-	adjacent_tiles.append(tile + Vector2i.UP + Vector2i.RIGHT)
-	adjacent_tiles.append(tile + Vector2i.DOWN)
-	adjacent_tiles.append(tile + Vector2i.DOWN + Vector2i.LEFT)
-	adjacent_tiles.append(tile + Vector2i.DOWN + Vector2i.RIGHT)
 	print("[GridManager] ==> adjacent tiles" % adjacent_tiles)
 	return adjacent_tiles # returns all adjacent tiles
 
@@ -102,10 +99,11 @@ func is_tile_vacant(tile: Vector2i) -> bool:
 	print("[GridManager] ==> checking if tile is vacant")
 	# This is a simplified check. In a real game, you'd want to have a more
 	# robust system for tracking occupied tiles.
-	for body in get_tree().get_nodes_in_group("enemies"):
-		if Grid.world_to_map(body.global_position) == tile:
-			print("[GridManager] ==> tile is NOT vacant")
-			return false
+	for body in get_tree().get_nodes_in_group("characters"):
+		if body.has_method("get_node_or_null") and is_instance_valid(body): # Safety check
+			if Grid.world_to_map(body.global_position) == tile:
+				print("[GridManager] ==> tile is NOT vacant")
+				return false
 	print("[GridManager] ==> tile is VACANT! :)")
 	return true
 
