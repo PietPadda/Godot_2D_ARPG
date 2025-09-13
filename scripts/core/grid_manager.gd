@@ -94,15 +94,19 @@ func get_adjacent_tiles(tile: Vector2i) -> Array[Vector2i]:
 	adjacent_tiles.append(tile + Vector2i.DOWN)
 	adjacent_tiles.append(tile + Vector2i.DOWN + Vector2i.LEFT)
 	adjacent_tiles.append(tile + Vector2i.DOWN + Vector2i.RIGHT)
+	print("[GridManager] ==> adjacent tiles" % adjacent_tiles)
 	return adjacent_tiles # returns all adjacent tiles
 
 # Checks if a given tile is currently occupied by a character
 func is_tile_vacant(tile: Vector2i) -> bool:
+	print("[GridManager] ==> checking if tile is vacant")
 	# This is a simplified check. In a real game, you'd want to have a more
 	# robust system for tracking occupied tiles.
-	for body in get_tree().get_nodes_in_group("characters"):
+	for body in get_tree().get_nodes_in_group("enemies"):
 		if Grid.world_to_map(body.global_position) == tile:
+			print("[GridManager] ==> tile is NOT vacant")
 			return false
+	print("[GridManager] ==> tile is VACANT! :)")
 	return true
 
 # Converts a world position (like a mouse click) to a map grid coordinate.
