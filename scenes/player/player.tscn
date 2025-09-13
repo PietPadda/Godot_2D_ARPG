@@ -209,7 +209,6 @@ stats_component = NodePath("../../StatsComponent")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 texture = ExtResource("1_8afob")
-script = ExtResource("5_5gtgg")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("CircleShape2D_yj68g")
