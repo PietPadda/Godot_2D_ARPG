@@ -51,7 +51,8 @@ func _process_physics(delta: float) -> void:
 	var attack_range = stats_component.get_total_stat("range")	
 	print("[ChaseState] Physics: Distance=%d, Range=%d" % [distance, attack_range])
 
-	if distance <= attack_range:
+	# Add a small buffer to the attack range to make it more lenient
+	if distance <= attack_range + Constants.PLAYER_ATTACK_RANGE_BUFFER:
 		print("[ChaseState] In range! Switching to AttackState.")
 		var attack_state: PlayerAttackState = state_machine.get_state(States.PLAYER.ATTACK)
 		attack_state.target = target
