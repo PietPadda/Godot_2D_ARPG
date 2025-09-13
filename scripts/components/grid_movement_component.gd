@@ -38,10 +38,12 @@ func _ready() -> void:
 	stuck_timer.one_shot = true
 	stuck_timer.timeout.connect(_on_stuck_timer_timeout)
 	add_child(stuck_timer)
+	print("[GridMovement] Ready.")
 
 # Public API
 # Starts moving the character along a given path.
 func move_along_path(path: PackedVector2Array) -> void:
+	print("[GridMovement] ==> move_along_path called with %d points." % path.size())
 	# If the new path is empty, it's a command to stop.
 	if path.is_empty():
 		stop()
@@ -62,6 +64,7 @@ func move_along_path(path: PackedVector2Array) -> void:
 
 # Stops all current movement immediately.
 func stop() -> void:
+	print("[GridMovement] ==> stop called.")
 	move_path.clear() # clear the current path
 	is_moving = false # set to no longer moving
 	character_body.velocity = Vector2.ZERO # Ensure physics velocity is also stopped
@@ -72,6 +75,7 @@ func stop() -> void:
 func _set_next_target() -> bool:
 	# if move path is finished
 	if move_path.is_empty():
+		print("[GridMovement] Path empty. Finishing movement.")
 		is_moving = false
 		character_body.velocity = Vector2.ZERO
 		stuck_timer.stop() # NEW: Stop the timer when the path is done
@@ -85,6 +89,7 @@ func _set_next_target() -> bool:
 	# NEW: When we get a new target, start the stuck timer
 	last_position = character_body.global_position
 	stuck_timer.start()
+	print("[GridMovement] New target set. is_moving=true. Stuck timer started.")
 	
 	return true # continue moving (bool allows func call)
 	
@@ -94,8 +99,10 @@ func _physics_process(_delta: float) -> void:
 
 	# Check if we've arrived at the current waypoint.
 	if character_body.global_position.distance_to(current_target_pos) < STOPPING_DISTANCE:
+		print("[GridMovement] Reached waypoint.")
 		# If we've arrived, try to get the next waypoint.
 		if not _set_next_target():
+			print("[GridMovement] No more waypoints. Emitting path_finished.")
 			# If there are no more waypoints, the path is finished.
 			emit_signal("path_finished")
 		return
@@ -108,8 +115,12 @@ func _physics_process(_delta: float) -> void:
 	
 # This function runs every STUCK_CHECK_INTERVAL seconds
 func _on_stuck_timer_timeout() -> void:
+	var dist = character_body.global_position.distance_to(last_position)
+	print("[GridMovement] Stuck timer timeout. Distance moved: ", dist)
+	
 	# If we haven't moved far enough since the last check...
-	if character_body.global_position.distance_to(last_position) < STUCK_DISTANCE_THRESHOLD:
+	if dist < STUCK_DISTANCE_THRESHOLD:
+		print("[GridMovement] STUCK! Emitting path_stuck.")
 		# ...we are stuck. Stop everything and announce it.
 		stop()
 		emit_signal("path_stuck")
@@ -118,3 +129,4 @@ func _on_stuck_timer_timeout() -> void:
 		last_position = character_body.global_position
 		# and retart the one-shot timer for the next check.
 		stuck_timer.start()
+		print("[GridMovement] Not stuck. Restarting timer.")
