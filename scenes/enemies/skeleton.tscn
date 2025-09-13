@@ -67,7 +67,7 @@ properties/1/path = NodePath("StatsComponent:current_health")
 properties/1/spawn = true
 properties/1/replication_mode = 2
 
-[node name="Skeleton" type="CharacterBody2D" groups=["enemies"]]
+[node name="Skeleton" type="CharacterBody2D" groups=["characters", "enemies"]]
 collision_layer = 2
 collision_mask = 7
 motion_mode = 1

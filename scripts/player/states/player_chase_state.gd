@@ -16,9 +16,12 @@ func enter() -> void:
 	
 	player.get_node("AnimationComponent").play_animation("Move")
 	
-	# Connect to signals
+	# Connect to ALL necessary signals for responsive control.
 	grid_movement_component.path_finished.connect(_on_path_finished) # Key change!
+	# these connections allow the player to interrupt the chase.
+	input_component.move_to_requested.connect(_on_move_to_requested)
 	input_component.target_requested.connect(_on_target_requested)
+	input_component.cast_requested.connect(_on_cast_requested)
 	
 	_recalculate_path() # Start the chase
 
@@ -27,8 +30,12 @@ func exit() -> void:
 	# Disconnect from all signals for clean state transitions
 	if grid_movement_component.path_finished.is_connected(_recalculate_path):
 		grid_movement_component.path_finished.disconnect(_recalculate_path)
+	if input_component.move_to_requested.is_connected(_on_move_to_requested):
+		input_component.move_to_requested.disconnect(_on_move_to_requested)
 	if input_component.target_requested.is_connected(_on_target_requested):
 		input_component.target_requested.disconnect(_on_target_requested)
+	if input_component.cast_requested.is_connected(_on_cast_requested):
+		input_component.cast_requested.disconnect(_on_cast_requested)
 
 	# Crucial cleanup to stop movement when exiting the state.
 	grid_movement_component.stop()
