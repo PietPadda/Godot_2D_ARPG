@@ -25,6 +25,10 @@ func cast(skill_data: SkillData, target_position: Vector2) -> bool:
 	if not stats_component.use_mana(skill_data.mana_cost):
 		print("Not enough mana!")
 		return false # insufficient mana returns false
+	
+	# --- DEBUG: Print the duration we are starting the timer with. ---
+	if get_parent().is_in_group("player"):
+		print("SKILL CASTER: Starting timer with duration: %f" % skill_data.cast_time)
 		
 	# Start the timer using the cast_time from our data resource.
 	duration_timer.start(skill_data.cast_time)
@@ -37,6 +41,9 @@ func cast(skill_data: SkillData, target_position: Vector2) -> bool:
 # -- Signal Handlers --
 # This function will be called when the timer ends.
 func on_timer_timeout():
+	# --- DEBUG: Print when the timer actually finishes. ---
+	if get_parent().is_in_group("player"):
+		print("SKILL CASTER: Timer finished. Emitting 'cast_finished'.")
 	emit_signal("cast_finished")
 
 # --- RPCs ---
