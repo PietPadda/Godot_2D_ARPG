@@ -16,7 +16,7 @@ func enter() -> void:
 func exit() -> void:
 	grid_movement_component.stop()
 	
-func process_physics(delta: float) -> void:
+func _physics_process(delta: float) -> void:
 	# First, check if our target is still valid (hasn't been defeated, etc.).
 	if not is_instance_valid(target): # Use the shared function from the base class
 		state_machine.change_state(States.ENEMY_STATE_NAMES[States.ENEMY.IDLE]) # change state

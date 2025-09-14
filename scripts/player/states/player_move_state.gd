@@ -35,6 +35,9 @@ func exit() -> void:
 	input_component.move_to_requested.disconnect(_on_move_to_requested)
 	input_component.target_requested.disconnect(_on_target_requested)
 	input_component.cast_requested.disconnect(_on_cast_requested)
+	
+func _physics_process(delta: float) -> void:
+	pass
 
 # ---Signal Handlers---
 func _on_path_finished() -> void:

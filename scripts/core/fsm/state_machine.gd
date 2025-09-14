@@ -34,23 +34,12 @@ func _unhandled_input(event: InputEvent) -> void:
 		current_state.process_input(event)
 
 func _physics_process(delta: float) -> void:
-	if get_parent().is_in_group("player"):
-		# --- DEBUG TRACE 4 ---
-		var state_name = "null"
-		if current_state:
-			state_name = current_state.name
-		print("TRACE 4: StateMachine is in _physics_process. Current state: %s" % state_name)
-	
 	# Delegate physics processing to the active state.
 	if current_state:
-		current_state.process_physics(delta)
+		current_state._physics_process(delta)
 
 # The main function for changing states.
 func change_state(new_state_name: String) -> void:
-	if get_parent().is_in_group("player"):
-		# --- DEBUG TRACE 2 ---
-		print("TRACE 2: StateMachine received 'change_state' request for: %s" % new_state_name)
-	
 	var new_state = states.get(new_state_name.to_lower())
 	if not new_state: # edge case if not a valid state
 		push_warning("StateMachine does not have a state named: %s" % new_state_name)

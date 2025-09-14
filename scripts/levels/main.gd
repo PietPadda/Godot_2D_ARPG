@@ -126,9 +126,6 @@ func _spawn_initial_enemies():
 		
 # handle the died signal and send the RPC
 func _on_enemy_died(stats_data: CharacterStats, attacker_id: int):
-	# DEBUG: See if the server is even hearing the event.
-	print("[SERVER] _on_enemy_died triggered for attacker: ", attacker_id)
-	
 	# This function will only ever run on the server, where the signal is emitted.
 	# First, check if the attacker is a valid player (not 0 or another enemy).
 	if attacker_id == 0:
@@ -139,15 +136,11 @@ func _on_enemy_died(stats_data: CharacterStats, attacker_id: int):
 	var player_node = get_node_or_null("PlayerContainer/" + str(attacker_id))
 	
 	if is_instance_valid(player_node):
-		# DEBUG: Confirm we found the player and are sending the RPC.
-		print("[SERVER] Found player node at path: ", player_path, ". Sending XP RPC.")
-		
 		var xp_reward = stats_data.xp_reward
 		# We found the player! Call the RPC on them to grant the XP award.
 		player_node.award_xp_rpc.rpc_id(attacker_id, xp_reward)
 	else:
-		# DEBUG: This will tell us if the lookup is failing.
-		print("[SERVER] FAILED to find player node at path: ", player_path)
+		pass
 
 # --- RPCs ---
 @rpc("any_peer", "call_local", "reliable")

@@ -33,8 +33,6 @@ func _unhandled_input(event: InputEvent) -> void:
 		var mouse_pos = get_parent().get_global_mouse_position()
 		var target = targeting_component.get_target_under_mouse()
 		if is_instance_valid(target):
-			# --- DEBUG TRACE 1 ---
-			print("TRACE 1: InputComponent detected target. Emitting 'target_requested'.")
 			# An enemy or interactable was clicked.
 			target_requested.emit(target)
 		else:
