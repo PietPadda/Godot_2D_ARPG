@@ -11,6 +11,7 @@ properties/0/spawn = false
 properties/0/replication_mode = 1
 
 [node name="LootDrop" type="Area2D"]
+visible = false
 collision_layer = 8
 collision_mask = 4
 script = ExtResource("1_8qepv")
