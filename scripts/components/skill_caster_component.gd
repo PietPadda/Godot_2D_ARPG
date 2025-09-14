@@ -2,11 +2,22 @@
 class_name SkillCasterComponent
 extends Node
 
+# Add a signal to announce when the cast time is over.
+signal cast_finished
+
 # This creates a dedicated slot in the Inspector for our skill.
 @export var secondary_attack_skill: SkillData
 
 # scene nodes
 @onready var stats_component: StatsComponent = get_owner().get_node("StatsComponent") # sibling
+# Add a timer to manage the cast duration.
+@onready var duration_timer: Timer = Timer.new()
+
+func _ready():
+	# Configure the timer.
+	duration_timer.one_shot = true
+	duration_timer.timeout.connect(on_timer_timeout)
+	add_child(duration_timer)
 
 # Tries to cast a skill. Returns true on success.
 func cast(skill_data: SkillData, target_position: Vector2) -> bool:
@@ -14,11 +25,19 @@ func cast(skill_data: SkillData, target_position: Vector2) -> bool:
 	if not stats_component.use_mana(skill_data.mana_cost):
 		print("Not enough mana!")
 		return false # insufficient mana returns false
+		
+	# Start the timer using the cast_time from our data resource.
+	duration_timer.start(skill_data.cast_time)
 
 	# Instead of spawning, we call the RPC on the server (peer 1).
 	# We no longer need to send the skill_path. The server knows what skill we have equipped.
 	server_request_cast.rpc_id(1, target_position)
 	return true
+
+# -- Signal Handlers --
+# This function will be called when the timer ends.
+func on_timer_timeout():
+	emit_signal("cast_finished")
 
 # --- RPCs ---
 # This new RPC function will only run on the server.
