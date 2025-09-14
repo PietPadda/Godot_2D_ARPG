@@ -6,8 +6,13 @@ extends PlayerState # Make sure it extends PlayerState
 var target: Node2D
 # We need to track the target's last known tile to avoid spamming the pathfinder.
 var last_target_tile: Vector2i
+# Add a flag to ensure this state only makes one decision per entry.
+var _has_made_decision: bool = false
 
 func enter() -> void:
+	# Reset the flag every time we enter the state.
+	_has_made_decision = false
+	
 	# On entering, immediately start moving towards the target.
 	if not is_instance_valid(target):
 		state_machine.change_state(States.PLAYER_STATE_NAMES[States.PLAYER.IDLE]) # just idle if invalid target
@@ -41,17 +46,23 @@ func exit() -> void:
 	grid_movement_component.stop()
 
 func _physics_process(delta: float) -> void:
+	# Wrap the entire logic in a check against our flag.
+	if _has_made_decision:
+		return # We've already told the FSM what to do. Do nothing.
+		
 	# First, check if our target still exists.
 	if not is_instance_valid(target):
+		_has_made_decision = true # Mark our decision as made.
 		state_machine.change_state(States.PLAYER_STATE_NAMES[States.PLAYER.IDLE]) # just idle if invalid target
 		return # early exit
 	
 	var distance = player.global_position.distance_to(target.global_position)
 	var attack_range = stats_component.get_total_stat("range")
 
-	# THE FIX: This is now our highest priority, checked every frame.
+	# This is now our highest priority, checked every frame.
 	# Are we within attack range RIGHT NOW?
 	if distance <= attack_range:
+		_has_made_decision = true # Mark our decision as made.
 		grid_movement_component.stop() # Immediately stop all movement.
 		var attack_state: PlayerAttackState = state_machine.get_state(States.PLAYER.ATTACK)
 		attack_state.target = target
