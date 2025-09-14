@@ -74,8 +74,14 @@ func _physics_process(_delta: float) -> void:
 		
 	# Check if we've arrived at the current waypoint.
 	if character_body.global_position.distance_to(current_target_pos) < STOPPING_DISTANCE:
+		if get_parent().is_in_group("player"):
+			print("[GridMovement] Reached waypoint.")
+			
 		# If we've arrived, try to get the next waypoint.
 		if not _set_next_target():
+			# DEBUG: Add a print statement right before the signal emission.
+			if get_parent().is_in_group("player"):
+				print("!!! GRID MOVEMENT FINISHED: EMITTING path_finished SIGNAL !!!")
 			# If there are no more waypoints, the path is finished.
 			emit_signal("path_finished")
 		return

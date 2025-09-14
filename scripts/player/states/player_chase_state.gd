@@ -59,7 +59,8 @@ func _process_physics(delta: float) -> void:
 # --- Helper Functions ---
 # Gets a new path and starts the movement process.
 func _recalculate_path() -> void:
-	print("[ChaseState] ==> _recalculate_path")
+	# DEBUG: Add a print statement to see how often this is called.
+	print("--- ChaseState: RECALCULATING PATH ---")
 	
 	if not is_instance_valid(target): 
 		return
