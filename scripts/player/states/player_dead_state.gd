@@ -10,5 +10,8 @@ func enter() -> void:
 	var collision_shape = player.get_node("CollisionShape2D")
 	collision_shape.disabled = true
 
-# By leaving process_input and process_physics empty,
+# By leaving process_input and physics_process empty,
 # we prevent the player from doing anything while dead.
+
+func _physics_process(delta: float) -> void:
+	pass

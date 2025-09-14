@@ -11,6 +11,6 @@ equipment_slot = 1
 item_type = 0
 value = 1
 stat_modifiers = {
-"damage": 15.0
+"damage": 10.0
 }
 metadata/_custom_type_script = "uid://dsidci2l4yr4r"

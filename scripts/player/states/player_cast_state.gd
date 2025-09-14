@@ -20,3 +20,6 @@ func enter() -> void:
 	# Check if the state is still active before changing.
 	if state_machine.current_state == self:
 		state_machine.change_state(States.PLAYER_STATE_NAMES[States.PLAYER.IDLE])
+		
+func _physics_process(delta: float) -> void:
+	pass

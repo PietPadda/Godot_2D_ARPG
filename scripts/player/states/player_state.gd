@@ -26,3 +26,6 @@ func _on_cast_requested(skill_slot: int, target_position: Vector2) -> void:
 	cast_state.skill_to_cast = skill_to_cast # set the skill to cast
 	cast_state.cast_target_position = player.get_global_mouse_position() # set target
 	state_machine.change_state(States.PLAYER_STATE_NAMES[States.PLAYER.CAST]) # change the state with skill and target
+
+func _physics_process(delta: float) -> void:
+	pass

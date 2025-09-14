@@ -15,7 +15,6 @@ func enter() -> void:
 	input_component.cast_requested.connect(_on_cast_requested)
 
 func exit() -> void:
-	print("Player exiting Idle State")
 	# IMPORTANT: Disconnect from the signals when we leave this state to prevent
 	# listening for input when we're not supposed to (e.g., while moving or attacking).
 	input_component.move_to_requested.disconnect(_on_move_to_requested)
