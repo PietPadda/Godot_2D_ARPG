@@ -14,6 +14,8 @@ signal mana_changed(current_mana, max_mana) # mana update
 signal xp_changed(level, current_xp, xp_to_next_level)
 ## gold update signal
 signal gold_changed(total_gold) # Announce when gold total changes.
+## one or more stats changed signal
+signal stats_changed
 
 # Link to the resource file that holds the base stats.
 @export var stats_data: CharacterStats
@@ -87,6 +89,10 @@ func add_xp(amount: int) -> void:
 	# Check if we have enough XP to level up.
 	while stats_data.current_xp >= stats_data.xp_to_next_level:
 		_level_up() # level up ONLY if more than req
+		
+		# If we are the client with authority, tell the server we have leveled up.
+		if get_owner().is_multiplayer_authority():
+			server_level_up.rpc_id(1, stats_data.level)
 
 # Public function to add gold to the player's stats.
 ## add gold to player
@@ -131,16 +137,23 @@ func _level_up() -> void:
 	
 	# Increase the XP requirement for the next level (static addition for now)
 	stats_data.xp_to_next_level = int(stats_data.xp_to_next_level + 100)
-
-	# Apply stat gains.
-	stats_data.max_health += 25 # hp increase
-	stats_data.max_mana += 20 # mana increase
 	emit_signal("xp_changed", stats_data.level, stats_data.current_xp, stats_data.xp_to_next_level)
 	
-	current_health = stats_data.max_health # Heal to full on level up.
-	current_mana = stats_data.max_mana # Restore to full on level up.
+	# Call new helper function to apply the stat gains.
+	_apply_stat_gains_for_level()
+	
+	current_health = stats_data.max_health # Heal to full.
+	current_mana = stats_data.max_mana # Restore to full.
 	# Announce the stats changes so the UI updates.
 	refresh_stats()
+	
+# reusable function for calculating stat gains.
+## Applies stat increases based on the current level.
+func _apply_stat_gains_for_level():
+	# This is the same logic that was in _level_up.
+	stats_data.max_health += 25
+	stats_data.max_mana += 20
+	# We can add more stat increases here in the future.
 	
 # --- RPCs ---
 # This function can be called by any client, but will only run on the server/owner.
@@ -155,3 +168,24 @@ func server_take_damage(damage_amount: int, attacker_id: int):
 @rpc("any_peer", "call_local", "reliable")
 func client_add_gold(amount: int):
 	add_gold(amount)
+	
+# This RPC is called by a client to inform the server that they have leveled up.
+@rpc("any_peer", "call_local", "reliable")
+func server_level_up(new_level: int):
+	# This function only runs on the server.
+	# get_owner() is the server's puppet for the client who called this RPC.
+	print("SERVER: Received level up notice from a client. They are now level %d." % new_level)
+	
+	# Update the puppet's stats data.
+	stats_data.level = new_level
+	
+	# Recalculate derived stats like max health and mana on the server.
+	_apply_stat_gains_for_level()
+	
+	# Refill health/mana on level up, which is a common RPG mechanic.
+	current_health = stats_data.max_health
+	current_mana = stats_data.max_mana
+	
+	# We can emit the stats_changed signal on the server as well,
+	# in case any server-side logic needs to react to the puppet's new stats.
+	stats_changed.emit()
