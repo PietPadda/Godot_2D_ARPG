@@ -91,7 +91,6 @@ func get_adjacent_tiles(tile: Vector2i) -> Array[Vector2i]:
 	adjacent_tiles.append(tile + Vector2i.DOWN)
 	adjacent_tiles.append(tile + Vector2i.LEFT)
 	adjacent_tiles.append(tile + Vector2i.RIGHT)
-	print("[GridManager] ==> adjacent tiles" % adjacent_tiles)
 	return adjacent_tiles # returns all adjacent tiles
 
 # Checks if a given tile is currently occupied by a character
