@@ -21,13 +21,17 @@ var is_moving: bool = false
 var current_target_pos: Vector2
 # We'll set this back to a small, reasonable value for precise point-to-point movement.
 const STOPPING_DISTANCE: float = 6.0
+# We need a reference to the actual chase target, not just the waypoints.
+# We'll add a variable to hold it.
+var chase_target: Node2D
 
 func _ready() -> void:
 	pass
 
 # Public API
 # Starts moving the character along a given path.
-func move_along_path(path: PackedVector2Array) -> void:
+func move_along_path(path: PackedVector2Array, new_chase_target: Node2D = null) -> void:
+	chase_target = new_chase_target
 	# If the new path is empty, it's a command to stop.
 	if path.is_empty():
 		stop()
@@ -71,6 +75,15 @@ func _set_next_target() -> bool:
 func _physics_process(_delta: float) -> void:
 	if not is_moving:
 		return
+	
+	# THE FIX: We add a new, higher-priority check.
+	# If we have a chase_target and are within its attack range, our job is done.
+	if is_instance_valid(chase_target):
+		var attack_range = stats_component.get_total_stat("range")
+		if character_body.global_position.distance_to(chase_target.global_position) <= attack_range:
+			stop() # Stop moving.
+			emit_signal("path_finished") # Announce that we are finished.
+			return
 		
 	# Check if we've arrived at the current waypoint.
 	if character_body.global_position.distance_to(current_target_pos) < STOPPING_DISTANCE:

@@ -91,7 +91,8 @@ func _recalculate_path() -> void:
 		
 		# The state simply tells the component what path to follow.
 		if not path.is_empty():
-			grid_movement_component.move_along_path(path)
+			# Pass the actual target to the movement component.
+			grid_movement_component.move_along_path(path, target)
 
 # --- Signal Handlers ---
 func _on_move_to_requested(target_position: Vector2) -> void:
@@ -99,25 +100,15 @@ func _on_move_to_requested(target_position: Vector2) -> void:
 	move_state.destination_tile = Grid.world_to_map(target_position)
 	state_machine.change_state(States.PLAYER_STATE_NAMES[States.PLAYER.MOVE])
 	
-# THIS is our new logic gate. It only runs when movement is complete.
 func _on_path_finished():
-	# Check if the target is still valid
-	if not is_instance_valid(target):
-		state_machine.change_state(States.PLAYER_STATE_NAMES[States.PLAYER.IDLE])
-		return
-
-	var distance = player.global_position.distance_to(target.global_position)
-	var attack_range = stats_component.get_total_stat("range")
-	var distleft = distance - attack_range
-
-	if distance <= attack_range + Constants.PLAYER_ATTACK_RANGE_BUFFER:
-		# We're in range! Time to attack.
-		var attack_state: PlayerAttackState = state_machine.get_state(States.PLAYER.ATTACK)
-		attack_state.target = target
-		state_machine.change_state(States.PLAYER_STATE_NAMES[States.PLAYER.ATTACK])
-	else:
-		# We've arrived, but the target has moved out of range. Recalculate.
+	# If the path finishes and we are STILL not in range (checked by _process_physics),
+	# it means the target has moved. We should try to find a new path.
+	# We'll add a validity check here as a safeguard.
+	if is_instance_valid(target):
 		_recalculate_path()
+	else:
+		# If the target is gone, just go idle.
+		state_machine.change_state(States.PLAYER_STATE_NAMES[States.PLAYER.IDLE])
 
 func _on_target_requested(new_target: Node2D) -> void:
 	if new_target != self.target:
