@@ -40,6 +40,15 @@ func _physics_process(delta: float) -> void:
 
 # The main function for changing states.
 func change_state(new_state_name: String) -> void:
+	# --- DEBUG TRACE ---
+	# We will log every state change to find the source of our interruption.
+	var old_state_name = "null"
+	if current_state:
+		old_state_name = current_state.name
+	
+	if get_parent().is_in_group("player"):
+		print("!!! STATE CHANGE TRIGGERED !!! From: '%s' -> To: '%s'" % [old_state_name, new_state_name])
+		
 	var new_state = states.get(new_state_name.to_lower())
 	if not new_state: # edge case if not a valid state
 		push_warning("StateMachine does not have a state named: %s" % new_state_name)
