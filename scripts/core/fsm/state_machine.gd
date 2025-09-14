@@ -45,9 +45,14 @@ func change_state(new_state_name: String) -> void:
 	var old_state_name = "null"
 	if current_state:
 		old_state_name = current_state.name
-	
-	if get_parent().is_in_group("player"):
-		print("!!! STATE CHANGE TRIGGERED !!! From: '%s' -> To: '%s'" % [old_state_name, new_state_name])
+
+	# --- NEW DEBUG TRACE: Find the source of the interruption ---
+	if old_state_name and (old_state_name == "Attack" or old_state_name == "Cast"):
+		if get_parent().is_in_group("player"):
+			print("--- TRACE: Forcibly exiting Attack or Cast state. Call stack: ---")
+			# get_stack() returns an array of dictionaries representing the call stack.
+			for frame in get_stack():
+				print("  - Function '%s' in script '%s' at line %s" % [frame.function, frame.source, frame.line])
 		
 	var new_state = states.get(new_state_name.to_lower())
 	if not new_state: # edge case if not a valid state
