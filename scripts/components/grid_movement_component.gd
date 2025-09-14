@@ -20,7 +20,7 @@ var is_moving: bool = false
 # We'll store the active target here.
 var current_target_pos: Vector2
 # We also need the physical stopping distance again
-const STOPPING_DISTANCE: float = 6.0
+const STOPPING_DISTANCE: float = 80.0
 
 func _ready() -> void:
 	pass
