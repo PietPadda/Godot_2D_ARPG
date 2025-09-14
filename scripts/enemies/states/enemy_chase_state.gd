@@ -11,15 +11,9 @@ func enter() -> void:
 		state_machine.change_state(States.ENEMY_STATE_NAMES[States.ENEMY.IDLE])
 		return
 		
-	#animation_component.play_animation("Move") # Assuming enemy has a "Move" animation
-	# Listen for the stuck signal
-	grid_movement_component.path_stuck.connect(_recalculate_path)
 	_recalculate_path()
 
 func exit() -> void:
-	# NEW: Disconnect from the stuck signal
-	if grid_movement_component.path_stuck.is_connected(_recalculate_path):
-		grid_movement_component.path_stuck.disconnect(_recalculate_path)
 	grid_movement_component.stop()
 	
 func process_physics(delta: float) -> void:

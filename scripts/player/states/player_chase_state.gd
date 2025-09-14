@@ -95,6 +95,7 @@ func _on_move_to_requested(target_position: Vector2) -> void:
 	
 # THIS is our new logic gate. It only runs when movement is complete.
 func _on_path_finished():
+	print("[ChaseState] Path finished.")
 	# Check if the target is still valid
 	if not is_instance_valid(target):
 		state_machine.change_state(States.PLAYER_STATE_NAMES[States.PLAYER.IDLE])
@@ -102,6 +103,8 @@ func _on_path_finished():
 
 	var distance = player.global_position.distance_to(target.global_position)
 	var attack_range = stats_component.get_total_stat("range")
+	var distleft = distance - attack_range
+	print("[ChaseState] dist to target: %d" % distleft)
 
 	if distance <= attack_range + Constants.PLAYER_ATTACK_RANGE_BUFFER:
 		# We're in range! Time to attack.
