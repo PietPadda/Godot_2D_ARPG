@@ -44,7 +44,7 @@ func drop_loot(position: Vector2) -> void:
 				# Add 'true' to force a network-safe name.
 				loot_container.add_child(loot_instance, true)
 				
-				# After spawning, call the RPC on the new instance to tell everyone
-				# what item it contains by sending its resource path.
-				loot_instance.setup_loot.rpc(item_to_drop.resource_path)
+				# Call our new, unified RPC to tell all clients to
+				# set the position, item data, and make it visible.
+				loot_instance.initialize.rpc(item_to_drop.resource_path, position)
 			return # We found our drop, so exit the function.
