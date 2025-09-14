@@ -41,4 +41,4 @@ func _on_target_requested(target: Node2D) -> void:
 	state_machine.change_state(States.PLAYER_STATE_NAMES[States.PLAYER.CHASE])
 	
 	# Ask the main player node to check the FSM status on the next idle frame.
-	player.call_deferred("check_fsm_status")
+	# player.call_deferred("check_fsm_status")

@@ -8,7 +8,6 @@ var target: Node2D
 var last_target_tile: Vector2i
 
 func enter() -> void:
-	print("[ChaseState] ==> ENTER")
 	# On entering, immediately start moving towards the target.
 	if not is_instance_valid(target):
 		state_machine.change_state(States.PLAYER_STATE_NAMES[States.PLAYER.IDLE]) # just idle if invalid target
@@ -26,7 +25,6 @@ func enter() -> void:
 	_recalculate_path() # Start the chase
 
 func exit() -> void:
-	print("[ChaseState] ==> EXIT")
 	# Disconnect from all signals for clean state transitions
 	# This was trying to disconnect the wrong function (_recalculate_path).
 	# It should be disconnecting the one we connected in enter(): _on_path_finished.
@@ -48,20 +46,28 @@ func _process_physics(delta: float) -> void:
 		state_machine.change_state(States.PLAYER_STATE_NAMES[States.PLAYER.IDLE]) # just idle if invalid target
 		return # early exit
 	
-	# THE FIX: We are removing the path recalculation from here.
-	# This function's only job is to ensure our target is still valid.
-	# The logic has been moved to _on_path_finished to prevent constant interruptions.
-	
-	# var current_target_tile = Grid.world_to_map(target.global_position)
-	# if current_target_tile != last_target_tile:
-	# 	_recalculate_path()
+	var distance = player.global_position.distance_to(target.global_position)
+	var attack_range = stats_component.get_total_stat("range")
+
+	# THE FIX: This is now our highest priority, checked every frame.
+	# Are we within attack range RIGHT NOW?
+	if distance <= attack_range:
+		print("[ChaseState] Target in range! Stopping movement and switching to Attack.")
+		grid_movement_component.stop() # Immediately stop all movement.
+		var attack_state: PlayerAttackState = state_machine.get_state(States.PLAYER.ATTACK)
+		attack_state.target = target
+		state_machine.change_state(States.PLAYER_STATE_NAMES[States.PLAYER.ATTACK])
+		return # Our job in this state is done.
+
+	# If we are NOT in attack range, then we continue with our movement logic.
+	# Check if the target has moved to a new tile, requiring a new path.
+	var current_target_tile = Grid.world_to_map(target.global_position)
+	if current_target_tile != last_target_tile:
+		_recalculate_path()
 
 # --- Helper Functions ---
 # Gets a new path and starts the movement process.
 func _recalculate_path() -> void:
-	# DEBUG: Add a print statement to see how often this is called.
-	print("--- ChaseState: RECALCULATING PATH ---")
-	
 	if not is_instance_valid(target): 
 		return
 	var start_pos = Grid.world_to_map(player.global_position)
@@ -89,14 +95,12 @@ func _recalculate_path() -> void:
 
 # --- Signal Handlers ---
 func _on_move_to_requested(target_position: Vector2) -> void:
-	print("[ChaseState] 'move_to_requested' signal received. Switching to MoveState.")
 	var move_state: PlayerMoveState = state_machine.get_state(States.PLAYER.MOVE)
 	move_state.destination_tile = Grid.world_to_map(target_position)
 	state_machine.change_state(States.PLAYER_STATE_NAMES[States.PLAYER.MOVE])
 	
 # THIS is our new logic gate. It only runs when movement is complete.
 func _on_path_finished():
-	print("[ChaseState] Path finished.")
 	# Check if the target is still valid
 	if not is_instance_valid(target):
 		state_machine.change_state(States.PLAYER_STATE_NAMES[States.PLAYER.IDLE])
@@ -105,21 +109,17 @@ func _on_path_finished():
 	var distance = player.global_position.distance_to(target.global_position)
 	var attack_range = stats_component.get_total_stat("range")
 	var distleft = distance - attack_range
-	print("[ChaseState] dist to target: %d" % distleft)
 
 	if distance <= attack_range + Constants.PLAYER_ATTACK_RANGE_BUFFER:
 		# We're in range! Time to attack.
-		print("[ChaseState] Path finished and IN RANGE. Switching to AttackState.")
 		var attack_state: PlayerAttackState = state_machine.get_state(States.PLAYER.ATTACK)
 		attack_state.target = target
 		state_machine.change_state(States.PLAYER_STATE_NAMES[States.PLAYER.ATTACK])
 	else:
 		# We've arrived, but the target has moved out of range. Recalculate.
-		print("[ChaseState] Path finished, but target is out of range. Recalculating.")
 		_recalculate_path()
 
 func _on_target_requested(new_target: Node2D) -> void:
-	print("[ChaseState] 'target_requested' signal received.")
 	if new_target != self.target:
 		self.target = new_target
 		_recalculate_path() # Immediately repath to the new target
