@@ -57,7 +57,8 @@ func _physics_process(_delta: float) -> void:
 
 	# If the move action is held down, continuously broadcast the intention to move.
 	if Input.is_action_pressed("move_click"):
-		# We will ONLY emit a move_to_requested signal here.
-		# By removing the target check, we stop the continuous signal spam
-		# that was interrupting the ChaseState.
-		move_to_requested.emit(get_parent().get_global_mouse_position())
+		# TWe add the same check here to prevent move signals
+		# from firing when the cursor is held over an enemy.
+		var target = targeting_component.get_target_under_mouse()
+		if not is_instance_valid(target):
+			move_to_requested.emit(get_parent().get_global_mouse_position())

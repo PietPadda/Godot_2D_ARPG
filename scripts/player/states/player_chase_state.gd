@@ -28,8 +28,10 @@ func enter() -> void:
 func exit() -> void:
 	print("[ChaseState] ==> EXIT")
 	# Disconnect from all signals for clean state transitions
-	if grid_movement_component.path_finished.is_connected(_recalculate_path):
-		grid_movement_component.path_finished.disconnect(_recalculate_path)
+	# This was trying to disconnect the wrong function (_recalculate_path).
+	# It should be disconnecting the one we connected in enter(): _on_path_finished.
+	if grid_movement_component.path_finished.is_connected(_on_path_finished):
+		grid_movement_component.path_finished.disconnect(_on_path_finished)
 	if input_component.move_to_requested.is_connected(_on_move_to_requested):
 		input_component.move_to_requested.disconnect(_on_move_to_requested)
 	if input_component.target_requested.is_connected(_on_target_requested):
@@ -46,11 +48,13 @@ func _process_physics(delta: float) -> void:
 		state_machine.change_state(States.PLAYER_STATE_NAMES[States.PLAYER.IDLE]) # just idle if invalid target
 		return # early exit
 	
-	# If the target moves to a new tile WHILE we are moving, recalculate path.
-	# This keeps the chase feeling responsive without constant recalculation.
-	var current_target_tile = Grid.world_to_map(target.global_position)
-	if current_target_tile != last_target_tile:
-		_recalculate_path()
+	# THE FIX: We are removing the path recalculation from here.
+	# This function's only job is to ensure our target is still valid.
+	# The logic has been moved to _on_path_finished to prevent constant interruptions.
+	
+	# var current_target_tile = Grid.world_to_map(target.global_position)
+	# if current_target_tile != last_target_tile:
+	# 	_recalculate_path()
 
 # --- Helper Functions ---
 # Gets a new path and starts the movement process.
