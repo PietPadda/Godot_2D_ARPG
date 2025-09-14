@@ -8,6 +8,9 @@ var target: Node2D
 var last_target_tile: Vector2i
 
 func enter() -> void:
+	# --- DEBUG TRACE 3 ---
+	print("TRACE 3: PlayerChaseState 'enter' function STARTING.")
+	
 	# On entering, immediately start moving towards the target.
 	if not is_instance_valid(target):
 		state_machine.change_state(States.PLAYER_STATE_NAMES[States.PLAYER.IDLE]) # just idle if invalid target
@@ -23,8 +26,12 @@ func enter() -> void:
 	input_component.cast_requested.connect(_on_cast_requested)
 	
 	_recalculate_path() # Start the chase
+	
+	# --- DEBUG TRACE 3.5 ---
+	print("TRACE 3.5: PlayerChaseState 'enter' function FINISHED.")
 
 func exit() -> void:
+	print("Player exiting Chase State")
 	# Disconnect from all signals for clean state transitions
 	# This was trying to disconnect the wrong function (_recalculate_path).
 	# It should be disconnecting the one we connected in enter(): _on_path_finished.
@@ -41,6 +48,9 @@ func exit() -> void:
 	grid_movement_component.stop()
 
 func _process_physics(delta: float) -> void:
+	# --- DEBUG TRACE 5 ---
+	print("TRACE 5: PlayerChaseState is running _process_physics!")
+	
 	# First, check if our target still exists.
 	if not is_instance_valid(target):
 		state_machine.change_state(States.PLAYER_STATE_NAMES[States.PLAYER.IDLE]) # just idle if invalid target

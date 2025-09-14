@@ -6,6 +6,7 @@ extends PlayerState
 var target: Node2D # holds the attack target
 
 func enter() -> void:
+	print("Player entering Attack State")
 	if not is_instance_valid(target):
 		# If we enter this state without a valid target, exit immediately.
 		state_machine.change_state(States.PLAYER_STATE_NAMES[States.PLAYER.IDLE])
