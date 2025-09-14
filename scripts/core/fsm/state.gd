@@ -20,5 +20,5 @@ func process_input(_event: InputEvent) -> void:
 	pass
 
 # Virtual function. Called every physics frame. Use for physics logic.
-func process_physics(_delta: float) -> void:
+func _physics_process(_delta: float) -> void:
 	pass
