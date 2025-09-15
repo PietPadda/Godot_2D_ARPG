@@ -14,13 +14,6 @@ func _ready() -> void:
 	# The timer should also report to the server to despawn itself.
 	timer.timeout.connect(on_timeout)
 
-# A new initialize function to set up the projectile from data.
-func initialize(skill_data: SkillData, _owner_id: int) -> void:
-	self.damage = skill_data.damage
-	self.speed = skill_data.projectile_data.speed
-	self.owner_id = _owner_id # Store the ID
-	timer.start(skill_data.projectile_data.lifetime)
-
 func _physics_process(delta: float) -> void:
 	# Move forward in the direction the projectile is facing.
 	position += transform.x * speed * delta
@@ -44,4 +37,19 @@ func on_timeout():
 		queue_free()
 	# Clients don't need to do anything, the server will replicate the deletion.
 
-# DELETE the old despawn() and server_request_despawn() functions. They are no longer needed.
+# --- RPCs ---
+# Convert 'initialize' into a unified RPC that runs on all clients.
+@rpc("any_peer", "call_local", "reliable")
+func initialize(skill_data: SkillData, _owner_id: int, start_pos: Vector2, target_pos: Vector2) -> void:
+	# Set up the projectile's data.
+	self.damage = skill_data.damage
+	self.speed = skill_data.projectile_data.speed
+	self.owner_id = _owner_id # Store the ID
+	timer.start(skill_data.projectile_data.lifetime)
+	
+	# Set the position and rotation while it's still invisible.
+	global_position = start_pos
+	look_at(target_pos)
+	
+	# Now that everything is perfect, make it visible.
+	visible = true

@@ -86,7 +86,7 @@ func server_request_cast(target_position: Vector2):
 	if not projectile_container:
 		return
 
-	# Instantiate and configure the projectile on the server
+	# Instantiate and configure the  (now invisible) projectile on the server
 	var projectile = projectile_scene.instantiate()
 	
 	# Add the projectile to the scene tree FIRST. This ensures all its @onready variables will be ready.
@@ -94,11 +94,15 @@ func server_request_cast(target_position: Vector2):
 	projectile_container.add_child(projectile, true) # Force a network-safe name
 	
 	# The projectile needs to know where it's going.
-	projectile.global_position = get_owner().global_position # get caster position
-	projectile.look_at(target_position) # get target position
-		
 	# get the caster's network ID
 	var caster_id = get_owner().get_multiplayer_authority()
-	# Pass the skill data AND the caster's network ID to the projectile.
-	projectile.initialize(skill_data, caster_id)
+	var caster_pos = get_owner().global_position
+	
+	# THE FIX: We no longer set position or initialize locally.
+	# projectile.global_position = get_owner().global_position
+	# projectile.look_at(target_position)
+	# projectile.initialize(skill_data, caster_id)
+	
+	# Instead, we call our new, unified RPC to do everything on all clients at once.
+	projectile.initialize.rpc(skill_data, caster_id, caster_pos, target_position)
 	
