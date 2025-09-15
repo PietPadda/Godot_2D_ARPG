@@ -40,12 +40,19 @@ func on_timeout():
 # --- RPCs ---
 # Convert 'initialize' into a unified RPC that runs on all clients.
 @rpc("any_peer", "call_local", "reliable")
-func initialize(skill_data: SkillData, _owner_id: int, start_pos: Vector2, target_pos: Vector2) -> void:
+func initialize(skill_data_path: String, _owner_id: int, start_pos: Vector2, target_pos: Vector2) -> void:
+	# Load the SkillData resource from the provided path.
+	var loaded_skill_data = load(skill_data_path)
+	if not loaded_skill_data:
+		queue_free() # If the path is bad, delete this projectile.
+		return
+	
+	# Now we can safely use the loaded data.
 	# Set up the projectile's data.
-	self.damage = skill_data.damage
-	self.speed = skill_data.projectile_data.speed
+	self.damage = loaded_skill_data.damage
+	self.speed = loaded_skill_data.projectile_data.speed
 	self.owner_id = _owner_id # Store the ID
-	timer.start(skill_data.projectile_data.lifetime)
+	timer.start(loaded_skill_data.projectile_data.lifetime)
 	
 	# Set the position and rotation while it's still invisible.
 	global_position = start_pos
