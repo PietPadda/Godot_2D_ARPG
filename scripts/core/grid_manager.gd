@@ -5,6 +5,10 @@ extends Node
 # Our debug tile scene
 @export var debug_tile_scene: PackedScene
 
+# We'll use a dictionary to keep track of which character is on which tile.
+# The structure will be: { character_instance: tile_coordinate }
+var _occupied_cells := {}
+
 # This will hold a reference to the current level's TileMapLayer.
 # Convert the variable into a property with a setter.
 var tile_map_layer: TileMapLayer:
@@ -71,29 +75,10 @@ func build_level_graph():
 					main_scene.add_child(tile_instance)
 					tile_instance.global_position = map_to_world(cell) - (Vector2(tile_map_layer.tile_set.tile_size) / 2)
 
-# Finds the shortest path between two points on the grid, avoiding dynamic obstacles.
+# Finds the shortest path between two points on the grid.
 func find_path(start_coord: Vector2i, end_coord: Vector2i) -> PackedVector2Array:
-	# --- DYNAMIC OBSTACLE AVOIDANCE ---
-	# Temporarily disable tiles occupied by other characters.
-	var characters = get_tree().get_nodes_in_group("characters")
-	var occupied_tiles: Array[Vector2i] = [] # we init our array
-	
-	# Now loop through each character in the scene
-	for char in characters:
-		var char_tile = world_to_map(char.global_position)
-		# We don't disable the tile our pathfinder is starting from,
-		# or it won't be able to move!
-		if char_tile != start_coord:
-			astar_grid.set_point_solid(char_tile, true)
-			occupied_tiles.append(char_tile)
-	
 	# AStarGrid2D returns an array of map coordinates directly.
 	var map_path: PackedVector2Array = astar_grid.get_point_path(start_coord, end_coord)
-	
-	# CRITICAL: Re-enable the tiles after the calculation is done.
-	# This ensures they aren't permanently blocked for the next path request.
-	for tile in occupied_tiles:
-		astar_grid.set_point_solid(tile, false)
 	
 	# Convert the path of map coordinates to world positions.
 	var world_path: PackedVector2Array = []
@@ -121,6 +106,24 @@ func is_tile_vacant(tile: Vector2i) -> bool:
 			if Grid.world_to_map(body.global_position) == tile:
 				return false
 	return true
+	
+
+# Allows a character to register or update its current grid position.
+# When a character moves to a new tile, it should call this function.
+func update_character_position(character: Node, new_position: Vector2i):
+	# First, we find and remove the character's old entry, if it exists.
+	# This prevents duplicate entries if a character is already in our dictionary.
+	var old_position_keys = _occupied_cells.keys().filter(func(key): return key == character)
+	for key in old_position_keys:
+		_occupied_cells.erase(key)
+		
+	# Now, we add the character's new position to the registry.
+	_occupied_cells[character] = new_position
+
+# A function for a character to announce it has been removed from the game (e.g., on death).
+func remove_character(character: Node):
+	if _occupied_cells.has(character):
+		_occupied_cells.erase(character)
 
 # Converts a world position (like a mouse click) to a map grid coordinate.
 func world_to_map(world_position: Vector2) -> Vector2i:
