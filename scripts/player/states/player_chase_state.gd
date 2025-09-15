@@ -69,6 +69,7 @@ func _physics_process(delta: float) -> void:
 		state_machine.change_state(States.PLAYER_STATE_NAMES[States.PLAYER.ATTACK])
 		return # Our job in this state is done.
 
+	# This is the key to reactive movement.
 	# If we are NOT in attack range, then we continue with our movement logic.
 	# Check if the target has moved to a new tile, requiring a new path.
 	var current_target_tile = Grid.world_to_map(target.global_position)
