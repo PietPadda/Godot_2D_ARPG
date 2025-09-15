@@ -103,6 +103,8 @@ func server_request_cast(target_position: Vector2):
 	# projectile.look_at(target_position)
 	# projectile.initialize(skill_data, caster_id)
 	
-	# Instead, we call our new, unified RPC to do everything on all clients at once.
-	projectile.initialize.rpc(skill_data, caster_id, caster_pos, target_position)
+	# we call our unified RPC to do everything on all clients at once.
+	# Instead of passing the whole 'skill_data' object,
+	# we pass its 'resource_path', which is just a string.
+	projectile.initialize.rpc(skill_data.resource_path, caster_id, caster_pos, target_position)
 	
