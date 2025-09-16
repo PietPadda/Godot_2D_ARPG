@@ -214,13 +214,18 @@ func _find_path_on_server(start_coord: Vector2i, end_coord: Vector2i, character_
 	# Calculate the path using the server's authoritative data.
 	var path = find_path(start_coord, end_coord, character)
 
-	# Now, send the result back to the original client.
-	_receive_path_from_server.rpc_id(client_id, path)
+	# THE FIX: We send the character_path BACK along with the path.
+	# This tells the client who this path is for.
+	_receive_path_from_server.rpc_id(client_id, path, character_path)
 
 # This function ONLY runs on a client, as a response from the server.
+# It receives the final path from the server.
 @rpc("authority")
-func _receive_path_from_server(path: PackedVector2Array) -> void:
-	# We store the result. We need a way to get this back to the character.
-	# For now, let's just print that we received it.
-	_client_path_result = path
-	print("Client received a path with %s points from the server." % path.size())
+func _receive_path_from_server(path: PackedVector2Array, character_path: NodePath) -> void:
+	# THE FIX: We no longer just print. We find the character and give it the path.
+	var character = get_node_or_null(character_path)
+	if is_instance_valid(character):
+		var movement_component = character.get_node_or_null("GridMovementComponent")
+		if is_instance_valid(movement_component):
+			# This is the final step. We tell the client's character to start moving.
+			movement_component.move_along_path(path)
