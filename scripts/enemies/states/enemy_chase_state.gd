@@ -42,9 +42,19 @@ func _recalculate_path() -> void:
 	var end = Grid.world_to_map(target.global_position)
 	last_target_tile = end
 	
+	# DEBUG: Print the path request details.
+	print("--- PATH REQUEST from %s ---" % owner_node.name)
+	print("Start: %s, End: %s" % [start, end])
+	
 	# We now pass 'owner_node' from enemy_state.gd as the character requesting the path.
 	# This tells the GridManager, "Find a path, but ignore my own body as an obstacle."
 	var path = Grid.find_path(start, end, owner_node)
+	
+	# DEBUG: Print the result of the path request.
+	if path.size() > 0:
+		print("Path found with %d points." % path.size())
+	else:
+		print("!!! Path NOT Found. Result is empty. !!!")
 	
 	# The state simply tells the component what path to follow.
 	grid_movement_component.move_along_path(path)
