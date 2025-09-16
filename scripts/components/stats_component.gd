@@ -151,8 +151,8 @@ func _level_up() -> void:
 ## Applies stat increases based on the current level.
 func _apply_stat_gains_for_level():
 	# This is the same logic that was in _level_up.
-	stats_data.max_health += 25
-	stats_data.max_mana += 20
+	stats_data.max_health += 5
+	stats_data.max_mana += 15
 	# We can add more stat increases here in the future.
 	
 # --- RPCs ---

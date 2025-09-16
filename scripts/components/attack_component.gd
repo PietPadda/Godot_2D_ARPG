@@ -43,9 +43,6 @@ func execute(target: Node2D) -> void:
 	animation_component.play_animation(attack_data.animation_name)
 	# Get the animation's length and start the timer with it.
 	var anim_duration = anim.length
-	# --- DEBUG: Print the duration we are starting the timer with. ---
-	if get_parent().is_in_group("player"):
-		print("ATTACK COMPONENT: Starting timer with duration: %f" % anim_duration)
 	duration_timer.start(anim_duration)
 	
 	# Only attempt to deal damage if the target is still valid.
@@ -63,8 +60,5 @@ func execute(target: Node2D) -> void:
 			target_stats.server_take_damage.rpc_id(target_owner_id, total_damage, my_id)
 
 func on_timer_timeout() -> void:
-	# --- DEBUG: Print when the timer actually finishes. ---
-	if get_parent().is_in_group("player"):
-		print("ATTACK COMPONENT: Timer finished. Emitting 'attack_finished'.")
 	# When the timer finishes, we emit the signal.
 	emit_signal("attack_finished")
