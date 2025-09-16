@@ -10,6 +10,9 @@ extends Node
 @onready var stats_component: StatsComponent = get_parent().get_node("StatsComponent")
 @onready var navigation_agent: NavigationAgent2D = get_parent().get_node("NavigationAgent2D")
 
+# We'll use this to track the character's current position on the grid.
+var _current_tile: Vector2i
+
 func _physics_process(delta: float) -> void:
 	# stop ai if reached target in mesh
 	if navigation_agent.is_navigation_finished():

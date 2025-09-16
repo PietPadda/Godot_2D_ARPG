@@ -26,11 +26,6 @@ func cast(skill_data: SkillData, target_position: Vector2) -> bool:
 		print("Not enough mana!")
 		return false # insufficient mana returns false
 	
-	# --- DEBUG TRACE: Check the client's stats at the moment of casting. ---
-	var current_level = stats_component.stats_data.level
-	var current_mana = stats_component.current_mana
-	print("CLIENT-SIDE CAST: Level is %d, Mana is %f" % [current_level, current_mana])
-		
 	# Start the timer using the cast_time from our data resource.
 	duration_timer.start(skill_data.cast_time)
 
@@ -42,9 +37,6 @@ func cast(skill_data: SkillData, target_position: Vector2) -> bool:
 # -- Signal Handlers --
 # This function will be called when the timer ends.
 func on_timer_timeout():
-	# --- DEBUG: Print when the timer actually finishes. ---
-	if get_parent().is_in_group("player"):
-		print("SKILL CASTER: Timer finished. Emitting 'cast_finished'.")
 	emit_signal("cast_finished")
 
 # --- RPCs ---
@@ -60,18 +52,11 @@ func server_request_cast(target_position: Vector2):
 	# Note: get_owner() here is the server's puppet of the casting player.
 	var caster_stats = get_owner().get_node("StatsComponent")
 	
-	# --- DEBUG TRACE: Check the server's stats for the casting player. ---
-	var server_level = caster_stats.stats_data.level
-	var server_mana = caster_stats.current_mana
-	print("SERVER-SIDE VALIDATION: Puppet level is %d, Puppet mana is %f" % [server_level, server_mana])
-	
 	# Only the server validates mana for remote players.
 	# The host (server, ID 1) already paid mana locally in the 'cast' function.
 	if get_owner().get_multiplayer_authority() != 1:
 		# Server-side validation (prevents cheating)
 		if not stats_component.use_mana(skill_data.mana_cost):
-			# --- DEBUG TRACE: If the check fails, tell us why. ---
-			print("SERVER-SIDE CHECK FAILED: Insufficient mana on server puppet.")
 			return # The server determined they couldn't cast.
 	
 	# Find the projectile scene
