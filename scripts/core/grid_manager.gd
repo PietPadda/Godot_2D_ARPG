@@ -85,7 +85,8 @@ func find_path(start_coord: Vector2i, end_coord: Vector2i, pathing_character: No
 		if character != pathing_character:
 			var cell = _occupied_cells[character]
 			# Only mark it if it's not already solid (e.g., a character standing in a wall).
-			if not astar_grid.is_point_solid(cell):
+			# THE FIX IS HERE: We add a check to ensure we never mark the destination tile as solid.
+			if not astar_grid.is_point_solid(cell) and cell != end_coord:
 				astar_grid.set_point_solid(cell, true)
 				temporarily_solid_points.append(cell)
 	
