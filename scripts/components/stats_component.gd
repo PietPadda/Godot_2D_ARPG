@@ -174,7 +174,6 @@ func client_add_gold(amount: int):
 func server_level_up(new_level: int):
 	# This function only runs on the server.
 	# get_owner() is the server's puppet for the client who called this RPC.
-	print("SERVER: Received level up notice from a client. They are now level %d." % new_level)
 	
 	# Update the puppet's stats data.
 	stats_data.level = new_level

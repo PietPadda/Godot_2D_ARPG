@@ -25,8 +25,13 @@ const STOPPING_DISTANCE: float = 6.0
 # We'll add a variable to hold it.
 var chase_target: Node2D
 
+# We'll use this to track the character's current position on the grid.
+var _current_tile: Vector2i
+
 func _ready() -> void:
-	pass
+	# Initial position update when the character first enters the scene.
+	_current_tile = Grid.world_to_map(owner.global_position)
+	Grid.update_character_position(owner, _current_tile)
 
 # Public API
 # Starts moving the character along a given path.
@@ -98,3 +103,11 @@ func _physics_process(_delta: float) -> void:
 	var move_speed = stats_component.get_total_stat("move_speed")
 	character_body.velocity = direction * move_speed
 	character_body.move_and_slide()
+	
+	# After movement, we check if the character has moved to a new tile.
+	var new_tile: Vector2i = Grid.world_to_map(owner.global_position)
+	if new_tile != _current_tile:
+		_current_tile = new_tile
+		# If they have, we notify the GridManager of their new position.
+		Grid.update_character_position(owner, _current_tile)
+	
