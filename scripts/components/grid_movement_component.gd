@@ -68,6 +68,8 @@ func stop() -> void:
 	move_path.clear() # clear the current path
 	is_moving = false # set to no longer moving
 	character_body.velocity = Vector2.ZERO # Ensure physics velocity is also stopped
+	# When we stop, we must release any tile reservation we hold.
+	Grid.release_tile_reservation(owner)
 	
 # Internal Logic
 # Sets the next tile in the path as the active target.
@@ -77,13 +79,27 @@ func _set_next_target() -> bool:
 		is_moving = false
 		character_body.velocity = Vector2.ZERO
 		return false # and end (bool allows func call)
-
-	# otherwise
-	is_moving = true # still moving
-	current_target_pos = move_path[0] # set new target
-	move_path.remove_at(0) # remove it
 	
-	return true # continue moving (bool allows func call)
+	# "Peek" at the next waypoint's tile.
+	var next_tile = Grid.world_to_map(move_path[0])
+	
+	# Try to reserve the next tile.
+	if Grid.reserve_tile(owner, next_tile):
+		# SUCCESS: The tile is ours. Proceed with movement.
+		is_moving = true # still moving
+		current_target_pos = move_path[0] # set new target
+		move_path.remove_at(0) # remove it
+		return true # continue moving (bool allows func call)
+	else:
+		# FAILURE: The tile is reserved by someone else. We must wait.
+		is_moving = false
+		character_body.velocity = Vector2.ZERO
+		
+		# The "Smart Wait": By emitting this, we tell our "brain" (the state machine)
+		# that we're blocked. The brain will then request a new path, automatically
+		# routing around the character that blocked us.
+		emit_signal("waypoint_reached")
+		return false # dont move
 	
 func _physics_process(_delta: float) -> void:
 	if not is_moving:
