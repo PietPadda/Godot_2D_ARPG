@@ -115,10 +115,18 @@ func request_path(start_coord: Vector2i, end_coord: Vector2i, character: Node) -
 	if character.is_multiplayer_authority():
 		# If we are the host/authority, calculate the path directly.
 		var path = find_path(start_coord, end_coord, character)
-		character.get_node("GridMovementComponent").move_along_path(path)
-	else:
-		# If we are a client, send an RPC to the host (ID=1) asking for a path.
-		_find_path_on_server.rpc_id(1, start_coord, end_coord, character.get_path())
+		
+		# Now, deliver the path to the correct machine.
+		if character.is_multiplayer_authority():
+			# If the character is controlled by me (the host's player or an enemy), apply the path directly.
+			var movement_component = character.get_node_or_null("GridMovementComponent")
+			if movement_component:
+				movement_component.move_along_path(path)
+		else:
+			# If the character is controlled by a client, find their ID...
+			var client_id = character.get_multiplayer_authority()
+			# ...and send the path back to them via RPC.
+			_find_path_on_server.rpc_id(client_id, start_coord, end_coord, character.get_path())
 	
 # Returns an array of the four cardinal tiles adjacent to the given tile.
 # Using 4 directions is more stable for grid pathfinding than 8.
