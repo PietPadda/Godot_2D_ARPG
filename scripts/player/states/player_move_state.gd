@@ -10,26 +10,22 @@ func enter() -> void:
 	player.get_node("AnimationComponent").play_animation("Move")
 	# When we enter, start listening for the component to finish a step.
 	grid_movement_component.path_finished.connect(_on_path_finished)
+	# THIS IS THE KEY: We now listen for waypoints to recalculate our path.
+	grid_movement_component.waypoint_reached.connect(_recalculate_path)
 	
 	# Connect to input component signals to allow interruption
 	input_component.move_to_requested.connect(_on_move_to_requested)
 	input_component.target_requested.connect(_on_target_requested)
 	input_component.cast_requested.connect(_on_cast_requested)
 	
-	# Calculate and start the initial path
-	var start_pos = Grid.world_to_map(player.global_position)
-	var path  = Grid.find_path(start_pos, destination_tile)
-
-	if not path.is_empty():
-		grid_movement_component.move_along_path(path)
-	else:
-		# If for some reason no path is found, just go back to idle.
-		state_machine.change_state(States.PLAYER_STATE_NAMES[States.PLAYER.IDLE])
+	_recalculate_path() # Calculate and start the initial path.
 	
 func exit() -> void:
 	# IMPORTANT: Disconnect the signal when we leave this state to prevent bugs.
 	if grid_movement_component.path_finished.is_connected(_on_path_finished):
 		grid_movement_component.path_finished.disconnect(_on_path_finished)
+	if grid_movement_component.waypoint_reached.is_connected(_recalculate_path):
+		grid_movement_component.waypoint_reached.disconnect(_recalculate_path)
 	
 	# Disconnect input signals
 	input_component.move_to_requested.disconnect(_on_move_to_requested)
@@ -38,6 +34,18 @@ func exit() -> void:
 	
 func _physics_process(delta: float) -> void:
 	pass
+	
+# We've moved the pathfinding logic into its own function for reuse.
+func _recalculate_path() -> void:
+	var start_pos = Grid.world_to_map(player.global_position)
+	# The 'owner_node' is available from the base PlayerState class.
+	var new_path = Grid.find_path(start_pos, destination_tile, owner) 
+	
+	if not new_path.is_empty():
+		grid_movement_component.move_along_path(new_path)
+	else:
+		# If no path is found (e.g., destination is now blocked), go idle.
+		state_machine.change_state(States.PLAYER_STATE_NAMES[States.PLAYER.IDLE])
 
 # ---Signal Handlers---
 func _on_path_finished() -> void:

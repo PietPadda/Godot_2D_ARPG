@@ -22,6 +22,9 @@ func enter() -> void:
 	
 	# Connect to ALL necessary signals for responsive control.
 	grid_movement_component.path_finished.connect(_on_path_finished) # Key change!
+	# AND THE FINAL CONNECTION: Listen for waypoints to update the chase path.
+	grid_movement_component.waypoint_reached.connect(_recalculate_path)
+	
 	# these connections allow the player to interrupt the chase.
 	input_component.move_to_requested.connect(_on_move_to_requested)
 	input_component.target_requested.connect(_on_target_requested)
@@ -35,6 +38,9 @@ func exit() -> void:
 	# It should be disconnecting the one we connected in enter(): _on_path_finished.
 	if grid_movement_component.path_finished.is_connected(_on_path_finished):
 		grid_movement_component.path_finished.disconnect(_on_path_finished)
+	# Make sure we disconnect from the waypoint signal too.
+	if grid_movement_component.waypoint_reached.is_connected(_recalculate_path):
+		grid_movement_component.waypoint_reached.disconnect(_recalculate_path)
 	if input_component.move_to_requested.is_connected(_on_move_to_requested):
 		input_component.move_to_requested.disconnect(_on_move_to_requested)
 	if input_component.target_requested.is_connected(_on_target_requested):

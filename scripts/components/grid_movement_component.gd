@@ -116,6 +116,4 @@ func _physics_process(_delta: float) -> void:
 		_current_tile = new_tile
 		# If they have, we notify the GridManager of their new position.
 		Grid.update_character_position(owner, _current_tile)
-		# DEBUG: Print when a character registers a new position.
-		print("%s moved to new tile: %s" % [owner.name, new_tile])
 	
