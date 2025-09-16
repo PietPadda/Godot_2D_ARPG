@@ -11,6 +11,8 @@ const Player = preload("res://scripts/player/player.gd")
 # We'll use a dictionary to keep track of which character is on which tile.
 # The structure will be: { character_instance: tile_coordinate }
 var _occupied_cells := {}
+# This will hold the result of a path requested by a client.
+var _client_path_result: PackedVector2Array
 
 # This will hold a reference to the current level's TileMapLayer.
 # Convert the variable into a property with a setter.
@@ -106,6 +108,17 @@ func find_path(start_coord: Vector2i, end_coord: Vector2i, pathing_character: No
 		world_path.append(map_to_world(map_coord as Vector2i))
 		
 	return world_path
+
+# This new function handles the logic for both host and clients.
+func request_path(start_coord: Vector2i, end_coord: Vector2i, character: Node) -> void:
+	# is_multiplayer_authority() checks if the local machine controls this character.
+	if character.is_multiplayer_authority():
+		# If we are the host/authority, calculate the path directly.
+		var path = find_path(start_coord, end_coord, character)
+		character.get_node("GridMovementComponent").move_along_path(path)
+	else:
+		# If we are a client, send an RPC to the host (ID=1) asking for a path.
+		_find_path_on_server.rpc_id(1, start_coord, end_coord, character.get_path())
 	
 # Returns an array of the four cardinal tiles adjacent to the given tile.
 # Using 4 directions is more stable for grid pathfinding than 8.
@@ -127,27 +140,6 @@ func is_tile_vacant(tile: Vector2i) -> bool:
 				return false
 	return true
 	
-# Allows a character to register or update its current grid position.
-# When a character moves to a new tile, it should call this function.
-# THE FIX: We mark this function so it can be called over the network.
-# authority: Only the server (the host) can execute this function.
-# call_local: The host should also run this function for its own movements.
-@rpc("any_peer", "call_local")
-func update_character_position(character_path: NodePath, new_position: Vector2i):
-	# On the server, we get the node using the path sent by the client.
-	var character = get_node_or_null(character_path)
-	if not is_instance_valid(character):
-		return # If the character isn't found (e.g., just died), do nothing.
-	
-	# First, we find and remove the character's old entry, if it exists.
-	# This prevents duplicate entries if a character is already in our dictionary.
-	var old_position_keys = _occupied_cells.keys().filter(func(key): return key == character)
-	for key in old_position_keys:
-		_occupied_cells.erase(key)
-		
-	# Now, we add the character's new position to the registry.
-	_occupied_cells[character] = new_position
-
 # A function for a character to announce it has been removed from the game (e.g., on death).
 func remove_character(character: Node):
 	if _occupied_cells.has(character):
@@ -184,3 +176,51 @@ func print_occupied_cells() -> void:
 	
 	if players_found == 0:
 		print("  - No players found in the registry.")
+		
+# --- RPCs ---
+
+# Allows a character to register or update its current grid position.
+# When a character moves to a new tile, it should call this function.
+# THE FIX: We mark this function so it can be called over the network.
+# authority: Only the server (the host) can execute this function.
+# call_local: The host should also run this function for its own movements.
+@rpc("any_peer", "call_local")
+func update_character_position(character_path: NodePath, new_position: Vector2i):
+	# On the server, we get the node using the path sent by the client.
+	var character = get_node_or_null(character_path)
+	if not is_instance_valid(character):
+		return # If the character isn't found (e.g., just died), do nothing.
+	
+	# First, we find and remove the character's old entry, if it exists.
+	# This prevents duplicate entries if a character is already in our dictionary.
+	var old_position_keys = _occupied_cells.keys().filter(func(key): return key == character)
+	for key in old_position_keys:
+		_occupied_cells.erase(key)
+		
+	# Now, we add the character's new position to the registry.
+	_occupied_cells[character] = new_position
+
+# This function ONLY runs on the server, as requested by a client.
+# We change the annotation to allow calls from ANY client.
+@rpc("any_peer", "call_local")
+func _find_path_on_server(start_coord: Vector2i, end_coord: Vector2i, character_path: NodePath) -> void:
+	# Get the peer ID of the client who made the request.
+	var client_id = multiplayer.get_remote_sender_id()
+	
+	var character = get_node_or_null(character_path)
+	if not is_instance_valid(character):
+		return
+
+	# Calculate the path using the server's authoritative data.
+	var path = find_path(start_coord, end_coord, character)
+
+	# Now, send the result back to the original client.
+	_receive_path_from_server.rpc_id(client_id, path)
+
+# This function ONLY runs on a client, as a response from the server.
+@rpc("authority")
+func _receive_path_from_server(path: PackedVector2Array) -> void:
+	# We store the result. We need a way to get this back to the character.
+	# For now, let's just print that we received it.
+	_client_path_result = path
+	print("Client received a path with %s points from the server." % path.size())

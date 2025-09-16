@@ -88,10 +88,6 @@ func _recalculate_path() -> void:
 	if not is_instance_valid(target): 
 		return
 		
-	# DEBUG: Print the GridManager's knowledge when the player is chasing.
-	print("--- PLAYER CHASE Path Request from %s ---" % player.name)
-	Grid.print_occupied_cells()
-	
 	var start_pos = Grid.world_to_map(player.global_position)
 	var end_pos = Grid.world_to_map(target.global_position)
 	
@@ -109,12 +105,8 @@ func _recalculate_path() -> void:
 	if destination_found:
 		# generate the path
 		last_target_tile = valid_destination
-		var path = Grid.find_path(start_pos, valid_destination, owner)
-		
-		# The state simply tells the component what path to follow.
-		if not path.is_empty():
-			# Pass the actual target to the movement component.
-			grid_movement_component.move_along_path(path, target)
+		# THE FIX: We call the same new request function.
+		Grid.request_path(start_pos, valid_destination, player)
 
 # --- Signal Handlers ---
 func _on_move_to_requested(target_position: Vector2) -> void:

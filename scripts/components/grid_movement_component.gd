@@ -31,9 +31,15 @@ var chase_target: Node2D
 var _current_tile: Vector2i
 
 func _ready() -> void:
-	# Initial position update when the character first enters the scene.
-	_current_tile = Grid.world_to_map(owner.global_position)
-	Grid.update_character_position(owner, _current_tile)
+	# We must wait a frame for the multiplayer authority to be assigned.
+	await owner.tree_entered
+	
+	# Only the machine that controls this character should send its initial position.
+	if owner.is_multiplayer_authority():
+		# Initial position update when the character first enters the scene.
+		_current_tile = Grid.world_to_map(owner.global_position)
+		# Send the initial position via RPC to the server (player ID 1).
+		Grid.update_character_position.rpc_id(1, owner.get_path(), _current_tile)
 
 # Public API
 # Starts moving the character along a given path.
@@ -116,8 +122,7 @@ func _physics_process(_delta: float) -> void:
 		_current_tile = new_tile
 		
 		# If they have, we notify the GridManager of their new position.
-		# THE FIX: We no longer update the grid directly.
-		# We send an RPC to the server (player with ID 1) and tell it to update the grid for us.
-		# The "reliable" flag ensures the message won't get lost in transit.
-		Grid.update_character_position.rpc_id(1, owner.get_path(), new_tile)
+		# Only the authority for this character sends the update to the server.
+		if owner.is_multiplayer_authority():
+			Grid.update_character_position.rpc_id(1, owner.get_path(), new_tile)
 	

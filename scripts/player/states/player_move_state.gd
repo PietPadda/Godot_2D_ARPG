@@ -37,19 +37,10 @@ func _physics_process(delta: float) -> void:
 	
 # We've moved the pathfinding logic into its own function for reuse.
 func _recalculate_path() -> void:
-	# DEBUG: Print the GridManager's knowledge, but only when a player requests a path.
-	print("--- PLAYER MOVE Path Request from %s ---" % player.name)
-	Grid.print_occupied_cells()
-	
 	var start_pos = Grid.world_to_map(player.global_position)
-	# The 'owner_node' is available from the base PlayerState class.
-	var new_path = Grid.find_path(start_pos, destination_tile, owner) 
-	
-	if not new_path.is_empty():
-		grid_movement_component.move_along_path(new_path)
-	else:
-		# If no path is found (e.g., destination is now blocked), go idle.
-		state_machine.change_state(States.PLAYER_STATE_NAMES[States.PLAYER.IDLE])
+	# THE FIX: We no longer call find_path directly.
+	# We call our new high-level request function.
+	Grid.request_path(start_pos, destination_tile, player)
 
 # ---Signal Handlers---
 func _on_path_finished() -> void:
