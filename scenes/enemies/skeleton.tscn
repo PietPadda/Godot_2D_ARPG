@@ -69,7 +69,6 @@ properties/1/replication_mode = 2
 
 [node name="Skeleton" type="CharacterBody2D" groups=["characters", "enemies"]]
 collision_layer = 2
-collision_mask = 7
 motion_mode = 1
 script = ExtResource("1_s0h66")
 
