@@ -2,6 +2,9 @@
 class_name GridManager
 extends Node
 
+# Preload the Player script so we can check an object's type against it.
+const Player = preload("res://scripts/player/player.gd")
+
 # Our debug tile scene
 @export var debug_tile_scene: PackedScene
 
@@ -126,7 +129,16 @@ func is_tile_vacant(tile: Vector2i) -> bool:
 	
 # Allows a character to register or update its current grid position.
 # When a character moves to a new tile, it should call this function.
-func update_character_position(character: Node, new_position: Vector2i):
+# THE FIX: We mark this function so it can be called over the network.
+# authority: Only the server (the host) can execute this function.
+# call_local: The host should also run this function for its own movements.
+@rpc("any_peer", "call_local")
+func update_character_position(character_path: NodePath, new_position: Vector2i):
+	# On the server, we get the node using the path sent by the client.
+	var character = get_node_or_null(character_path)
+	if not is_instance_valid(character):
+		return # If the character isn't found (e.g., just died), do nothing.
+	
 	# First, we find and remove the character's old entry, if it exists.
 	# This prevents duplicate entries if a character is already in our dictionary.
 	var old_position_keys = _occupied_cells.keys().filter(func(key): return key == character)
@@ -154,3 +166,21 @@ func map_to_world(map_position: Vector2i) -> Vector2:
 		var local_pos = tile_map_layer.map_to_local(map_position)
 		return tile_map_layer.to_global(local_pos)
 	return Vector2.ZERO # Return a default value if the tilemap isn't set
+	
+# A debug function to print the contents of our occupied cells registry.
+func print_occupied_cells() -> void:
+	print("GridManager Knowledge Check (Players Only):")
+	if _occupied_cells.is_empty():
+		print("  - Occupied cells registry is EMPTY.")
+		return
+		
+	var players_found = 0
+	for character in _occupied_cells:
+		# THE CHANGE IS HERE: We only print if the character is a Player.
+		if character is Player:
+			players_found += 1
+			var tile = _occupied_cells[character]
+			print("  - Player '%s' is at tile %s" % [character.name, tile])
+	
+	if players_found == 0:
+		print("  - No players found in the registry.")

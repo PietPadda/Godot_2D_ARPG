@@ -87,6 +87,11 @@ func _physics_process(delta: float) -> void:
 func _recalculate_path() -> void:
 	if not is_instance_valid(target): 
 		return
+		
+	# DEBUG: Print the GridManager's knowledge when the player is chasing.
+	print("--- PLAYER CHASE Path Request from %s ---" % player.name)
+	Grid.print_occupied_cells()
+	
 	var start_pos = Grid.world_to_map(player.global_position)
 	var end_pos = Grid.world_to_map(target.global_position)
 	
@@ -104,7 +109,7 @@ func _recalculate_path() -> void:
 	if destination_found:
 		# generate the path
 		last_target_tile = valid_destination
-		var path = Grid.find_path(start_pos, valid_destination)
+		var path = Grid.find_path(start_pos, valid_destination, owner)
 		
 		# The state simply tells the component what path to follow.
 		if not path.is_empty():

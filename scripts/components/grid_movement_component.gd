@@ -114,6 +114,10 @@ func _physics_process(_delta: float) -> void:
 	var new_tile: Vector2i = Grid.world_to_map(owner.global_position)
 	if new_tile != _current_tile:
 		_current_tile = new_tile
+		
 		# If they have, we notify the GridManager of their new position.
-		Grid.update_character_position(owner, _current_tile)
+		# THE FIX: We no longer update the grid directly.
+		# We send an RPC to the server (player with ID 1) and tell it to update the grid for us.
+		# The "reliable" flag ensures the message won't get lost in transit.
+		Grid.update_character_position.rpc_id(1, owner.get_path(), new_tile)
 	
