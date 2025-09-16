@@ -11,8 +11,9 @@ const Player = preload("res://scripts/player/player.gd")
 # We'll use a dictionary to keep track of which character is on which tile.
 # The structure will be: { character_instance: tile_coordinate }
 var _occupied_cells := {}
-# This will hold the result of a path requested by a client.
-var _client_path_result: PackedVector2Array
+# We add a new dictionary to track which tile a character intends to move to.
+# The structure will be { tile_coordinate: character_instance }
+var _reserved_cells := {}
 
 # This will hold a reference to the current level's TileMapLayer.
 # Convert the variable into a property with a setter.
@@ -166,7 +167,30 @@ func map_to_world(map_position: Vector2i) -> Vector2:
 		var local_pos = tile_map_layer.map_to_local(map_position)
 		return tile_map_layer.to_global(local_pos)
 	return Vector2.ZERO # Return a default value if the tilemap isn't set
+
+# --- Tile Reservation API ---
+# Tries to reserve a tile for a character. Returns true on success, false on failure.
+func reserve_tile(character: Node, tile: Vector2i) -> bool:
+	# First, release any tile this character might have previously reserved.
+	release_tile_reservation(character)
 	
+	# Check if the desired tile is already reserved by SOMEONE ELSE.
+	if _reserved_cells.has(tile) and _reserved_cells[tile] != character:
+		return false # Reservation failed.
+	
+	# If the tile is free, reserve it for this character and return success.
+	_reserved_cells[tile] = character
+	return true
+
+# Releases any reservation held by a specific character.
+func release_tile_reservation(character: Node) -> void:
+	# We need to find the tile associated with this character, as we don't know it beforehand.
+	for tile in _reserved_cells:
+		if _reserved_cells[tile] == character:
+			_reserved_cells.erase(tile)
+			return # Exit once found and removed.
+
+# --- Debug ---
 # A debug function to print the contents of our occupied cells registry.
 func print_occupied_cells() -> void:
 	print("GridManager Knowledge Check (Players Only):")
@@ -186,7 +210,6 @@ func print_occupied_cells() -> void:
 		print("  - No players found in the registry.")
 		
 # --- RPCs ---
-
 # Allows a character to register or update its current grid position.
 # When a character moves to a new tile, it should call this function.
 # THE FIX: We mark this function so it can be called over the network.
