@@ -11,9 +11,17 @@ func enter() -> void:
 		state_machine.change_state(States.ENEMY_STATE_NAMES[States.ENEMY.IDLE])
 		return
 		
-	_recalculate_path()
+	# Connect the signal. Every time the component reaches a waypoint, we'll recalculate the path.
+	# This makes the AI much more reactive to a changing environment.
+	grid_movement_component.waypoint_reached.connect(_recalculate_path)
+	
+	_recalculate_path() # Calculate the initial path to get started.
 
 func exit() -> void:
+	# CRITICAL: Always disconnect signals when a state exits to avoid unwanted behavior.
+	if grid_movement_component.is_connected("waypoint_reached", _recalculate_path):
+		grid_movement_component.waypoint_reached.disconnect(_recalculate_path)
+	
 	grid_movement_component.stop()
 	
 func _physics_process(delta: float) -> void:
@@ -42,19 +50,9 @@ func _recalculate_path() -> void:
 	var end = Grid.world_to_map(target.global_position)
 	last_target_tile = end
 	
-	# DEBUG: Print the path request details.
-	print("--- PATH REQUEST from %s ---" % owner_node.name)
-	print("Start: %s, End: %s" % [start, end])
-	
 	# We now pass 'owner_node' from enemy_state.gd as the character requesting the path.
 	# This tells the GridManager, "Find a path, but ignore my own body as an obstacle."
 	var path = Grid.find_path(start, end, owner_node)
-	
-	# DEBUG: Print the result of the path request.
-	if path.size() > 0:
-		print("Path found with %d points." % path.size())
-	else:
-		print("!!! Path NOT Found. Result is empty. !!!")
 	
 	# The state simply tells the component what path to follow.
 	grid_movement_component.move_along_path(path)

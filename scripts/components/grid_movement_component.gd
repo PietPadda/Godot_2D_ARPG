@@ -5,6 +5,8 @@ extends Node
 
 # Emitted when the character has arrived at its target.
 signal path_finished
+# This signal will be emitted each time the component reaches a waypoint in its path.
+signal waypoint_reached
 
 # Preload the Player script to make the "Player" type available for our type check.
 const Player = preload("res://scripts/player/player.gd")
@@ -81,7 +83,7 @@ func _physics_process(_delta: float) -> void:
 	if not is_moving:
 		return
 	
-	# THE FIX: We add a new, higher-priority check.
+	#  We add a new, higher-priority check.
 	# If we have a chase_target and are within its attack range, our job is done.
 	if is_instance_valid(chase_target):
 		var attack_range = stats_component.get_total_stat("range")
@@ -92,6 +94,10 @@ func _physics_process(_delta: float) -> void:
 		
 	# Check if we've arrived at the current waypoint.
 	if character_body.global_position.distance_to(current_target_pos) < STOPPING_DISTANCE:
+		# We emit the signal BEFORE getting the next waypoint.
+		# This lets any listener (like a state machine) react to the progress.
+		emit_signal("waypoint_reached")
+		
 		# If we've arrived, try to get the next waypoint.
 		if not _set_next_target():
 			# If there are no more waypoints, the path is finished.
