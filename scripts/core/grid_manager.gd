@@ -75,10 +75,26 @@ func build_level_graph():
 					main_scene.add_child(tile_instance)
 					tile_instance.global_position = map_to_world(cell) - (Vector2(tile_map_layer.tile_set.tile_size) / 2)
 
-# Finds the shortest path between two points on the grid.
-func find_path(start_coord: Vector2i, end_coord: Vector2i) -> PackedVector2Array:
+# Finds the shortest path between two points on the grid, avoiding dynamic obstacles.
+# We pass the character requesting the path so it doesn't consider its own tile an obstacle.
+func find_path(start_coord: Vector2i, end_coord: Vector2i, pathing_character: Node = null) -> PackedVector2Array:
+	# Temporarily mark occupied cells as solid for this calculation.
+	var temporarily_solid_points: Array[Vector2i] = []
+	for character in _occupied_cells:
+		# Make sure we don't mark the pathing character's own tile as an obstacle.
+		if character != pathing_character:
+			var cell = _occupied_cells[character]
+			# Only mark it if it's not already solid (e.g., a character standing in a wall).
+			if not astar_grid.is_point_solid(cell):
+				astar_grid.set_point_solid(cell, true)
+				temporarily_solid_points.append(cell)
+	
 	# AStarGrid2D returns an array of map coordinates directly.
 	var map_path: PackedVector2Array = astar_grid.get_point_path(start_coord, end_coord)
+	
+	# CRITICAL: Clean up by reverting the temporarily solid points back to walkable.
+	for cell in temporarily_solid_points:
+		astar_grid.set_point_solid(cell, false)
 	
 	# Convert the path of map coordinates to world positions.
 	var world_path: PackedVector2Array = []
@@ -107,7 +123,6 @@ func is_tile_vacant(tile: Vector2i) -> bool:
 				return false
 	return true
 	
-
 # Allows a character to register or update its current grid position.
 # When a character moves to a new tile, it should call this function.
 func update_character_position(character: Node, new_position: Vector2i):

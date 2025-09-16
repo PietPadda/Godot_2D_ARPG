@@ -57,7 +57,7 @@ _data = {
 }
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_xro8k"]
-radius = 63.0
+radius = 50.01
 
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_f0dbl"]
 properties/0/path = NodePath(".:position")
