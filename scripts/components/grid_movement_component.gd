@@ -80,8 +80,10 @@ func stop() -> void:
 	# When we stop, we must release any tile reservation we hold.
 	Grid.release_tile_reservation(owner)
 	
-	# ensure the timer is stopped.
-	_repath_timer.stop()
+	# THE FIX: Only try to stop the timer if it has been created.
+	if is_instance_valid(_repath_timer):
+		# ensure the timer is stopped.
+		_repath_timer.stop()
 	
 # Internal Logic
 # Sets the next tile in the path as the active target.
@@ -98,7 +100,9 @@ func _set_next_target() -> bool:
 	# Try to reserve the next tile.
 	if Grid.reserve_tile(owner, next_tile):
 		# SUCCESS: The tile is ours. Proceed with movement.
-		_repath_timer.stop() # No need to wait.
+		# THE FIX: Add the same safety check here.
+		if is_instance_valid(_repath_timer):
+			_repath_timer.stop() # No need to wait.
 		is_moving = true # still moving
 		current_target_pos = move_path[0] # set new target
 		move_path.remove_at(0) # remove it
@@ -107,6 +111,7 @@ func _set_next_target() -> bool:
 		# FAILURE: The tile is reserved by someone else. We must wait.
 		is_moving = false
 		character_body.velocity = Vector2.ZERO
+		# This will only be called after _ready() has run, so it's safe.
 		_repath_timer.start() # Start the patience timer.
 		return false # dont move
 	
