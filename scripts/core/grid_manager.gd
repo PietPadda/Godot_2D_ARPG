@@ -282,3 +282,11 @@ func release_occupied_tile(character_path: NodePath, tile: Vector2i) -> void:
 	
 	if _occupied_cells.has(character):
 		_occupied_cells[character].erase(tile)
+
+# Wipes a character's occupied list and resets it to only their current tile.
+@rpc("any_peer", "call_local")
+func release_all_but_current_tile(character_path: NodePath, current_tile: Vector2i):
+	var character = get_node_or_null(character_path)
+	if is_instance_valid(character):
+		# Simply overwrite their list with a new one containing only their current tile.
+		_occupied_cells[character] = [current_tile]
