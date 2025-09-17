@@ -184,16 +184,9 @@ func map_to_world(map_position: Vector2i) -> Vector2:
 func reserve_tile(character: Node, tile: Vector2i) -> bool:
 	# Check if the desired tile is available BEFORE changing anything.
 	if _reserved_cells.has(tile) and _reserved_cells[tile] != character:
-		# LOGGING: Announce the failure.
-		print("GRID_RESERVATION: FAILED for '%s' at tile %s (already reserved by '%s')" % [character.name, tile, _reserved_cells[tile].name])
 		return false # Reservation failed. Do not release the old tile.
 		
-	# Since the new tile is available, NOW we can safely release the old one.
-	release_tile_reservation(character)
-	
-	# LOGGING: Announce the success.
-	print("GRID_RESERVATION: SUCCESS for '%s' at tile %s" % [character.name, tile])
-
+	# We no longer release the old reservation prematurely.
 	# Claim the new tile.
 	_reserved_cells[tile] = character
 	return true # Reservation Success. Claim the new tile.
@@ -249,9 +242,10 @@ func update_character_position(character_path: NodePath, new_position: Vector2i)
 	var character = get_node_or_null(character_path)
 	if not is_instance_valid(character):
 		return # If the character isn't found (e.g., just died), do nothing.
-	
-	# LOGGING: Announce the change.
-	print("GRID_UPDATE: Occupying tile %s for '%s'" % [new_position, character.name])
+		
+	# THE FIX: When a character occupies a new tile, its reservation on that tile is fulfilled.
+	# We can now safely release it.
+	release_tile_reservation(character)
 	
 	# First, we find and remove the character's old entry, if it exists.
 	# This prevents duplicate entries if a character is already in our dictionary.
