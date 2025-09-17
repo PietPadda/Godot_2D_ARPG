@@ -98,7 +98,10 @@ func _set_next_target() -> bool:
 		# The "Smart Wait": By emitting this, we tell our "brain" (the state machine)
 		# that we're blocked. The brain will then request a new path, automatically
 		# routing around the character that blocked us.
-		emit_signal("waypoint_reached")
+		# THE FIX: We defer the signal emission.
+		# This breaks the infinite loop by pushing the next path request
+		# to the end of the current frame's processing queue.
+		call_deferred("emit_signal", "waypoint_reached")
 		return false # dont move
 	
 func _physics_process(_delta: float) -> void:
