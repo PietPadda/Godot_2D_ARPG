@@ -11,9 +11,8 @@ const Player = preload("res://scripts/player/player.gd")
 # We'll use a dictionary to keep track of which character is on which tile.
 # The structure will be: { character_instance: tile_coordinate }
 var _occupied_cells := {}
-# We add a new dictionary to track which tile a character intends to move to.
-# The structure will be { tile_coordinate: character_instance }
-var _reserved_cells := {}
+# We can now completely remove the reservation system.
+# var _reserved_cells := {} # <-- DELETE THIS
 
 # This will hold a reference to the current level's TileMapLayer.
 # Convert the variable into a property with a setter.
@@ -91,21 +90,15 @@ func find_path(start_coord: Vector2i, end_coord: Vector2i, pathing_character: No
 	for character in _occupied_cells:
 		# Make sure we don't mark the pathing character's own tile as an obstacle.
 		if character != pathing_character:
-			var cell = _occupied_cells[character]
-			# Only mark it if it's not already solid (e.g., a character standing in a wall).
-			# We add a check to ensure we never mark the destination tile as solid.
-			if not astar_grid.is_point_solid(cell) and cell != end_coord:
-				astar_grid.set_point_solid(cell, true)
-				temporarily_solid_points.append(cell)
+			# Get the list of tiles this character occupies.
+			var occupied_tiles: Array[Vector2i] = _occupied_cells[character]
+			for cell in occupied_tiles:
+				if not astar_grid.is_point_solid(cell) and cell != end_coord:
+					astar_grid.set_point_solid(cell, true)
+					temporarily_solid_points.append(cell)
 	
-	# Mark RESERVED cells as temporary obstacles
-	for tile in _reserved_cells:
-		var character_reserving = _reserved_cells[tile]
-		# Make sure we don't block a path because of our own reservation.
-		if character_reserving != pathing_character:
-			if not astar_grid.is_point_solid(tile) and tile != end_coord:
-				astar_grid.set_point_solid(tile, true)
-				temporarily_solid_points.append(tile)
+	# We no longer need to check _reserved_cells.
+	# <-- DELETE the reservation loop that was here.
 	
 	# AStarGrid2D returns an array of map coordinates directly.
 	var map_path: PackedVector2Array = astar_grid.get_point_path(start_coord, end_coord)
@@ -180,27 +173,9 @@ func map_to_world(map_position: Vector2i) -> Vector2:
 	return Vector2.ZERO # Return a default value if the tilemap isn't set
 
 # --- Tile Reservation API ---
-# Tries to reserve a tile for a character. Returns true on success, false on failure.
-func reserve_tile(character: Node, tile: Vector2i) -> bool:
-	# Check if the desired tile is available BEFORE changing anything.
-	if _reserved_cells.has(tile) and _reserved_cells[tile] != character:
-		return false # Reservation failed. Do not release the old tile.
-		
-	# We no longer release the old reservation prematurely.
-	# Claim the new tile.
-	_reserved_cells[tile] = character
-	return true # Reservation Success. Claim the new tile.
-
-# Releases any reservation held by a specific character.
-func release_tile_reservation(character: Node) -> void:
-	# We need to find the tile associated with this character, as we don't know it beforehand.
-	for tile in _reserved_cells:
-		if _reserved_cells[tile] == character:
-			# LOGGING: Announce the release.
-			print("GRID_RESERVATION: Releasing tile %s for '%s'" % [tile, character.name])
-			
-			_reserved_cells.erase(tile)
-			return # Exit once found and removed.
+# We remove the entire Tile Reservation API section.
+# func reserve_tile(...) # <-- DELETE
+# func release_tile_reservation(...) # <-- DELETE
 
 # --- Debug ---
 # A debug function to print the contents of our occupied cells registry.
@@ -220,22 +195,9 @@ func print_occupied_cells() -> void:
 	
 	if players_found == 0:
 		print("  - No players found in the registry.")
-		
-	# LOGGING: Also print the reserved cells for a complete picture.
-	print("  Reserved Tiles:")
-	if _reserved_cells.is_empty():
-		print("    - None")
-	else:
-		for tile in _reserved_cells:
-			print("    - Tile %s is reserved by '%s'" % [tile, _reserved_cells[tile].name])
-	print("-------------------------------------------------")
 
 # --- RPCs ---
-# Allows a character to register or update its current grid position.
-# When a character moves to a new tile, it should call this function.
-# THE FIX: We mark this function so it can be called over the network.
-# authority: Only the server (the host) can execute this function.
-# call_local: The host should also run this function for its own movements.
+# This function is now much simpler. It just sets the initial occupied tile.
 @rpc("any_peer", "call_local")
 func update_character_position(character_path: NodePath, new_position: Vector2i):
 	# On the server, we get the node using the path sent by the client.
@@ -243,19 +205,9 @@ func update_character_position(character_path: NodePath, new_position: Vector2i)
 	if not is_instance_valid(character):
 		return # If the character isn't found (e.g., just died), do nothing.
 		
-	# THE FIX: When a character occupies a new tile, its reservation on that tile is fulfilled.
-	# We can now safely release it.
-	release_tile_reservation(character)
+	# On initial spawn, a character occupies one tile.
+	_occupied_cells[character] = [new_position]
 	
-	# First, we find and remove the character's old entry, if it exists.
-	# This prevents duplicate entries if a character is already in our dictionary.
-	var old_position_keys = _occupied_cells.keys().filter(func(key): return key == character)
-	for key in old_position_keys:
-		_occupied_cells.erase(key)
-		
-	# Now, we add the character's new position to the registry.
-	_occupied_cells[character] = new_position
-
 # This function ONLY runs on the server, as requested by a client.
 # We change the annotation to allow calls from ANY client.
 @rpc("any_peer", "call_local")
@@ -290,11 +242,7 @@ func _receive_path_from_server(path: PackedVector2Array, character_path: NodePat
 @rpc("any_peer", "call_local")
 func clear_character_from_grid(character_path: NodePath) -> void:
 	var character = get_node_or_null(character_path)
-	
-	# LOGGING: Announce the cleanup.
-	var char_name = character.name if is_instance_valid(character) else str(character_path)
-	print("GRID_UPDATE: Clearing '%s' from all systems." % char_name)
-	
+
 	if not is_instance_valid(character):
 		# If the character is already gone, try to find it in the dictionaries by value.
 		# This is a fallback for tricky timing situations.
@@ -302,14 +250,9 @@ func clear_character_from_grid(character_path: NodePath) -> void:
 			if key.get_path() == character_path:
 				_occupied_cells.erase(key)
 				break
-		for tile in _reserved_cells:
-			if _reserved_cells[tile].get_path() == character_path:
-				_reserved_cells.erase(tile)
-				break
 		return
 
 	# If the character is valid, remove it the normal way.
-	release_tile_reservation(character)
 	var old_position_keys = _occupied_cells.keys().filter(func(key): return key == character)
 	for key in old_position_keys:
 		_occupied_cells.erase(key)
