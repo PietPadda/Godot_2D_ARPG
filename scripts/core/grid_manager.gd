@@ -91,7 +91,9 @@ func find_path(start_coord: Vector2i, end_coord: Vector2i, pathing_character: No
 		# Make sure we don't mark the pathing character's own tile as an obstacle.
 		if character != pathing_character:
 			# Get the list of tiles this character occupies.
-			var occupied_tiles: Array[Vector2i] = _occupied_cells[character]
+			# We cast the dictionary value to a generic Array.
+			# Godot knows it's an array, but the type hint needs this for safety.
+			var occupied_tiles: Array = _occupied_cells[character]
 			for cell in occupied_tiles:
 				if not astar_grid.is_point_solid(cell) and cell != end_coord:
 					astar_grid.set_point_solid(cell, true)
@@ -269,6 +271,12 @@ func occupy_tile(character_path: NodePath, tile: Vector2i) -> bool:
 			if _occupied_cells[other_character].has(tile):
 				return false # Tile is occupied by another character.
 
+	# First, ensure this character has an entry in our dictionary.
+	# If it doesn't, create an empty one.
+	if not _occupied_cells.has(character):
+		_occupied_cells[character] = []
+	
+	# Now it's safe to check
 	# If the tile is free, add it to this character's list.
 	if not _occupied_cells[character].has(tile):
 		_occupied_cells[character].append(tile)
