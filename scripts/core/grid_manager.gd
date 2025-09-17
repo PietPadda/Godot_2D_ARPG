@@ -256,3 +256,29 @@ func clear_character_from_grid(character_path: NodePath) -> void:
 	var old_position_keys = _occupied_cells.keys().filter(func(key): return key == character)
 	for key in old_position_keys:
 		_occupied_cells.erase(key)
+
+# Tries to add a tile to a character's occupied list.
+@rpc("any_peer", "call_local")
+func occupy_tile(character_path: NodePath, tile: Vector2i) -> bool:
+	var character = get_node_or_null(character_path)
+	if not is_instance_valid(character): return false
+
+	# Check if the desired tile is occupied by SOMEONE ELSE.
+	for other_character in _occupied_cells:
+		if other_character != character:
+			if _occupied_cells[other_character].has(tile):
+				return false # Tile is occupied by another character.
+
+	# If the tile is free, add it to this character's list.
+	if not _occupied_cells[character].has(tile):
+		_occupied_cells[character].append(tile)
+	return true
+
+# Removes a specific tile from a character's occupied list.
+@rpc("any_peer", "call_local")
+func release_occupied_tile(character_path: NodePath, tile: Vector2i) -> void:
+	var character = get_node_or_null(character_path)
+	if not is_instance_valid(character): return
+	
+	if _occupied_cells.has(character):
+		_occupied_cells[character].erase(tile)
