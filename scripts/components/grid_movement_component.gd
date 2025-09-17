@@ -111,8 +111,9 @@ func _set_next_target() -> bool:
 		# FAILURE: The tile is reserved by someone else. We must wait.
 		is_moving = false
 		character_body.velocity = Vector2.ZERO
-		# This will only be called after _ready() has run, so it's safe.
-		_repath_timer.start() # Start the patience timer.
+		# Add a safety check before trying to start the timer.
+		if is_instance_valid(_repath_timer):
+			_repath_timer.start() # Start the patience timer.
 		return false # dont move
 	
 func _physics_process(_delta: float) -> void:

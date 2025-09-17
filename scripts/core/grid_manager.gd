@@ -208,7 +208,16 @@ func print_occupied_cells() -> void:
 	
 	if players_found == 0:
 		print("  - No players found in the registry.")
-		
+
+# -- Engine-Level Events Functions ---
+# Godot calls this function for various engine-level events.
+func _notification(what: int) -> void:
+	# We check if the notification is the one sent just before deletion.
+	if what == NOTIFICATION_PREDELETE:
+		# If we have authority, we must tell the server to clean us up.
+		if owner.is_multiplayer_authority():
+			Grid.clear_character_from_grid.rpc_id(1, owner.get_path())
+
 # --- RPCs ---
 # Allows a character to register or update its current grid position.
 # When a character moves to a new tile, it should call this function.
@@ -260,3 +269,26 @@ func _receive_path_from_server(path: PackedVector2Array, character_path: NodePat
 		if is_instance_valid(movement_component):
 			# This is the final step. We tell the client's character to start moving.
 			movement_component.move_along_path(path)
+			
+# This RPC completely removes a character from all grid tracking systems.
+@rpc("any_peer", "call_local")
+func clear_character_from_grid(character_path: NodePath) -> void:
+	var character = get_node_or_null(character_path)
+	if not is_instance_valid(character):
+		# If the character is already gone, try to find it in the dictionaries by value.
+		# This is a fallback for tricky timing situations.
+		for key in _occupied_cells:
+			if key.get_path() == character_path:
+				_occupied_cells.erase(key)
+				break
+		for tile in _reserved_cells:
+			if _reserved_cells[tile].get_path() == character_path:
+				_reserved_cells.erase(tile)
+				break
+		return
+
+	# If the character is valid, remove it the normal way.
+	release_tile_reservation(character)
+	var old_position_keys = _occupied_cells.keys().filter(func(key): return key == character)
+	for key in old_position_keys:
+		_occupied_cells.erase(key)
