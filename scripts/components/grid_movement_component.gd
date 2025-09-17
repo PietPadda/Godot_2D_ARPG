@@ -31,6 +31,8 @@ var chase_target: Node2D
 var _current_tile: Vector2i
 # We will create and manage a timer for handling blocked paths.
 var _repath_timer: Timer
+# We need to remember the tile we just left, so we can release it.
+var _previous_tile: Vector2i
 
 func _ready() -> void:
 	# We must wait a frame for the multiplayer authority to be assigned.
@@ -40,6 +42,8 @@ func _ready() -> void:
 	if owner.is_multiplayer_authority():
 		# Initial position update when the character first enters the scene.
 		_current_tile = Grid.world_to_map(owner.global_position)
+		# Set the previous tile to our starting tile initially.
+		_previous_tile = _current_tile
 		# Send the initial position via RPC to the server (player ID 1).
 		Grid.update_character_position.rpc_id(1, owner.get_path(), _current_tile)
 
@@ -74,13 +78,15 @@ func move_along_path(path: PackedVector2Array, new_chase_target: Node2D = null) 
 
 # Stops all current movement immediately.
 func stop() -> void:
+	# When we stop, we should release all occupied tiles except our current one.
+	if owner.is_multiplayer_authority():
+		Grid.release_all_but_current_tile.rpc_id(1, owner.get_path(), _current_tile)
+		
 	move_path.clear() # clear the current path
 	is_moving = false # set to no longer moving
 	character_body.velocity = Vector2.ZERO # Ensure physics velocity is also stopped
-	# When we stop, we must release any tile reservation we hold.
-	Grid.release_tile_reservation(owner)
 	
-	# THE FIX: Only try to stop the timer if it has been created.
+	# Only try to stop the timer if it has been created.
 	if is_instance_valid(_repath_timer):
 		# ensure the timer is stopped.
 		_repath_timer.stop()
@@ -97,25 +103,20 @@ func _set_next_target() -> bool:
 	# "Peek" at the next waypoint's tile.
 	var next_tile = Grid.world_to_map(move_path[0])
 	
-	# Try to reserve the next tile.
-	if Grid.reserve_tile(owner, next_tile):
-		# SUCCESS: The tile is ours. Proceed with movement.
-		# THE FIX: Add the same safety check here.
-		if is_instance_valid(_repath_timer):
-			_repath_timer.stop() # No need to wait.
-		is_moving = true # still moving
-		current_target_pos = move_path[0] # set new target
-		move_path.remove_at(0) # remove it
-		return true # continue moving (bool allows func call)
-	else:
-		# FAILURE: The tile is reserved by someone else. We must wait.
-		is_moving = false
-		character_body.velocity = Vector2.ZERO
-		# Add a safety check before trying to start the timer.
-		if is_instance_valid(_repath_timer):
-			_repath_timer.start() # Start the patience timer.
-		return false # dont move
+	# Proactively occupy the next tile. We send the request to the server.
+	if owner.is_multiplayer_authority():
+		# We will create this occupy_tile RPC in the GridManager next.
+		Grid.occupy_tile.rpc_id(1, owner.get_path(), next_tile)
 	
+	# NOTE: We are assuming the occupation will succeed. The server is the authority.
+	# The path we received was already checked for validity.
+	if is_instance_valid(_repath_timer):
+		_repath_timer.stop() # No need to wait.
+	is_moving = true # still moving
+	current_target_pos = move_path[0] # set new target
+	move_path.remove_at(0) # remove it
+	return true # continue moving (bool allows func call)
+		
 func _physics_process(_delta: float) -> void:
 	if not is_moving:
 		return
@@ -131,6 +132,13 @@ func _physics_process(_delta: float) -> void:
 		
 	# Check if we've arrived at the current waypoint.
 	if character_body.global_position.distance_to(current_target_pos) < STOPPING_DISTANCE:
+		# We have arrived at the 'current_tile'. Now we release the 'previous_tile'.
+		if owner.is_multiplayer_authority():
+			Grid.release_occupied_tile.rpc_id(1, owner.get_path(), _previous_tile)
+		
+		# Update our trackers for the next move.
+		_previous_tile = _current_tile
+		
 		# We emit the signal BEFORE getting the next waypoint.
 		# This lets any listener (like a state machine) react to the progress.
 		emit_signal("waypoint_reached")
@@ -152,11 +160,6 @@ func _physics_process(_delta: float) -> void:
 	if new_tile != _current_tile:
 		_current_tile = new_tile
 		
-		# If they have, we notify the GridManager of their new position.
-		# Only the authority for this character sends the update to the server.
-		if owner.is_multiplayer_authority():
-			Grid.update_character_position.rpc_id(1, owner.get_path(), new_tile)
-	
 # --- Signal Handlers ---
 # This function runs after our short "patience" delay.
 func _on_repath_timer_timeout() -> void:
