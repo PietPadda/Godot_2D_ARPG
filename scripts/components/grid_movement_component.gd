@@ -29,6 +29,8 @@ var chase_target: Node2D
 
 # We'll use this to track the character's current position on the grid.
 var _current_tile: Vector2i
+# We will create and manage a timer for handling blocked paths.
+var _repath_timer: Timer
 
 func _ready() -> void:
 	# We must wait a frame for the multiplayer authority to be assigned.
@@ -41,6 +43,13 @@ func _ready() -> void:
 		# Send the initial position via RPC to the server (player ID 1).
 		Grid.update_character_position.rpc_id(1, owner.get_path(), _current_tile)
 
+	# Create the patience timer.
+	_repath_timer = Timer.new()
+	_repath_timer.one_shot = true
+	_repath_timer.wait_time = 0.25 # A short wait of 250ms
+	_repath_timer.timeout.connect(_on_repath_timer_timeout)
+	add_child(_repath_timer)
+	
 # Public API
 # Starts moving the character along a given path.
 func move_along_path(path: PackedVector2Array, new_chase_target: Node2D = null) -> void:
@@ -71,6 +80,9 @@ func stop() -> void:
 	# When we stop, we must release any tile reservation we hold.
 	Grid.release_tile_reservation(owner)
 	
+	# ensure the timer is stopped.
+	_repath_timer.stop()
+	
 # Internal Logic
 # Sets the next tile in the path as the active target.
 func _set_next_target() -> bool:
@@ -86,6 +98,7 @@ func _set_next_target() -> bool:
 	# Try to reserve the next tile.
 	if Grid.reserve_tile(owner, next_tile):
 		# SUCCESS: The tile is ours. Proceed with movement.
+		_repath_timer.stop() # No need to wait.
 		is_moving = true # still moving
 		current_target_pos = move_path[0] # set new target
 		move_path.remove_at(0) # remove it
@@ -94,14 +107,7 @@ func _set_next_target() -> bool:
 		# FAILURE: The tile is reserved by someone else. We must wait.
 		is_moving = false
 		character_body.velocity = Vector2.ZERO
-		
-		# The "Smart Wait": By emitting this, we tell our "brain" (the state machine)
-		# that we're blocked. The brain will then request a new path, automatically
-		# routing around the character that blocked us.
-		# THE FIX: We defer the signal emission.
-		# This breaks the infinite loop by pushing the next path request
-		# to the end of the current frame's processing queue.
-		call_deferred("emit_signal", "waypoint_reached")
+		_repath_timer.start() # Start the patience timer.
 		return false # dont move
 	
 func _physics_process(_delta: float) -> void:
@@ -145,3 +151,11 @@ func _physics_process(_delta: float) -> void:
 		if owner.is_multiplayer_authority():
 			Grid.update_character_position.rpc_id(1, owner.get_path(), new_tile)
 	
+# --- Signal Handlers ---
+# This function runs after our short "patience" delay.
+func _on_repath_timer_timeout() -> void:
+	# After waiting, we try one more time to get the next target.
+	if not _set_next_target():
+		# If it's STILL blocked, then it's a serious problem.
+		# NOW we emit the signal to tell our brain to find a whole new path.
+		emit_signal("waypoint_reached")
