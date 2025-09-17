@@ -42,8 +42,6 @@ func _ready() -> void:
 	if owner.is_multiplayer_authority():
 		# Initial position update when the character first enters the scene.
 		_current_tile = Grid.world_to_map(owner.global_position)
-		# Set the previous tile to our starting tile initially.
-		_previous_tile = _current_tile
 		# Send the initial position via RPC to the server (player ID 1).
 		Grid.update_character_position.rpc_id(1, owner.get_path(), _current_tile)
 
@@ -103,6 +101,9 @@ func _set_next_target() -> bool:
 	# "Peek" at the next waypoint's tile.
 	var next_tile = Grid.world_to_map(move_path[0])
 	
+	# THE LOGIC SHIFT: Before we move, our previous tile is our current tile.
+	_previous_tile = _current_tile
+	
 	# Proactively occupy the next tile. We send the request to the server.
 	if owner.is_multiplayer_authority():
 		# We will create this occupy_tile RPC in the GridManager next.
@@ -118,6 +119,9 @@ func _set_next_target() -> bool:
 	return true # continue moving (bool allows func call)
 		
 func _physics_process(_delta: float) -> void:
+	# We no longer care about the physical tile position during movement.
+	# The logic for updating _current_tile here is REMOVED.
+	
 	if not is_moving:
 		return
 	
@@ -132,12 +136,12 @@ func _physics_process(_delta: float) -> void:
 		
 	# Check if we've arrived at the current waypoint.
 	if character_body.global_position.distance_to(current_target_pos) < STOPPING_DISTANCE:
+		# We have arrived at our destination. NOW we update our logical position.
+		_current_tile = Grid.world_to_map(current_target_pos)
+		
 		# We have arrived at the 'current_tile'. Now we release the 'previous_tile'.
 		if owner.is_multiplayer_authority():
 			Grid.release_occupied_tile.rpc_id(1, owner.get_path(), _previous_tile)
-		
-		# Update our trackers for the next move.
-		_previous_tile = _current_tile
 		
 		# We emit the signal BEFORE getting the next waypoint.
 		# This lets any listener (like a state machine) react to the progress.
