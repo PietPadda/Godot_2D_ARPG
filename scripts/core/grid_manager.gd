@@ -86,15 +86,26 @@ func build_level_graph():
 func find_path(start_coord: Vector2i, end_coord: Vector2i, pathing_character: Node = null) -> PackedVector2Array:
 	# Temporarily mark occupied cells as solid for this calculation.
 	var temporarily_solid_points: Array[Vector2i] = []
+	
+	# Mark OCCUPIED cells as temporary obstacles
 	for character in _occupied_cells:
 		# Make sure we don't mark the pathing character's own tile as an obstacle.
 		if character != pathing_character:
 			var cell = _occupied_cells[character]
 			# Only mark it if it's not already solid (e.g., a character standing in a wall).
-			# THE FIX IS HERE: We add a check to ensure we never mark the destination tile as solid.
+			# We add a check to ensure we never mark the destination tile as solid.
 			if not astar_grid.is_point_solid(cell) and cell != end_coord:
 				astar_grid.set_point_solid(cell, true)
 				temporarily_solid_points.append(cell)
+	
+	# Mark RESERVED cells as temporary obstacles
+	for tile in _reserved_cells:
+		var character_reserving = _reserved_cells[tile]
+		# Make sure we don't block a path because of our own reservation.
+		if character_reserving != pathing_character:
+			if not astar_grid.is_point_solid(tile) and tile != end_coord:
+				astar_grid.set_point_solid(tile, true)
+				temporarily_solid_points.append(tile)
 	
 	# AStarGrid2D returns an array of map coordinates directly.
 	var map_path: PackedVector2Array = astar_grid.get_point_path(start_coord, end_coord)
@@ -208,15 +219,6 @@ func print_occupied_cells() -> void:
 	
 	if players_found == 0:
 		print("  - No players found in the registry.")
-
-# -- Engine-Level Events Functions ---
-# Godot calls this function for various engine-level events.
-func _notification(what: int) -> void:
-	# We check if the notification is the one sent just before deletion.
-	if what == NOTIFICATION_PREDELETE:
-		# If we have authority, we must tell the server to clean us up.
-		if owner.is_multiplayer_authority():
-			Grid.clear_character_from_grid.rpc_id(1, owner.get_path())
 
 # --- RPCs ---
 # Allows a character to register or update its current grid position.
