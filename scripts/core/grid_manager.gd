@@ -284,23 +284,19 @@ func _receive_path_from_server(path: PackedVector2Array, character_path: NodePat
 @rpc("any_peer", "call_local")
 func clear_character_from_grid(character_path: NodePath) -> void:
 	var character = get_node_or_null(character_path)
-
+	# It's possible the character is already gone, so we must check if it's valid.
 	if not is_instance_valid(character):
-		# If the character is already gone, try to find it in the dictionaries by value.
-		# This is a fallback for tricky timing situations.
-		for key in _occupied_cells:
-			if key.get_path() == character_path:
-				_occupied_cells.erase(key)
-				break
-		return
+		return # Do nothing if the character node is already deleted.
+	
+	# We now find the character in the dictionary's values, not its keys.
+	var tile_to_free = null
+	# Iterate through all occupied tiles.
+	for tile in _occupied_cells:
+		# If the character occupying this tile is the one we want to remove...
+		if _occupied_cells[tile] == character:
+			tile_to_free = tile # ...mark this tile for removal...
+			break # ...and stop searching.
 
-	# If the character is valid, remove it the normal way.
-	var old_position_keys = _occupied_cells.keys().filter(func(key): return key == character)
-	for key in old_position_keys:
-		_occupied_cells.erase(key)
-
-# REMOVED: We no longer need these complex RPCs for tile management.
-# The new `occupy_tile` and `release_tile` handle this server-side.
-# @rpc(...) func occupy_tile(...) <-- REMOVED
-# @rpc(...) func release_occupied_tile(...) <-- REMOVED
-# @rpc(...) func release_all_but_current_tile(...) <-- REMOVED
+	# If we found the tile the character was on, free it.
+	if tile_to_free != null:
+		_occupied_cells.erase(tile_to_free)
