@@ -74,9 +74,11 @@ func stop() -> void:
 	if is_instance_valid(_active_tween):
 		_active_tween.kill()
 	
-	# When we stop, we should release all occupied tiles except our current one.
-	if owner.is_multiplayer_authority():
-		Grid.release_all_but_current_tile.rpc_id(1, owner.get_path(), _current_tile)
+	# THE FIX: We no longer need to manage tile releases when stopping.
+	# The server already knows our last occupied position. When we request a new
+	# path, the GridManager's `occupy_tile` will handle releasing it.
+	# if owner.is_multiplayer_authority():
+	# 	Grid.release_all_but_current_tile.rpc_id(1, owner.get_path(), _current_tile) # <-- DELETE THIS
 		
 	move_path.clear() # clear the current path
 	is_moving = false # set to no longer moving
@@ -132,9 +134,10 @@ func _on_move_step_finished():
 	# Our "current" tile is now the one we just arrived at.
 	_current_tile = Grid.world_to_map(owner.global_position)
 	
-	# NOW we can authoritatively release the actual previous tile.
+	# THE FIX: We now use our new, simple RPC to tell the server we've vacated the previous tile.
 	if owner.is_multiplayer_authority():
-		Grid.release_occupied_tile.rpc_id(1, owner.get_path(), _previous_tile)
+		# Grid.release_occupied_tile.rpc_id(1, owner.get_path(), _previous_tile) # <-- DELETE THIS
+		Grid.server_release_tile.rpc_id(1, _previous_tile)
 
 	emit_signal("waypoint_reached")
 	
