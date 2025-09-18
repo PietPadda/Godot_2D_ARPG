@@ -95,12 +95,11 @@ func _start_next_move_step() -> bool:
 		return false # and end (bool allows func call)
 	
 	# "Peek" at the next waypoint's tile.
-	var next_tile = Grid.world_to_map(move_path[0])
-		
-	# Proactively occupy the next tile. We send the request to the server.
-	if owner.is_multiplayer_authority():
-		# We will create this occupy_tile RPC in the GridManager next.
-		Grid.occupy_tile.rpc_id(1, owner.get_path(), next_tile)
+	# var next_tile = Grid.world_to_map(move_path[0])
+	# THE CHANGE: We no longer call occupy_tile from the client.
+	# The server has already proactively occupied this tile for us.
+	# if owner.is_multiplayer_authority():
+	# 	Grid.occupy_tile.rpc_id(1, owner.get_path(), next_tile)
 	
 	# NOTE: We are assuming the occupation will succeed. The server is the authority.
 	is_moving = true # still moving

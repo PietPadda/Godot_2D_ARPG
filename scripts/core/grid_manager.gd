@@ -117,23 +117,40 @@ func find_path(start_coord: Vector2i, end_coord: Vector2i, pathing_character: No
 	return world_path
 
 # This new function handles the logic for both host and clients.
+# This is the function that is called by the State Machine's _recalculate_path()
 func request_path(start_coord: Vector2i, end_coord: Vector2i, character: Node) -> void:
-	# is_multiplayer_authority() checks if the local machine controls this character.
-	if character.is_multiplayer_authority():
-		# If we are the host/authority, calculate the path directly.
-		var path = find_path(start_coord, end_coord, character)
+	# This function now ONLY runs on the server.
+	# If we're a client, we send the request and do nothing else locally.
+	if not multiplayer.is_server():
+		_find_path_on_server.rpc_id(1, start_coord, end_coord, character.get_path())
+		return
 		
-		# Now, deliver the path to the correct machine.
-		if character.is_multiplayer_authority():
-			# If the character is controlled by me (the host's player or an enemy), apply the path directly.
-			var movement_component = character.get_node_or_null("GridMovementComponent")
-			if movement_component:
-				movement_component.move_along_path(path)
-		else:
-			# If the character is controlled by a client, find their ID...
-			var client_id = character.get_multiplayer_authority()
-			# ...and send the path back to them via RPC.
-			_find_path_on_server.rpc_id(client_id, start_coord, end_coord, character.get_path())
+	# --- The below ONLY run on the HOST ---
+	# Generate a potential path.
+	var path = find_path(start_coord, end_coord, character)
+	
+	# If a path was found, ATOMICALLY check and occupy the first step.
+	if not path.is_empty():
+		var next_tile = world_to_map(path[0])
+		# We call occupy_tile LOCALLY, not as an RPC.
+		var success = occupy_tile(character.get_path(), next_tile) 
+		
+		if not success:
+			# The first step was already blocked! This path is invalid.
+			# Clear the path so the character knows to wait and try again.
+			path.clear()
+	
+	# Deliver the final, validated (or empty) path to the character.
+	if character.is_multiplayer_authority(): # Is it the host's character?
+		# If the character is controlled by me (the host's player or an enemy), apply the path directly.
+		var movement_component = character.get_node_or_null("GridMovementComponent")
+		if movement_component:
+			movement_component.move_along_path(path)
+	else: # It's a client's character.
+		# If the character is controlled by a client, find their ID...
+		var client_id = character.get_multiplayer_authority()
+		# ...and send the path back to them via RPC.
+		_receive_path_from_server.rpc_id(client_id, start_coord, end_coord, character.get_path())
 	
 # Returns an array of the four cardinal tiles adjacent to the given tile.
 # Using 4 directions is more stable for grid pathfinding than 8.
@@ -260,10 +277,14 @@ func clear_character_from_grid(character_path: NodePath) -> void:
 		_occupied_cells.erase(key)
 
 # Tries to add a tile to a character's occupied list.
+# We also need to fix our occupy_tile RPC to be callable locally by the server.
 @rpc("any_peer", "call_local")
-func occupy_tile(character_path: NodePath, tile: Vector2i) -> bool:
-	var character = get_node_or_null(character_path)
-	if not is_instance_valid(character): return false
+func occupy_tile(character_or_path, tile: Vector2i) -> bool:
+	var character: Node
+	if character_or_path is NodePath:
+		character = get_node_or_null(character_or_path)
+	else:
+		character = character_or_path
 
 	# Check if the desired tile is occupied by SOMEONE ELSE.
 	for other_character in _occupied_cells:
