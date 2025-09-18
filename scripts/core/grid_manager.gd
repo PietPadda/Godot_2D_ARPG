@@ -231,6 +231,14 @@ func print_occupied_cells() -> void:
 		print("  - No players found in the registry.")
 
 # --- RPCs ---
+
+# Allows clients to request the server to free a tile they've just left.
+@rpc("any_peer", "call_local")
+func server_release_tile(tile: Vector2i) -> void:
+	# This RPC is just a secure entry point.
+	# The actual logic is in our existing server-side function.
+	release_tile(tile)
+	
 # When a character spawns, they occupy their starting tile.
 @rpc("any_peer", "call_local")
 func update_character_position(character_path: NodePath, new_position: Vector2i):
