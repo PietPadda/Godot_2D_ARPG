@@ -8,10 +8,11 @@ const Player = preload("res://scripts/player/player.gd")
 # Our debug tile scene
 @export var debug_tile_scene: PackedScene
 
-# REFACTORED DATA STRUCTURE
-# We're changing the structure to: { tile_coordinate: character_instance }
-# This makes lookups instant and enforces one character per tile.
-var _occupied_cells := {}
+# We now use TWO dictionaries to track occupation for high performance.
+# The primary, authoritative source of truth.
+var _occupied_cells := {} # { tile_coordinate: character_instance }
+# A reverse-lookup dictionary for instant character location checks.
+var _character_locations := {} # { character_instance: tile_coordinate }
 
 # This will hold a reference to the current level's TileMapLayer.
 # Convert the variable into a property with a setter.
@@ -183,33 +184,31 @@ func map_to_world(map_position: Vector2i) -> Vector2:
 		return tile_map_layer.to_global(local_pos)
 	return Vector2.ZERO # Return a default value if the tilemap isn't set
 	
-# REFACTORED: This is now the ONLY way to claim a tile. It's atomic on the server.
-# This function is no longer an RPC, it's a server-only helper.
+# This is now the ONLY way to claim a tile. It's atomic on the server.
+# Now updates both dictionaries for atomic, high-speed operations.
 func occupy_tile(character: Node, new_tile: Vector2i) -> bool:
-	# Check if the new tile is already occupied.
-	if _occupied_cells.has(new_tile):
-		return false # Failure: Tile is taken.
+	# Check if the new tile is occupied by SOMEONE ELSE.
+	if _occupied_cells.has(new_tile) and _occupied_cells[new_tile] != character:
+		return false # Failure: Tile is taken by another character.
 
-	# Find and release the character's old tile, if they had one.
-	# This is inefficient, so we'll create a reverse-lookup dictionary for performance.
-	# For now, we iterate to find the key (tile) from the value (character).
-	var old_tile = null
-	for tile in _occupied_cells:
-		if _occupied_cells[tile] == character:
-			old_tile = tile
-			break
-	if old_tile != null:
+	# Find and release the character's old tile using our fast lookup.
+	if _character_locations.has(character):
+		var old_tile = _character_locations[character]
 		_occupied_cells.erase(old_tile)
-
-	# Occupy the new tile.
+		
+	# Occupy the new tile in both dictionaries.
 	_occupied_cells[new_tile] = character
+	_character_locations[character] = new_tile
 	return true # Success!
 	
 # A simple helper to free a tile when a character moves off it.
-# We'll use this from the GridMovementComponent later.
+# Uses the fast lookup dictionary.
 func release_tile(tile: Vector2i):
 	if _occupied_cells.has(tile):
+		var character = _occupied_cells[tile]
 		_occupied_cells.erase(tile)
+		_character_locations.erase(character)
+
 
 # --- Debug ---
 # A debug function to print the contents of our occupied cells registry.
@@ -288,15 +287,8 @@ func clear_character_from_grid(character_path: NodePath) -> void:
 	if not is_instance_valid(character):
 		return # Do nothing if the character node is already deleted.
 	
-	# We now find the character in the dictionary's values, not its keys.
-	var tile_to_free = null
-	# Iterate through all occupied tiles.
-	for tile in _occupied_cells:
-		# If the character occupying this tile is the one we want to remove...
-		if _occupied_cells[tile] == character:
-			tile_to_free = tile # ...mark this tile for removal...
-			break # ...and stop searching.
-
-	# If we found the tile the character was on, free it.
-	if tile_to_free != null:
+	# Use our new, high-speed lookup dictionary.
+	if _character_locations.has(character):
+		var tile_to_free = _character_locations[character]
 		_occupied_cells.erase(tile_to_free)
+		_character_locations.erase(character)
