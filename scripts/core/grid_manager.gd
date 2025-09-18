@@ -125,12 +125,9 @@ func request_path(start_coord: Vector2i, end_coord: Vector2i, character: Node) -
 	# Generate a potential path.
 	var full_path = find_path(start_coord, end_coord, character)
 	
-	# THE FIX: We must be absolutely sure the path is not empty before trying to access its elements.
+	# THE REAL FIX: If a path exists, THEN we process it.
 	if not full_path.is_empty():
-		# If no path is found, we do nothing. The empty `final_path` will be sent,
-		# correctly telling the character that it cannot move right now.
-		pass
-	else: 
+		# This code now only runs when we are GUARANTEED to have a valid path.
 		# If a path exists, we can safely access its first element.
 		var next_tile = world_to_map(full_path[0])
 		# We call occupy_tile LOCALLY, not as an RPC.
@@ -140,6 +137,9 @@ func request_path(start_coord: Vector2i, end_coord: Vector2i, character: Node) -
 			# Only add the first step of the path to the final path.
 			final_path.append(full_path[0])
 		# If success is false, final_path remains empty, telling the character to wait.
+	
+	# If full_path was empty, the entire 'if' block is skipped, and we correctly
+	# send an empty final_path, telling the character to wait.	
 	
 	# Deliver the final, validated (or empty) path to the character.
 	if character.is_multiplayer_authority(): # Is it the host's character?
