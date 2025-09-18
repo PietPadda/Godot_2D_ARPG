@@ -120,30 +120,34 @@ func request_path(start_coord: Vector2i, end_coord: Vector2i, character: Node) -
 		
 	# --- The below ONLY run on the HOST ---
 	# Generate a potential path.
-	var path = find_path(start_coord, end_coord, character)
+	var path: PackedVector2Array
+	var final_path: PackedVector2Array = [] # This will be the path we actually send.
+	
+	# Generate a potential path.
+	var full_path = find_path(start_coord, end_coord, character)
 	
 	# If a path was found, ATOMICALLY check and occupy the first step.
-	if not path.is_empty():
+	if not full_path.is_empty():
 		var next_tile = world_to_map(path[0])
 		# We call occupy_tile LOCALLY, not as an RPC.
 		var success = occupy_tile(character, next_tile) 
 		
-		if not success:
-			# The first step was already blocked! This path is invalid.
-			# Clear the path so the character knows to wait and try again.
-			path.clear()
+		if success:
+			# THE FIX: Only add the first step of the path to the final path.
+			final_path.append(full_path[0])
+		# If success is false, final_path remains empty, telling the character to wait.
 	
 	# Deliver the final, validated (or empty) path to the character.
 	if character.is_multiplayer_authority(): # Is it the host's character?
 		# If the character is controlled by me (the host's player or an enemy), apply the path directly.
 		var movement_component = character.get_node_or_null("GridMovementComponent")
 		if movement_component:
-			movement_component.move_along_path(path)
+			movement_component.move_along_path(final_path)
 	else: # It's a client's character.
 		# If the character is controlled by a client, find their ID...
 		var client_id = character.get_multiplayer_authority()
 		# ...and send the path back to them via RPC.
-		_receive_path_from_server.rpc_id(client_id, path, character.get_path())
+		_receive_path_from_server.rpc_id(client_id, final_path, character.get_path())
 	
 # Returns an array of the four cardinal tiles adjacent to the given tile.
 # Using 4 directions is more stable for grid pathfinding than 8.
