@@ -8,11 +8,10 @@ const Player = preload("res://scripts/player/player.gd")
 # Our debug tile scene
 @export var debug_tile_scene: PackedScene
 
-# We'll use a dictionary to keep track of which character is on which tile.
-# The structure will be: { character_instance: tile_coordinate }
+# REFACTORED DATA STRUCTURE
+# We're changing the structure to: { tile_coordinate: character_instance }
+# This makes lookups instant and enforces one character per tile.
 var _occupied_cells := {}
-# We can now completely remove the reservation system.
-# var _reserved_cells := {} # <-- DELETE THIS
 
 # This will hold a reference to the current level's TileMapLayer.
 # Convert the variable into a property with a setter.
@@ -87,20 +86,13 @@ func find_path(start_coord: Vector2i, end_coord: Vector2i, pathing_character: No
 	var temporarily_solid_points: Array[Vector2i] = []
 	
 	# Mark OCCUPIED cells as temporary obstacles
-	for character in _occupied_cells:
+	for cell in _occupied_cells:
+		var character = _occupied_cells[cell]
 		# Make sure we don't mark the pathing character's own tile as an obstacle.
 		if character != pathing_character:
-			# Get the list of tiles this character occupies.
-			# We cast the dictionary value to a generic Array.
-			# Godot knows it's an array, but the type hint needs this for safety.
-			var occupied_tiles: Array = _occupied_cells[character]
-			for cell in occupied_tiles:
-				if not astar_grid.is_point_solid(cell) and cell != end_coord:
-					astar_grid.set_point_solid(cell, true)
-					temporarily_solid_points.append(cell)
-	
-	# We no longer need to check _reserved_cells.
-	# <-- DELETE the reservation loop that was here.
+			if not astar_grid.is_point_solid(cell) and cell != end_coord:
+				astar_grid.set_point_solid(cell, true)
+				temporarily_solid_points.append(cell)
 	
 	# AStarGrid2D returns an array of map coordinates directly.
 	var map_path: PackedVector2Array = astar_grid.get_point_path(start_coord, end_coord)
@@ -133,7 +125,7 @@ func request_path(start_coord: Vector2i, end_coord: Vector2i, character: Node) -
 	if not path.is_empty():
 		var next_tile = world_to_map(path[0])
 		# We call occupy_tile LOCALLY, not as an RPC.
-		var success = occupy_tile(character.get_path(), next_tile) 
+		var success = occupy_tile(character, next_tile) 
 		
 		if not success:
 			# The first step was already blocked! This path is invalid.
@@ -150,7 +142,7 @@ func request_path(start_coord: Vector2i, end_coord: Vector2i, character: Node) -
 		# If the character is controlled by a client, find their ID...
 		var client_id = character.get_multiplayer_authority()
 		# ...and send the path back to them via RPC.
-		_receive_path_from_server.rpc_id(client_id, start_coord, end_coord, character.get_path())
+		_receive_path_from_server.rpc_id(client_id, path, character.get_path())
 	
 # Returns an array of the four cardinal tiles adjacent to the given tile.
 # Using 4 directions is more stable for grid pathfinding than 8.
@@ -190,11 +182,34 @@ func map_to_world(map_position: Vector2i) -> Vector2:
 		var local_pos = tile_map_layer.map_to_local(map_position)
 		return tile_map_layer.to_global(local_pos)
 	return Vector2.ZERO # Return a default value if the tilemap isn't set
+	
+# REFACTORED: This is now the ONLY way to claim a tile. It's atomic on the server.
+# This function is no longer an RPC, it's a server-only helper.
+func occupy_tile(character: Node, new_tile: Vector2i) -> bool:
+	# Check if the new tile is already occupied.
+	if _occupied_cells.has(new_tile):
+		return false # Failure: Tile is taken.
 
-# --- Tile Reservation API ---
-# We remove the entire Tile Reservation API section.
-# func reserve_tile(...) # <-- DELETE
-# func release_tile_reservation(...) # <-- DELETE
+	# Find and release the character's old tile, if they had one.
+	# This is inefficient, so we'll create a reverse-lookup dictionary for performance.
+	# For now, we iterate to find the key (tile) from the value (character).
+	var old_tile = null
+	for tile in _occupied_cells:
+		if _occupied_cells[tile] == character:
+			old_tile = tile
+			break
+	if old_tile != null:
+		_occupied_cells.erase(old_tile)
+
+	# Occupy the new tile.
+	_occupied_cells[new_tile] = character
+	return true # Success!
+	
+# A simple helper to free a tile when a character moves off it.
+# We'll use this from the GridMovementComponent later.
+func release_tile(tile: Vector2i):
+	if _occupied_cells.has(tile):
+		_occupied_cells.erase(tile)
 
 # --- Debug ---
 # A debug function to print the contents of our occupied cells registry.
@@ -216,7 +231,7 @@ func print_occupied_cells() -> void:
 		print("  - No players found in the registry.")
 
 # --- RPCs ---
-# This function is now much simpler. It just sets the initial occupied tile.
+# When a character spawns, they occupy their starting tile.
 @rpc("any_peer", "call_local")
 func update_character_position(character_path: NodePath, new_position: Vector2i):
 	# On the server, we get the node using the path sent by the client.
@@ -224,8 +239,8 @@ func update_character_position(character_path: NodePath, new_position: Vector2i)
 	if not is_instance_valid(character):
 		return # If the character isn't found (e.g., just died), do nothing.
 		
-	# On initial spawn, a character occupies one tile.
-	_occupied_cells[character] = [new_position]
+	# On spawn, just occupy the tile directly.
+	occupy_tile(character, new_position)
 	
 # This function ONLY runs on the server, as requested by a client.
 # We change the annotation to allow calls from ANY client.
@@ -276,46 +291,8 @@ func clear_character_from_grid(character_path: NodePath) -> void:
 	for key in old_position_keys:
 		_occupied_cells.erase(key)
 
-# Tries to add a tile to a character's occupied list.
-# We also need to fix our occupy_tile RPC to be callable locally by the server.
-@rpc("any_peer", "call_local")
-func occupy_tile(character_or_path, tile: Vector2i) -> bool:
-	var character: Node
-	if character_or_path is NodePath:
-		character = get_node_or_null(character_or_path)
-	else:
-		character = character_or_path
-
-	# Check if the desired tile is occupied by SOMEONE ELSE.
-	for other_character in _occupied_cells:
-		if other_character != character:
-			if _occupied_cells[other_character].has(tile):
-				return false # Tile is occupied by another character.
-
-	# First, ensure this character has an entry in our dictionary.
-	# If it doesn't, create an empty one.
-	if not _occupied_cells.has(character):
-		_occupied_cells[character] = []
-	
-	# Now it's safe to check
-	# If the tile is free, add it to this character's list.
-	if not _occupied_cells[character].has(tile):
-		_occupied_cells[character].append(tile)
-	return true
-
-# Removes a specific tile from a character's occupied list.
-@rpc("any_peer", "call_local")
-func release_occupied_tile(character_path: NodePath, tile: Vector2i) -> void:
-	var character = get_node_or_null(character_path)
-	if not is_instance_valid(character): return
-	
-	if _occupied_cells.has(character):
-		_occupied_cells[character].erase(tile)
-
-# Wipes a character's occupied list and resets it to only their current tile.
-@rpc("any_peer", "call_local")
-func release_all_but_current_tile(character_path: NodePath, current_tile: Vector2i):
-	var character = get_node_or_null(character_path)
-	if is_instance_valid(character):
-		# Simply overwrite their list with a new one containing only their current tile.
-		_occupied_cells[character] = [current_tile]
+# REMOVED: We no longer need these complex RPCs for tile management.
+# The new `occupy_tile` and `release_tile` handle this server-side.
+# @rpc(...) func occupy_tile(...) <-- REMOVED
+# @rpc(...) func release_occupied_tile(...) <-- REMOVED
+# @rpc(...) func release_all_but_current_tile(...) <-- REMOVED
