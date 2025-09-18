@@ -125,21 +125,22 @@ func request_path(start_coord: Vector2i, end_coord: Vector2i, character: Node) -
 	# Generate a potential path.
 	var full_path = find_path(start_coord, end_coord, character)
 	
-	# THE REAL FIX: If a path exists, THEN we process it.
-	if not full_path.is_empty():
-		# This code now only runs when we are GUARANTEED to have a valid path.
-		# If a path exists, we can safely access its first element.
-		var next_tile = world_to_map(full_path[0])
+	# THE ACTUAL REAL FIX: A movable path must contain more than just the starting point.
+	# We need to check if the path has at least 2 points (our current location, and the first step).
+	if full_path.size() > 1:
+		# The first element (index 0) is our current tile.
+		# The second element (index 1) is the first actual step we need to take.
+		var first_step_world_pos = full_path[1]
+		var next_tile = world_to_map(first_step_world_pos)
 		# We call occupy_tile LOCALLY, not as an RPC.
 		var success = occupy_tile(character, next_tile) 
 		
 		if success:
-			# Only add the first step of the path to the final path.
-			final_path.append(full_path[0])
-		# If success is false, final_path remains empty, telling the character to wait.
+			# If we successfully reserved the tile, add that step to our path.
+			final_path.append(first_step_world_pos)
 	
-	# If full_path was empty, the entire 'if' block is skipped, and we correctly
-	# send an empty final_path, telling the character to wait.	
+	# If full_path has 1 or 0 elements, it means there's no valid step to take.
+	# The 'if' block is skipped, and we correctly send an empty final_path.
 	
 	# Deliver the final, validated (or empty) path to the character.
 	if character.is_multiplayer_authority(): # Is it the host's character?
