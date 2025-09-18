@@ -120,20 +120,24 @@ func request_path(start_coord: Vector2i, end_coord: Vector2i, character: Node) -
 		
 	# --- The below ONLY run on the HOST ---
 	# Generate a potential path.
-	var path: PackedVector2Array
 	var final_path: PackedVector2Array = [] # This will be the path we actually send.
 	
 	# Generate a potential path.
 	var full_path = find_path(start_coord, end_coord, character)
 	
-	# If a path was found, ATOMICALLY check and occupy the first step.
+	# THE FIX: We must be absolutely sure the path is not empty before trying to access its elements.
 	if not full_path.is_empty():
-		var next_tile = world_to_map(path[0])
+		# If no path is found, we do nothing. The empty `final_path` will be sent,
+		# correctly telling the character that it cannot move right now.
+		pass
+	else: 
+		# If a path exists, we can safely access its first element.
+		var next_tile = world_to_map(full_path[0])
 		# We call occupy_tile LOCALLY, not as an RPC.
 		var success = occupy_tile(character, next_tile) 
 		
 		if success:
-			# THE FIX: Only add the first step of the path to the final path.
+			# Only add the first step of the path to the final path.
 			final_path.append(full_path[0])
 		# If success is false, final_path remains empty, telling the character to wait.
 	
