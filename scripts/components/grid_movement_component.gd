@@ -146,15 +146,8 @@ func _on_move_step_finished():
 		# If there are no more steps, the path is finished.
 		emit_signal("path_finished")
 
+# THE FIX: This function should not contain game logic. A character must
+# always complete its move to a tile's center. We are removing this function
+# to prevent movement from being interrupted mid-tween.
 func _physics_process(_delta: float) -> void:
-	# This function is now only for checking game logic, not for movement.
-	if not is_moving:
-		return
-
-	# This safety check is still crucial!
-	if is_instance_valid(chase_target):
-		var attack_range = stats_component.get_total_stat("range")
-		if owner.global_position.distance_to(chase_target.global_position) <= attack_range:
-			stop()
-			emit_signal("path_finished")
-			return
+	pass
