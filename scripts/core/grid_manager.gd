@@ -118,6 +118,7 @@ func request_path(start_coord: Vector2i, end_coord: Vector2i, character: Node) -
 		_find_path_on_server.rpc_id(1, start_coord, end_coord, character.get_path())
 		return
 		
+		
 	# --- The below ONLY run on the HOST ---
 	# Generate a potential path.
 	var final_path: PackedVector2Array = [] # This will be the path we actually send.
@@ -125,24 +126,27 @@ func request_path(start_coord: Vector2i, end_coord: Vector2i, character: Node) -
 	# Generate a potential path.
 	var full_path = find_path(start_coord, end_coord, character)
 	
-	# THE ACTUAL REAL FIX: A movable path must contain more than just the starting point.
-	# We need to check if the path has at least 2 points (our current location, and the first step).
-	if full_path.size() > 1:
-		# The first element (index 0) is our current tile.
-		# The second element (index 1) is the first actual step we need to take.
-		var first_step_world_pos = full_path[1]
-		var next_tile = world_to_map(first_step_world_pos)
-		# We call occupy_tile LOCALLY, not as an RPC.
-		var success = occupy_tile(character, next_tile) 
-		
-		if success:
-			# If we successfully reserved the tile, add that step to our path.
-			final_path.append(first_step_world_pos)
+	# THE FIX: Differentiate between Player and Enemy pathfinding logic.
+	if character is Player:
+		# PLAYER LOGIC: Return the full path. The GridMovementComponent
+		# already handles stripping the starting point. No tile reservation is needed
+		# as enemies should react to the player's current position.
+		final_path = full_path
+	else:
+		# ENEMY LOGIC: Return a single, reserved step to prevent stacking.
+		final_path = [] # Default to an empty path.
+		if full_path.size() > 1:
+			# The first element (index 0) is our current tile.
+			# The second element (index 1) is the first actual step we need to take.
+			var first_step_world_pos = full_path[1]
+			var next_tile = world_to_map(first_step_world_pos)
+			# We call occupy_tile LOCALLY, not as an RPC.
+			var success = occupy_tile(character, next_tile) 
+			if success:
+				# If we successfully reserved the tile, add that step to our path.
+				final_path.append(first_step_world_pos)
 	
-	# If full_path has 1 or 0 elements, it means there's no valid step to take.
-	# The 'if' block is skipped, and we correctly send an empty final_path.
-	
-	# Deliver the final, validated (or empty) path to the character.
+	# Deliver the appropriate path (full or single-step) to the character.
 	if character.is_multiplayer_authority(): # Is it the host's character?
 		# If the character is controlled by me (the host's player or an enemy), apply the path directly.
 		var movement_component = character.get_node_or_null("GridMovementComponent")
