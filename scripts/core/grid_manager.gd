@@ -297,3 +297,43 @@ func clear_character_from_grid(character_path: NodePath) -> void:
 		var tile_to_free = _character_locations[character]
 		_occupied_cells.erase(tile_to_free)
 		_character_locations.erase(character)
+
+# NEW RPC: Called by a player's client to ask for permission for the next step.
+@rpc("any_peer", "call_local")
+func server_player_request_tile(character_path: NodePath, requested_tile: Vector2i) -> void:
+	var character = get_node_or_null(character_path)
+	if not is_instance_valid(character): return
+
+	var client_id = multiplayer.get_remote_sender_id()
+
+	# Our existing occupy_tile function is already atomic and perfect for this.
+	var success = occupy_tile(character, requested_tile)
+
+	if success:
+		# Approved. Tell the client they can proceed.
+		client_confirm_player_move.rpc_id(client_id, character_path, requested_tile)
+	else:
+		# Denied. Tell the client their path is blocked.
+		client_reject_player_move.rpc_id(client_id, character_path)
+
+# NEW RPC: Sent from the server to the client to confirm a move.
+@rpc("authority")
+func client_confirm_player_move(character_path: NodePath, confirmed_tile: Vector2i) -> void:
+	var character = get_node_or_null(character_path)
+	# Ensure this code only runs on the machine that controls the character.
+	if is_instance_valid(character) and character.is_multiplayer_authority():
+		var movement_component = character.get_node_or_null("GridMovementComponent")
+		if movement_component:
+			# We'll create this function in the next step.
+			movement_component._execute_approved_move(confirmed_tile)
+
+# NEW RPC: Sent from the server to the client to reject a move.
+@rpc("authority")
+func client_reject_player_move(character_path: NodePath) -> void:
+	var character = get_node_or_null(character_path)
+	# Ensure this code only runs on the machine that controls the character.
+	if is_instance_valid(character) and character.is_multiplayer_authority():
+		var movement_component = character.get_node_or_null("GridMovementComponent")
+		if movement_component:
+			# We'll create this function in the next step.
+			movement_component._handle_rejected_move()
