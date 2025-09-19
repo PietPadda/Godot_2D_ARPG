@@ -218,7 +218,6 @@ func release_tile(tile: Vector2i):
 		_occupied_cells.erase(tile)
 		_character_locations.erase(character)
 
-
 # --- Debug ---
 # A debug function to print the contents of our occupied cells registry.
 func print_occupied_cells() -> void:
@@ -240,12 +239,12 @@ func print_occupied_cells() -> void:
 
 # --- RPCs ---
 
-# Allows clients to request the server to free a tile they've just left.
-@rpc("any_peer", "call_local")
-func server_release_tile(tile: Vector2i) -> void:
-	# This RPC is just a secure entry point.
-	# The actual logic is in our existing server-side function.
-	release_tile(tile)
+# THE FIX: This function is no longer needed and should be removed.
+# @rpc("any_peer", "call_local")
+# func server_release_tile(tile: Vector2i) -> void: # <-- DELETE THIS ENTIRE FUNCTION
+# 	# This RPC is just a secure entry point.
+# 	# The actual logic is in our existing server-side function.
+# 	release_tile(tile)
 	
 # When a character spawns, they occupy their starting tile.
 @rpc("any_peer", "call_local")

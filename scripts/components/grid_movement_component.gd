@@ -134,10 +134,11 @@ func _on_move_step_finished():
 	# Our "current" tile is now the one we just arrived at.
 	_current_tile = Grid.world_to_map(owner.global_position)
 	
-	# THE FIX: We now use our new, simple RPC to tell the server we've vacated the previous tile.
-	if owner.is_multiplayer_authority():
-		# Grid.release_occupied_tile.rpc_id(1, owner.get_path(), _previous_tile) # <-- DELETE THIS
-		Grid.server_release_tile.rpc_id(1, _previous_tile)
+	# THE FIX: Remove this RPC call. The server's `occupy_tile` function
+	# already handles releasing the previous tile atomically. This call is
+	# redundant and dangerous.
+	# if owner.is_multiplayer_authority():
+	# 	Grid.server_release_tile.rpc_id(1, _previous_tile) # <-- DELETE THIS
 
 	emit_signal("waypoint_reached")
 	
@@ -145,15 +146,8 @@ func _on_move_step_finished():
 		# If there are no more steps, the path is finished.
 		emit_signal("path_finished")
 
+# THE FIX: This function should not contain game logic. A character must
+# always complete its move to a tile's center. We are removing this function
+# to prevent movement from being interrupted mid-tween.
 func _physics_process(_delta: float) -> void:
-	# This function is now only for checking game logic, not for movement.
-	if not is_moving:
-		return
-
-	# This safety check is still crucial!
-	if is_instance_valid(chase_target):
-		var attack_range = stats_component.get_total_stat("range")
-		if owner.global_position.distance_to(chase_target.global_position) <= attack_range:
-			stop()
-			emit_signal("path_finished")
-			return
+	pass
