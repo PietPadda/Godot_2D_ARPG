@@ -20,5 +20,13 @@ func _physics_process(delta: float) -> void:
 	pass
 
 func on_attack_finished() -> void:
-	# After attacking, go back to chasing the player.
-	state_machine.change_state(States.ENEMY_STATE_NAMES[States.ENEMY.CHASE]) # change state
+	# After attacking, decide what to do next.
+	if not is_instance_valid(target):
+		state_machine.change_state(States.ENEMY_STATE_NAMES[States.ENEMY.IDLE])
+		return
+
+	# THE FIX: Pass the target back to the Chase state before transitioning.
+	var chase_state: EnemyChaseState = state_machine.get_state(States.ENEMY.CHASE)
+	if chase_state:
+		chase_state.target = target
+		state_machine.change_state(States.ENEMY_STATE_NAMES[States.ENEMY.CHASE])

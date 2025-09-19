@@ -45,8 +45,13 @@ func _recalculate_path() -> void:
 	# This guarantees the check only happens when we are perfectly centered.
 	var distance = owner_node.global_position.distance_to(target.global_position)
 	if distance <= stats_component.get_total_stat("range"):
-		# We're in range, so switch to the Attack state.
-		state_machine.change_state(States.ENEMY_STATE_NAMES[States.ENEMY.ATTACK]) # change state
+		# THE FIX: Use get_state() with the ENUM to get a reference.
+		var attack_state: EnemyAttackState = state_machine.get_state(States.ENEMY.ATTACK)
+		if attack_state:
+			# Set the target property directly on that state.
+			attack_state.target = target
+			# We're in range, so switch to the Attack state.
+			state_machine.change_state(States.ENEMY_STATE_NAMES[States.ENEMY.ATTACK]) # change state
 		return # Stop here, we don't need to move.
 	
 	# If not in range, then proceed with finding the next step.
