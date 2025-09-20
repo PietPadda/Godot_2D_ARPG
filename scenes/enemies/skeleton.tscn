@@ -150,7 +150,8 @@ loot_table = ExtResource("15_s01nw")
 [node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
 replication_config = SubResource("SceneReplicationConfig_f0dbl")
 
-[node name="VisibleOnScreenNotifier2D" type="VisibleOnScreenNotifier2D" parent="."]
-rect = Rect2(-64, -64, 128, 128)
+[node name="RayCast2D" type="RayCast2D" parent="."]
+target_position = Vector2(0, 0)
+collision_mask = 32
 
 [connection signal="body_entered" from="AggroRadius" to="." method="_on_aggro_radius_body_entered"]

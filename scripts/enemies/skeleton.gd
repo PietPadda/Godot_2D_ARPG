@@ -5,23 +5,22 @@ extends CharacterBody2D
 @onready var stats_component: StatsComponent = $StatsComponent
 @onready var loot_component: LootComponent = $LootComponent
 @onready var health_bar = $HealthBar
+@onready var raycast: RayCast2D = $RayCast2D
 
-# Get a reference to the new notifier node.
-@onready var visibility_notifier: VisibleOnScreenNotifier2D = $VisibleOnScreenNotifier2D
+# We need a reference to the player. We'll get it from the chase state.
+var current_target: Node2D
 
 func _ready() -> void:
 	# connect signals to functions
 	stats_component.died.connect(_on_death)
 	
-	# Connect the notifier's signals to our show/hide methods.
-	visibility_notifier.screen_entered.connect(show)
-	visibility_notifier.screen_exited.connect(hide)
-
 func _on_aggro_radius_body_entered(body: Node2D) -> void:
 	# Don't re-aggro if we're already chasing or attacking.
 	if state_machine.current_state.name != "Idle":
 		return
-		
+	
+	current_target = body # Store the target here.
+	
 	# Get the Chase state, give it the player as a target, and change state.
 	var chase_state = state_machine.states["chase"] # set state var
 	chase_state.target = body # set state target
@@ -37,6 +36,25 @@ func _physics_process(_delta):
 		var max_val = stats_component.stats_data.max_health
 		health_bar.update_health(current, max_val)
 		health_bar.visible = (current < max_val)
+	
+	 # Line-of-sight logic
+	if is_instance_valid(current_target):
+		# Point the ray from our position to the target's position.
+		raycast.target_position = current_target.global_position - global_position
+
+		# Force the ray to update its collision status immediately.
+		raycast.force_raycast_update()
+
+		# Check the result.
+		if raycast.is_colliding():
+			# The ray hit a wall before it hit the player. Hide.
+			hide()
+		else:
+			# The path is clear. Show.
+			show()
+	else:
+		# If we have no target, we should be hidden by default.
+		hide()
 	
 # This function is called when our own StatsComponent emits the "died" signal.
 func _on_death(attacker_id: int) -> void:
