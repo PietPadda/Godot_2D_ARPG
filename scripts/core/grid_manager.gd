@@ -8,39 +8,45 @@ const Player = preload("res://scripts/player/player.gd")
 # Our debug tile scene
 @export var debug_tile_scene: PackedScene
 
+# THE FIX: We now need references to both tilemaps.
+var floor_tilemap: TileMapLayer
+var wall_tilemap: TileMapLayer
+
+# The level will call this to provide its tilemaps and trigger the graph build.
+func register_level_tilemaps(new_floor_map: TileMapLayer, new_wall_map: TileMapLayer) -> void:
+	floor_tilemap = new_floor_map
+	wall_tilemap = new_wall_map
+	build_level_graph()
+
+# We can remove the old single tile_map_layer variable and its setter.
+# var tile_map_layer: TileMapLayer: # <-- DELETE THIS ENTIRE BLOCK
+
+# Pathfinding: Use AStarGrid2D
+var astar_grid := AStarGrid2D.new()
+
 # We now use TWO dictionaries to track occupation for high performance.
 # The primary, authoritative source of truth.
 var _occupied_cells := {} # { tile_coordinate: character_instance }
 # A reverse-lookup dictionary for instant character location checks.
 var _character_locations := {} # { character_instance: tile_coordinate }
 
-# This will hold a reference to the current level's TileMapLayer.
-# Convert the variable into a property with a setter.
-var tile_map_layer: TileMapLayer:
-	set(value):
-		tile_map_layer = value
-		# If the new value is valid, automatically rebuild the graph.
-		if is_instance_valid(tile_map_layer):
-			# We still defer to ensure the tilemap is fully ready in the scene tree.
-			call_deferred("build_level_graph")
-		else:
-			# This helps us see if we're ever setting it to an invalid node.
-			print("GridManager: WARNING - tile_map_layer was set to an invalid instance.")
-
-# Pathfinding: Use AStarGrid2D
-var astar_grid := AStarGrid2D.new()
-
-# Builds the A* pathfrom the level's TileMapLayer.
+# Builds the A* pathfinding graph from the floor and wall tilemaps.
 func build_level_graph():
-	if not is_instance_valid(tile_map_layer):
-		push_error("GridManager: Attempted to build graph with an invalid TileMapLayer.")
+	if not is_instance_valid(floor_tilemap) or not is_instance_valid(wall_tilemap):
+		push_error("GridManager: Tilemap references are not valid.")
 		return
 		
 	# Clear all old points and connections from the previous level's graph.
 	astar_grid.clear()
 
 	# Set up the AStarGrid2D with our map's data
-	var map_rect = tile_map_layer.get_used_rect()
+	# TGet the bounding box for both tilemaps.
+	var floor_rect = floor_tilemap.get_used_rect()
+	var wall_rect = wall_tilemap.get_used_rect()
+	
+	# Merge them into a single rectangle that covers the entire level.
+	var map_rect = floor_rect.merge(wall_rect)
+	
 	astar_grid.region = map_rect
 	astar_grid.cell_size = Vector2(1, 1) # We use a 1-to-1 mapping
 	
@@ -52,24 +58,33 @@ func build_level_graph():
 	astar_grid.diagonal_mode = AStarGrid2D.DIAGONAL_MODE_ALWAYS
 	astar_grid.update()
 	
-	# Now, tell the grid which cells are walls ("solid")
+	# Iterate over every cell in the map.
 	for x in range(map_rect.position.x, map_rect.end.x): # loop x cells
 		for y in range(map_rect.position.y, map_rect.end.y): # loop y cells
 			var cell = Vector2i(x, y) # cell at x:y
-			var tile_data = tile_map_layer.get_cell_tile_data(cell)
-			
 			# A cell is walkable if it's empty (no tile data)
 			# OR if it has a tile, and that tile's "is_walkable" custom data is true.
-			var is_walkable = false
-			if not tile_data:
-				is_walkable = true # Empty space is walkable
+			var is_walkable = true # Assume the cell is walkable by default.
+			
+			# Rule 1: Is there a wall here? If so, it's not walkable.
+			if wall_tilemap.get_cell_source_id(cell) != -1:
+				is_walkable = false
 			else:
-				is_walkable = tile_data.get_custom_data("is_walkable") # Check the tile's property
+				# Rule 2: No wall, so is there a floor?
+				# We must specify the tilemap layer index, which is 0.
+				var floor_tile_data = floor_tilemap.get_cell_tile_data(cell)
+				if not floor_tile_data:
+					# No floor tile. We'll treat this as walkable for now.
+					is_walkable = true
+				else:
+					# Rule 3: There is a floor. Use its custom data property.
+					is_walkable = floor_tile_data.get_custom_data("is_walkable")
+
 			# If a tile is NOT walkable, then it is a solid point.
 			if not is_walkable:
 				astar_grid.set_point_solid(cell)
 				
-	# Debug Walkable Tiles Visualisation
+	# Update the debug visualization to use the floor_tilemap.
 	if debug_tile_scene:
 		var main_scene = get_tree().current_scene
 		for x in range(map_rect.position.x, map_rect.end.x):
@@ -78,7 +93,9 @@ func build_level_graph():
 				if not astar_grid.is_point_solid(cell):
 					var tile_instance = debug_tile_scene.instantiate()
 					main_scene.add_child(tile_instance)
-					tile_instance.global_position = map_to_world(cell) - (Vector2(tile_map_layer.tile_set.tile_size) / 2)
+					# Use the floor_tilemap for coordinate conversion.
+					var tile_size = floor_tilemap.tile_set.tile_size
+					tile_instance.global_position = map_to_world(cell) - (Vector2(tile_size) / 2)
 
 # Finds the shortest path between two points on the grid, avoiding dynamic obstacles.
 # We pass the character requesting the path so it doesn't consider its own tile an obstacle.
@@ -185,16 +202,16 @@ func remove_character(character: Node):
 
 # Converts a world position (like a mouse click) to a map grid coordinate.
 func world_to_map(world_position: Vector2) -> Vector2i:
-	if tile_map_layer:
-		var local_pos = tile_map_layer.to_local(world_position)
-		return tile_map_layer.local_to_map(local_pos)
+	if is_instance_valid(floor_tilemap):
+		var local_pos = floor_tilemap.to_local(world_position)
+		return floor_tilemap.local_to_map(local_pos)
 	return Vector2i.ZERO # Return a default value if the tilemap isn't set
 
 # Converts a map grid coordinate back to a world position (the center of the tile).
 func map_to_world(map_position: Vector2i) -> Vector2:
-	if tile_map_layer:
-		var local_pos = tile_map_layer.map_to_local(map_position)
-		return tile_map_layer.to_global(local_pos)
+	if is_instance_valid(floor_tilemap):
+		var local_pos = floor_tilemap.map_to_local(map_position)
+		return floor_tilemap.to_global(local_pos)
 	return Vector2.ZERO # Return a default value if the tilemap isn't set
 	
 # This is now the ONLY way to claim a tile. It's atomic on the server.

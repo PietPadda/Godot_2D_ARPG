@@ -5,7 +5,9 @@ extends Node2D
 const SKELETON_SCENE = preload("res://scenes/enemies/skeleton.tscn")
 
 # scene nodes
-@onready var tile_map_layer = $TileMapLayer
+# Get direct references to the tilemap nodes in this scene.
+@onready var floor_tilemap: TileMapLayer = $FloorTileMap
+@onready var wall_tilemap: TileMapLayer = $WallTileMap
 # player container used for spawning
 @onready var player_container: Node2D = $PlayerContainer
 # Add a reference to our new spawn points container.
@@ -33,6 +35,9 @@ var enemy_spawn_points: Array = []
 
 # The setup logic MUST be in _ready() to run once at the start.
 func _ready():
+	# When the level loads, tell the GridManager about our tilemaps.
+	Grid.register_level_tilemaps(floor_tilemap, wall_tilemap)
+	
 	# CRITICAL: Give the server ownership of the spawners FIRST.
 	player_spawner.set_multiplayer_authority(1)
 	enemy_spawner.set_multiplayer_authority(1)
@@ -49,10 +54,6 @@ func _ready():
 		
 	# Announce which level is setting the tilemap.
 	print(self.scene_file_path, ": _ready() is setting Grid.tile_map_layer.")
-	
-	# Give the GridManager a direct reference to our level's TileMapLayer.
-	# The GridManager will handle the rest automatically.
-	Grid.tile_map_layer = tile_map_layer
 	
 	# Connect our listener FIRST, so we are ready to receive requests.
 	NetworkManager.player_spawn_requested.connect(_on_player_spawn_requested)
