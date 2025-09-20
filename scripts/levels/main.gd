@@ -66,6 +66,8 @@ func _ready():
 		
 	# The server will listen for any enemy dying in its world.
 	EventBus.enemy_died.connect(_on_enemy_died)
+	# THE FIX: Connect to our new debug signal.
+	EventBus.debug_respawn_enemies_requested.connect(_on_debug_respawn_enemies)
 
 # This function can now be left empty or used for other inputs.
 func _unhandled_input(event: InputEvent) -> void:
@@ -165,3 +167,15 @@ func server_process_projectile_hit(projectile_path: NodePath, target_path: NodeP
 	
 	# The server authoritatively destroys the projectile after the hit is processed.
 	projectile.queue_free()
+	
+# This new function will handle the respawn request.
+func _on_debug_respawn_enemies() -> void:
+	print("DEBUG (Main): Received request to respawn enemies.")
+	
+	# Delete all existing enemies.
+	for enemy in get_tree().get_nodes_in_group("enemies"):
+		enemy.queue_free()
+		
+	# Call our original spawning function to create new ones.
+	# (Assuming your spawn function is named _spawn_initial_enemies)
+	_spawn_initial_enemies()
