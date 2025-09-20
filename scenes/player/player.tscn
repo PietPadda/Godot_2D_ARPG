@@ -261,5 +261,6 @@ replication_config = SubResource("SceneReplicationConfig_ioxgp")
 
 [node name="PointLight2D" type="PointLight2D" parent="."]
 position = Vector2(0, -1)
-scale = Vector2(4.373, 4)
+scale = Vector2(5.5, 5.5)
+shadow_enabled = true
 texture = SubResource("GradientTexture2D_cnsyf")

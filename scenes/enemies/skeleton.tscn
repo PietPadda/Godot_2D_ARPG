@@ -1,4 +1,4 @@
-[gd_scene load_steps=22 format=3 uid="uid://dg2sqch3jtd3h"]
+[gd_scene load_steps=23 format=3 uid="uid://dg2sqch3jtd3h"]
 
 [ext_resource type="Script" uid="uid://ccfvg0731wml7" path="res://scripts/core/fsm/state_machine.gd" id="1_038oa"]
 [ext_resource type="Texture2D" uid="uid://4d68lc3a6uwp" path="res://assets/icon.svg" id="1_p728r"]
@@ -56,6 +56,9 @@ _data = {
 &"RESET": SubResource("Animation_quxur")
 }
 
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_f0dbl"]
+polygon = PackedVector2Array(0, 40, 80, 0, 0, -40, -80, 0)
+
 [sub_resource type="CircleShape2D" id="CircleShape2D_xro8k"]
 radius = 50.01
 
@@ -112,6 +115,9 @@ animation_component = NodePath("../../AnimationComponent")
 attack_component = NodePath("../../AttackComponent")
 grid_movement_component = NodePath("../../GridMovementComponent")
 stats_component = NodePath("../../StatsComponent")
+
+[node name="LightOccluder2D" type="LightOccluder2D" parent="."]
+occluder = SubResource("OccluderPolygon2D_f0dbl")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 modulate = Color(1, 0, 0, 1)
