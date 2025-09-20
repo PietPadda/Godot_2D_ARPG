@@ -117,7 +117,9 @@ grid_movement_component = NodePath("../../GridMovementComponent")
 stats_component = NodePath("../../StatsComponent")
 
 [node name="LightOccluder2D" type="LightOccluder2D" parent="."]
+light_mask = 3
 occluder = SubResource("OccluderPolygon2D_f0dbl")
+occluder_light_mask = 3
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 modulate = Color(1, 0, 0, 1)
