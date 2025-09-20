@@ -12,3 +12,6 @@
 .mono/
 bin/
 obj/
+
+# Temporary files
+*.tmp
