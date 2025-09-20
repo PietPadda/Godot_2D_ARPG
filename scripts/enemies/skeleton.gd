@@ -6,13 +6,16 @@ extends CharacterBody2D
 @onready var loot_component: LootComponent = $LootComponent
 @onready var health_bar = $HealthBar
 
-# REMOVE the entire synced_health property. We don't need it anymore.
-# @export var synced_health: int = 100:
-# 	...
+# Get a reference to the new notifier node.
+@onready var visibility_notifier: VisibleOnScreenNotifier2D = $VisibleOnScreenNotifier2D
 
 func _ready() -> void:
 	# connect signals to functions
 	stats_component.died.connect(_on_death)
+	
+	# Connect the notifier's signals to our show/hide methods.
+	visibility_notifier.screen_entered.connect(show)
+	visibility_notifier.screen_exited.connect(hide)
 
 func _on_aggro_radius_body_entered(body: Node2D) -> void:
 	# Don't re-aggro if we're already chasing or attacking.
