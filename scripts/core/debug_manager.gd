@@ -11,5 +11,5 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("debug_respawn_enemies"):
 		# CRITICAL: We only want the server/host to be able to run this command.
 		if multiplayer.is_server():
-			print("DEBUG: F2 pressed on server. Requesting enemy respawn.")
-			# In the next step, we'll emit a global signal here.
+			# THE FIX: Instead of just printing, we now emit our global signal.
+			EventBus.emit_signal("debug_respawn_enemies_requested")
