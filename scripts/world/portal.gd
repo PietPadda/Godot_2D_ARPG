@@ -15,9 +15,16 @@ func _ready() -> void:
 
 # ---Signal Handlers---
 func _on_body_entered(body: Node2D) -> void:
-	# First, check if the body that entered is the player.
-	if body.is_in_group("player"):
-		print("Player entered portal. Transitioning to: ", target_scene_path)
-		# Call our global SceneManager to handle the transition.
-		# Get the spawn point's global position and pass it along.
-		Scene.change_scene(target_scene_path, spawn_point.global_position)
+	# This check is vital for multiplayer. It ensures only the player who
+	# actually controls their character can trigger the portal action.
+	if body.is_multiplayer_authority():
+		print("Player entered portal. Requesting transition to: ", target_scene_path)
+		
+		# --- BEFORE (Single-player logic) ---
+		# Scene.change_scene(target_scene_path, spawn_point.global_position)
+		
+		# --- AFTER (Multiplayer logic) ---
+		# Get our unique ID and send an RPC to the server (peer 1)
+		# asking it to handle the scene change.
+		var my_id = multiplayer.get_unique_id()
+		Scene.request_scene_transition.rpc_id(1, target_scene_path, my_id)

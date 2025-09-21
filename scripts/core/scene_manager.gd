@@ -24,3 +24,14 @@ func change_scene(scene_path: String, target_spawn_position: Vector2 = Vector2.I
 		
 	# defer the call to a safe time at the end of the current physics frame.
 	get_tree().call_deferred("change_scene_to_file", scene_path)
+
+# --- RPCs ---
+# This function can be called by any client, but will only run on the server (peer 1).
+@rpc("any_peer", "call_local")
+func request_scene_transition(scene_path: String, player_id: int) -> void:
+	# This is a guard clause. If a non-server peer somehow tries to run this, stop.
+	if not multiplayer.is_server():
+		return
+
+	# For now, we just prove the message was received by the server.
+	print("[SERVER] Received request from player %s to transition to scene: %s" % [player_id, scene_path])
