@@ -87,6 +87,14 @@ func stop() -> void:
 # Internal Logic
 # This function now creates and starts the Tween for one step of the path.
 func _start_next_move_step() -> bool:
+	# --- THE FIX ---
+	# Movement logic, especially creating tweens, should ONLY run on
+	# the machine that has authority over this character. Puppets should not move themselves.
+	if not owner.is_multiplayer_authority():
+		# On puppets, we simply wait for the synchronizer to update our position.
+		# We must still return false to stop the movement loop.
+		return false
+		
 	# Kill the previous tween before starting a new one.
 	if is_instance_valid(_active_tween):
 		_active_tween.kill()
@@ -95,13 +103,6 @@ func _start_next_move_step() -> bool:
 	if move_path.is_empty():
 		is_moving = false
 		return false # and end (bool allows func call)
-	
-	# "Peek" at the next waypoint's tile.
-	# var next_tile = Grid.world_to_map(move_path[0])
-	# THE CHANGE: We no longer call occupy_tile from the client.
-	# The server has already proactively occupied this tile for us.
-	# if owner.is_multiplayer_authority():
-	# 	Grid.occupy_tile.rpc_id(1, owner.get_path(), next_tile)
 	
 	# NOTE: We are assuming the occupation will succeed. The server is the authority.
 	is_moving = true # still moving
