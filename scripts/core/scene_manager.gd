@@ -33,5 +33,24 @@ func request_scene_transition(scene_path: String, player_id: int) -> void:
 	if not multiplayer.is_server():
 		return
 
-	# For now, we just prove the message was received by the server.
+	# Server Log
 	print("[SERVER] Received request from player %s to transition to scene: %s" % [player_id, scene_path])
+	print("[SERVER] Initiating transition...")
+	
+	# Persist the data for ALL players before we leave the scene.
+	# We need to find the portal's target spawn point for the requesting player.
+	var portal = get_tree().get_first_node_in_group("Portal") # A simple way to find the portal
+	if portal:
+		GameManager.target_spawn_position = portal.spawn_point.global_position
+		GameManager.requesting_player_id = player_id
+	GameManager.carry_player_data_for_all()
+
+	# Command all clients to transition.
+	transition_to_scene.rpc(scene_path)
+	
+# This RPC is called BY the server ON all clients to execute the change.
+@rpc("any_peer", "call_local", "reliable")
+func transition_to_scene(scene_path: String) -> void:
+	# Each client (and the server) will run this code locally.
+	# We can add fade-out/fade-in logic here later.
+	get_tree().change_scene_to_file(scene_path)
