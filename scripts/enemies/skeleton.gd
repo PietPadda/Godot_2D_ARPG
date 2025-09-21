@@ -1,11 +1,12 @@
 # skeleton.gd
 extends CharacterBody2D
 
-@onready var state_machine: StateMachine = $StateMachine
-@onready var stats_component: StatsComponent = $StatsComponent
-@onready var loot_component: LootComponent = $LootComponent
-@onready var health_bar = $HealthBar
-@onready var raycast: RayCast2D = $RayCast2D
+# get components
+@export var state_machine: StateMachine
+@export var stats_component: StatsComponent
+@export var loot_component: LootComponent
+@export var health_bar: ProgressBar
+@export var raycast: RayCast2D
 
 # We need a reference to the player. We'll get it from the chase state.
 var current_target: Node2D

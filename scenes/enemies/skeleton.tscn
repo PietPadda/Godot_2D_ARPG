@@ -70,10 +70,15 @@ properties/1/path = NodePath("StatsComponent:current_health")
 properties/1/spawn = true
 properties/1/replication_mode = 2
 
-[node name="Skeleton" type="CharacterBody2D" groups=["characters", "enemies"]]
+[node name="Skeleton" type="CharacterBody2D" node_paths=PackedStringArray("state_machine", "stats_component", "loot_component", "health_bar", "raycast") groups=["characters", "enemies"]]
 collision_layer = 2
 motion_mode = 1
 script = ExtResource("1_s0h66")
+state_machine = NodePath("StateMachine")
+stats_component = NodePath("StatsComponent")
+loot_component = NodePath("LootComponent")
+health_bar = NodePath("HealthBar")
+raycast = NodePath("RayCast2D")
 
 [node name="AnimationComponent" type="Node" parent="."]
 script = ExtResource("2_pxfki")
