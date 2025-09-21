@@ -3,13 +3,20 @@ extends Node
 
 const SAVE_PATH = "user://savegame.tres"
 
+# Preloading the Player script ensures Godot knows about the "Player" type
+# when it parses the rest of this file.
+const Player = preload("res://scripts/player/player.gd")
+
 # This variable will temporarily hold our loaded data during a scene change.
 var loaded_player_data: SaveData = null
 # This variable will hold our player's data during a normal scene transition.
 var player_data_on_transition: SaveData = null
 
-# --- Public API ---
+func _ready() -> void:
+	# Listen for when the player we control has spawned into a scene.
+	EventBus.local_player_spawned.connect(_on_local_player_spawned)
 
+# --- Public API ---
 #  This function grabs the current player's data and stores it for the transition.
 ## Save chardata between scene transitions
 func carry_player_data() -> void:
@@ -86,3 +93,17 @@ func load_game() -> void:
 	# Now, reload the entire level. Diablo 2 style!!
 	get_tree().change_scene_to_file("res://scenes/levels/main.tscn")
 	print("Game loaded!")
+
+# -- Signal Handlers --
+# This function is called by the EventBus when the player is ready.
+func _on_local_player_spawned(player: Player) -> void:
+	# Check if we have save game data to apply.
+	if is_instance_valid(loaded_player_data):
+		player.apply_persistent_data(loaded_player_data, false)
+		# Clear the data after it's been used.
+		loaded_player_data = null
+	# Check if we have scene transition data to apply.
+	elif is_instance_valid(player_data_on_transition):
+		player.apply_persistent_data(player_data_on_transition, true)
+		# Clear the data after it's been used.
+		player_data_on_transition = null

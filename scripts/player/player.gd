@@ -46,51 +46,11 @@ func _ready() -> void:
 	# Force this camera to be the active one for the viewport.
 	camera.make_current() # <-- Add this line
 	
-	# Check for SAVE GAME data first (highest priority).
-	if is_instance_valid(GameManager.loaded_player_data):
-		# Swap our default resources with the loaded ones.
-		stats_component.stats_data = GameManager.loaded_player_data.player_stats_data
-		# Apply the loaded inventory data
-		inventory_component.inventory_data = GameManager.loaded_player_data.player_inventory_data
-		# Apply the loaded equipment data
-		equipment_component.equipment_data = GameManager.loaded_player_data.player_equipment_data
-		
-		# On SAVE LOAD, restore to full health and mana (Diablo II style).
-		stats_component.current_health = stats_component.stats_data.max_health
-		stats_component.current_mana = stats_component.stats_data.max_mana
-
-		# Tell the UI to update.
-		stats_component.refresh_stats()
-
-		# Clear the data from the manager so it's not reused.
-		GameManager.loaded_player_data = null
-		
-		# We need to manually tell the UI to redraw after loading all the data
-		var hud = get_tree().get_first_node_in_group("hud")
-		if hud and hud.character_sheet:
-			hud.character_sheet.redraw()
-			
-	# If not loading a save, check for TRANSITION data.
-	elif is_instance_valid(GameManager.player_data_on_transition):
-		var transition_data = GameManager.player_data_on_transition
-		stats_component.stats_data = transition_data.player_stats_data
-		inventory_component.inventory_data = transition_data.player_inventory_data
-		equipment_component.equipment_data = transition_data.player_equipment_data
-		
-		# Check if a target spawn position was carried over.
-		if transition_data.target_spawn_position != Vector2.INF:
-			# Use call_deferred to wait for the physics engine to settle.
-			call_deferred("set_global_position", transition_data.target_spawn_position)
-		
-		# On SCENE TRANSITION, apply the carried-over health and mana.
-		stats_component.current_health = transition_data.current_health
-		stats_component.current_mana = transition_data.current_mana
-		
-		# Tell the UI to update.
-		stats_component.refresh_stats()
-		
-		# Clear the transition data from the manager so it's not reused.
-		GameManager.player_data_on_transition = null
+	# --- REMOVE THIS ENTIRE LOGIC BLOCK ---
+	# if is_instance_valid(GameManager.loaded_player_data):
+	# ...
+	# elif is_instance_valid(GameManager.player_data_on_transition):
+	# ...
 		
 	# Connect signals only for the local player.
 	stats_component.died.connect(_on_death) # player died
@@ -109,7 +69,7 @@ func _physics_process(_delta: float) -> void:
 	if is_multiplayer_authority() and not _first_physics_frame_checked:
 		_first_physics_frame_checked = true
 
-# --- Public Methods ---
+# --- Public API ---
 # Calculates a final stat value by orchestrating its components.
 func get_total_stat(stat_name: String) -> float:
 	var total_value: float = 0.0
@@ -136,6 +96,31 @@ func handle_damage(damage_amount: int, attacker_id: int) -> void:
 		var my_multiplayer_authority = get_multiplayer_authority()
 		stats_component.server_take_damage.rpc_id(my_multiplayer_authority, damage_amount, attacker_id)
 
+# This new public function is the player's API for receiving data.
+func apply_persistent_data(data: Resource, is_transition: bool) -> void:
+	# This is the same logic as before, just refactored into a function.
+	stats_component.stats_data = data.player_stats_data
+	inventory_component.inventory_data = data.player_inventory_data
+	equipment_component.equipment_data = data.player_equipment_data
+	
+	if is_transition:
+		# On SCENE TRANSITION, apply the carried-over health and mana.
+		stats_component.current_health = data.current_health
+		stats_component.current_mana = data.current_mana
+		if data.target_spawn_position != Vector2.INF:
+			call_deferred("set_global_position", data.target_spawn_position)
+	else:
+		# On SAVE LOAD, restore to full health and mana.
+		stats_component.current_health = stats_component.stats_data.max_health
+		stats_component.current_mana = stats_component.stats_data.max_mana
+
+	# Tell the UI to update.
+	stats_component.refresh_stats()
+	var hud = get_tree().get_first_node_in_group("hud")
+	if hud and hud.character_sheet:
+		hud.character_sheet.redraw()
+
+# -- Signal Handlers --
 # This function is called when the StatsComponent emits the "died" signal.
 ## Player death function for Player
 func _on_death(_attacker_id: int) -> void:
@@ -165,7 +150,7 @@ func check_fsm_status():
 	print("--- FSM STATUS CHECK ---")
 	print("Is StateMachine processing physics? ", state_machine.is_physics_processing())
 			
-# -- Remote Procedure Calls (RPCs) ---
+# -- RPCs ---
 @rpc("any_peer", "call_local")
 func award_xp_rpc(amount: int):
 	# When this RPC is called by the server, award the XP.
