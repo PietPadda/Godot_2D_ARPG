@@ -1,4 +1,4 @@
-[gd_scene load_steps=23 format=3 uid="uid://dg2sqch3jtd3h"]
+[gd_scene load_steps=24 format=3 uid="uid://dg2sqch3jtd3h"]
 
 [ext_resource type="Script" uid="uid://ccfvg0731wml7" path="res://scripts/core/fsm/state_machine.gd" id="1_038oa"]
 [ext_resource type="Texture2D" uid="uid://4d68lc3a6uwp" path="res://assets/icon.svg" id="1_p728r"]
@@ -15,6 +15,7 @@
 [ext_resource type="PackedScene" uid="uid://c4bbgluq74ake" path="res://scenes/ui/HealthBar.tscn" id="13_xro8k"]
 [ext_resource type="Script" uid="uid://crxo2p6i3ss52" path="res://scripts/components/loot_component.gd" id="14_f0dbl"]
 [ext_resource type="Resource" uid="uid://d053rkg5v7tfo" path="res://data/loot/skeleton_loot_table.tres" id="15_s01nw"]
+[ext_resource type="Script" uid="uid://bwteatasr3ax5" path="res://scripts/core/stat_calculator.gd" id="16_s01nw"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_s0h66"]
 radius = 357.022
@@ -70,13 +71,14 @@ properties/1/path = NodePath("StatsComponent:current_health")
 properties/1/spawn = true
 properties/1/replication_mode = 2
 
-[node name="Skeleton" type="CharacterBody2D" node_paths=PackedStringArray("attack_component", "loot_component", "stats_component", "state_machine", "health_bar", "raycast") groups=["characters", "enemies"]]
+[node name="Skeleton" type="CharacterBody2D" node_paths=PackedStringArray("attack_component", "loot_component", "stats_component", "stat_calculator", "state_machine", "health_bar", "raycast") groups=["characters", "enemies"]]
 collision_layer = 2
 motion_mode = 1
 script = ExtResource("1_s0h66")
 attack_component = NodePath("AttackComponent")
 loot_component = NodePath("LootComponent")
 stats_component = NodePath("StatsComponent")
+stat_calculator = NodePath("StatCalculator")
 state_machine = NodePath("StateMachine")
 health_bar = NodePath("HealthBar")
 raycast = NodePath("RayCast2D")
@@ -154,6 +156,11 @@ animation_component = NodePath("../AnimationComponent")
 [node name="LootComponent" type="Node" parent="."]
 script = ExtResource("14_f0dbl")
 loot_table = ExtResource("15_s01nw")
+
+[node name="StatCalculator" type="Node" parent="." node_paths=PackedStringArray("stats_component", "attack_component")]
+script = ExtResource("16_s01nw")
+stats_component = NodePath("../StatsComponent")
+attack_component = NodePath("../AttackComponent")
 
 [node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
 replication_config = SubResource("SceneReplicationConfig_f0dbl")
