@@ -17,13 +17,14 @@ func _ready() -> void:
 	
 func _on_aggro_radius_body_entered(body: Node2D) -> void:
 	# Don't re-aggro if we're already chasing or attacking.
-	if state_machine.current_state.name != "Idle":
+	if state_machine.current_state.name != States.ENEMY_STATE_NAMES[States.ENEMY.IDLE]:
 		return
 	
 	current_target = body # Store the target here.
 	
 	# Get the Chase state, give it the player as a target, and change state.
-	var chase_state = state_machine.states["chase"] # set state var
+	# Use the helper function, which handles the implementation detail (like .to_lower()) for us.
+	var chase_state = state_machine.get_state(States.ENEMY.CHASE)# set state var
 	chase_state.target = body # set state target
 	state_machine.change_state(States.ENEMY_STATE_NAMES[States.ENEMY.CHASE]) # update state
 	
