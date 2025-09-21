@@ -146,14 +146,16 @@ fill = 1
 fill_from = Vector2(0.48433048, 0.50427353)
 fill_to = Vector2(0.051282052, 0.84045583)
 
-[node name="Player" type="CharacterBody2D" node_paths=PackedStringArray("stats_component", "inventory_component", "equipment_component", "state_machine", "camera") groups=["characters", "player"]]
+[node name="Player" type="CharacterBody2D" node_paths=PackedStringArray("attack_component", "equipment_component", "movement_component", "inventory_component", "stats_component", "state_machine", "camera") groups=["characters", "player"]]
 collision_layer = 4
 collision_mask = 9
 motion_mode = 1
 script = ExtResource("1_dovo2")
-stats_component = NodePath("StatsComponent")
-inventory_component = NodePath("InventoryComponent")
+attack_component = NodePath("AttackComponent")
 equipment_component = NodePath("EquipmentComponent")
+movement_component = NodePath("GridMovementComponent")
+inventory_component = NodePath("InventoryComponent")
+stats_component = NodePath("StatsComponent")
 state_machine = NodePath("StateMachine")
 camera = NodePath("Camera2D")
 

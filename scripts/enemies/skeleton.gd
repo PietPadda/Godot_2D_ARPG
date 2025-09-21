@@ -2,9 +2,10 @@
 extends CharacterBody2D
 
 # get components
-@export var state_machine: StateMachine
-@export var stats_component: StatsComponent
+@export var attack_component: AttackComponent
 @export var loot_component: LootComponent
+@export var stats_component: StatsComponent
+@export var state_machine: StateMachine
 @export var health_bar: ProgressBar
 @export var raycast: RayCast2D
 
@@ -64,7 +65,6 @@ func get_total_stat(stat_name: String) -> float:
 	var total_value: float = 0.0
 
 	# If we're calculating attack stats, get the base value from the AttackComponent.
-	var attack_component = get_node_or_null("AttackComponent") # We'll improve this later
 	if (stat_name == "damage" or stat_name == "range") and attack_component and attack_component.attack_data:
 		total_value = attack_component.attack_data.get(stat_name)
 	# Otherwise, start with the base value from the CharacterStats resource.
