@@ -13,6 +13,7 @@ const GameOverScreen = preload("res://scenes/ui/game_over_screen.tscn")
 @export var stat_calculator: StatCalculator
 @export var state_machine: StateMachine
 @export var camera: Camera2D
+@onready var multiplayer_synchronizer: MultiplayerSynchronizer = $MultiplayerSynchronizer
 
 # consts and vars
 var _first_physics_frame_checked: bool = false
@@ -23,6 +24,11 @@ func _enter_tree() -> void:
 	# We convert the name (which is a String) to an integer.
 	# The engine error log specifically tells us to set authority here.
 	set_multiplayer_authority(int(name))
+	
+	# Set the root path for EVERY instance (puppets included).
+	# This must happen as early as possible to configure the replication system
+	# before any sync data starts flowing.
+	multiplayer_synchronizer.set_root_path(self.get_path())
 
 func _ready() -> void:
 	# Duplicate the data resources to make them unique to this player instance.
@@ -43,16 +49,10 @@ func _ready() -> void:
 		state_machine.set_process_unhandled_input(false)
 		# Do nothing else
 		return # This is the most important part!
-		
-	# Force this camera to be the active one for the viewport.
-	camera.make_current() # <-- Add this line
 	
-	# --- REMOVE THIS ENTIRE LOGIC BLOCK ---
-	# if is_instance_valid(GameManager.loaded_player_data):
-	# ...
-	# elif is_instance_valid(GameManager.player_data_on_transition):
-	# ...
-		
+	# Force this camera to be the active one for the viewport.
+	camera.make_current()
+	
 	# Connect signals only for the local player.
 	stats_component.died.connect(_on_death) # player died
 	EventBus.game_state_changed.connect(_on_game_state_changed) # game state change
