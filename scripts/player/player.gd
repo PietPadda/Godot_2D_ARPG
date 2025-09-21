@@ -13,7 +13,6 @@ const GameOverScreen = preload("res://scenes/ui/game_over_screen.tscn")
 @export var stat_calculator: StatCalculator
 @export var state_machine: StateMachine
 @export var camera: Camera2D
-@onready var multiplayer_synchronizer: MultiplayerSynchronizer = $MultiplayerSynchronizer
 
 # consts and vars
 var _first_physics_frame_checked: bool = false
@@ -25,11 +24,6 @@ func _enter_tree() -> void:
 	# The engine error log specifically tells us to set authority here.
 	set_multiplayer_authority(int(name))
 	
-	# Set the root path for EVERY instance (puppets included).
-	# This must happen as early as possible to configure the replication system
-	# before any sync data starts flowing.
-	multiplayer_synchronizer.set_root_path(self.get_path())
-
 func _ready() -> void:
 	# Duplicate the data resources to make them unique to this player instance.
 	# This prevents players from sharing inventories, stats, or equipment.
