@@ -5,9 +5,11 @@ extends CharacterBody2D
 const GameOverScreen = preload("res://scenes/ui/game_over_screen.tscn")
 
 # get components
-@export var stats_component: StatsComponent
-@export var inventory_component: InventoryComponent
+@export var attack_component: AttackComponent
 @export var equipment_component: EquipmentComponent
+@export var movement_component: GridMovementComponent
+@export var inventory_component: InventoryComponent
+@export var stats_component: StatsComponent
 @export var state_machine: StateMachine
 @export var camera: Camera2D
 
@@ -113,7 +115,6 @@ func get_total_stat(stat_name: String) -> float:
 	var total_value: float = 0.0
 
 	# If we're calculating attack stats, get the base value from the AttackComponent.
-	var attack_component = get_node_or_null("AttackComponent") # We'll improve this later
 	if (stat_name == "damage" or stat_name == "range") and attack_component and attack_component.attack_data:
 		total_value = attack_component.attack_data.get(stat_name)
 	# Otherwise, start with the base value from the CharacterStats resource.
@@ -150,7 +151,6 @@ func _on_game_state_changed(new_state: EventBus.GameState) -> void:
 
 	# If gameplay is NOT active, we must also ensure the player stops moving.
 	if not is_gameplay_active:
-		var movement_component = get_node_or_null("GridMovementComponent")
 		if movement_component:
 			movement_component.stop()
 			
