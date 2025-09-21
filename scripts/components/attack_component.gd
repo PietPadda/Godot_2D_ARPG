@@ -8,8 +8,7 @@ signal attack_finished
 
 # The data defining the attack's properties.
 @export var attack_data: AttackData
-
-@onready var animation_component: AnimationComponent = get_owner().get_node("AnimationComponent")
+@export  var animation_component: AnimationComponent
 @onready var duration_timer: Timer = Timer.new() # A timer used internally to manage the attack's duration.
 
 func _ready() -> void:
@@ -49,16 +48,13 @@ func execute(target: Node2D) -> void:
 	if is_instance_valid(target):
 		# Get the character's total damage from the StatCalculator.
 		var total_damage = owner.get_total_stat("damage")
-		# Find the target's StatsComponent and deal damage.
-		var target_stats: StatsComponent = target.get_node("StatsComponent")
-		if target_stats:
-			# Get the ID of the player we're attacking...
-			var target_owner_id = target.get_multiplayer_authority()
-			# Add the attacker's ID to the RPC call
-			var my_id = multiplayer.get_unique_id()
-			# Instead of dealing damage directly, we send a request to the server (peer ID).
-			target_stats.server_take_damage.rpc_id(target_owner_id, total_damage, my_id)
-
+		# Add the attacker's ID to the RPC call
+		var my_id = multiplayer.get_unique_id()
+		
+		# We just tell the target to handle the damage. We don't care how it does it.
+		if target.has_method("handle_damage"):
+			target.handle_damage(total_damage, my_id)
+			
 func on_timer_timeout() -> void:
 	# When the timer finishes, we emit the signal.
 	emit_signal("attack_finished")

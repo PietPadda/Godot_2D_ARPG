@@ -2,9 +2,6 @@
 class_name EnemyState
 extends State
 
-# Common components needed by all enemy states.
-@onready var owner_node: CharacterBody2D = get_owner()
-
 # export components
 @export var animation_component: AnimationComponent
 @export var attack_component: AttackComponent
