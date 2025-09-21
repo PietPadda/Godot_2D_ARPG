@@ -1,4 +1,4 @@
-# skeleton.gd
+# scripts/enemies/skeleton.gd
 extends CharacterBody2D
 
 # get components

@@ -1,5 +1,5 @@
-# town.gd
-extends Node2D
+# scripts/levels/town.gd
+extends BaseLevel
 
 # scene nodes
 @onready var tile_map_layer = $TileMapLayer
