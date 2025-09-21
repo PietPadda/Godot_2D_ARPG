@@ -10,6 +10,7 @@ const GameOverScreen = preload("res://scenes/ui/game_over_screen.tscn")
 @export var movement_component: GridMovementComponent
 @export var inventory_component: InventoryComponent
 @export var stats_component: StatsComponent
+@export var stat_calculator: StatCalculator
 @export var state_machine: StateMachine
 @export var camera: Camera2D
 
@@ -70,24 +71,14 @@ func _physics_process(_delta: float) -> void:
 		_first_physics_frame_checked = true
 
 # --- Public API ---
-# Calculates a final stat value by orchestrating its components.
+# This function is now just a clean pass-through to the dedicated calculator.
 func get_total_stat(stat_name: String) -> float:
-	var total_value: float = 0.0
-
-	# If we're calculating attack stats, get the base value from the AttackComponent.
-	if (stat_name == "damage" or stat_name == "range") and attack_component and attack_component.attack_data:
-		total_value = attack_component.attack_data.get(stat_name)
-	# Otherwise, start with the base value from the CharacterStats resource.
-	elif stat_name in stats_component.stats_data:
-		total_value = stats_component.stats_data.get(stat_name)
-
-	# Add modifiers from equipped items.
-	if equipment_component:
-		for item in equipment_component.equipment_data.equipped_items.values():
-			if item and item.stat_modifiers.has(stat_name):
-				total_value += item.stat_modifiers[stat_name]
-				
-	return total_value
+	if stat_calculator:
+		return stat_calculator.get_total_stat(stat_name)
+	
+	# no stats returned? error and give 0
+	push_warning("StatCalculator not found on %s" % name)
+	return 0.0
 	
 # This is the entity's public interface for taking damage.
 func handle_damage(damage_amount: int, attacker_id: int) -> void:
