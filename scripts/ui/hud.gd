@@ -20,7 +20,7 @@ func _ready() -> void:
 	# The HUD now listens for requests to open the shop.
 	EventBus.shop_panel_requested.connect(_on_shop_panel_requested)
 
-func _unhandled_input(event: InputEvent) -> void:
+func _unhandled_input(_event: InputEvent) -> void:
 	# Toggle the character sheet panel's visibility
 	if Input.is_action_just_pressed("toggle_character_sheet"): # "C"
 		character_sheet.visible = not character_sheet.visible

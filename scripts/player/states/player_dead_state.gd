@@ -13,5 +13,5 @@ func enter() -> void:
 # By leaving process_input and physics_process empty,
 # we prevent the player from doing anything while dead.
 
-func _physics_process(delta: float) -> void:
+func _physics_process(_delta: float) -> void:
 	pass
