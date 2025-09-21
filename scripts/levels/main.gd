@@ -5,9 +5,6 @@ extends BaseLevel
 const SKELETON_SCENE = preload("res://scenes/enemies/skeleton.tscn")
 
 # scene nodes
-# Get direct references to the tilemap nodes in this scene.
-@onready var floor_tilemap: TileMapLayer = $FloorTileMap
-@onready var wall_tilemap: TileMapLayer = $WallTileMap
 # Add a reference to our bunch of enemies.
 @onready var enemies_container: Node2D = $EnemyContainer
 # Add a reference to our new spawn points container.
@@ -19,18 +16,12 @@ const SKELETON_SCENE = preload("res://scenes/enemies/skeleton.tscn")
 # Add a reference to our projectile spawner.
 @onready var projectile_spawner: MultiplayerSpawner = $ProjectileSpawner
 
-# Expose a slot in the Inspector for the music track.
-@export var level_music: MusicTrackData
-
 # Consts and vars
 var enemy_spawn_points: Array = []
 
 # The setup logic MUST be in _ready() to run once at the start.
 func _ready():
 	super() # This runs all the logic from BaseLevel._ready()
-	
-	# When the level loads, tell the GridManager about our tilemaps.
-	Grid.register_level_tilemaps(floor_tilemap, wall_tilemap)
 	
 	# CRITICAL: Give the server ownership of the spawners FIRST.
 	enemy_spawner.set_multiplayer_authority(1)
@@ -39,13 +30,6 @@ func _ready():
 	
 	# Get all the spawn point children into an array when the level loads.
 	enemy_spawn_points = enemy_spawn_points_container.get_children()
-	
-	# Play the music track that has been assigned in the Inspector.
-	if level_music:
-		Music.play_music(level_music)
-		
-	# Announce which level is setting the tilemap.
-	print(self.scene_file_path, ": _ready() is setting Grid.tile_map_layer.")
 	
 	# If we are the server, call a new function to spawn enemies for everyone.
 	if multiplayer.is_server():

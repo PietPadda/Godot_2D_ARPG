@@ -5,6 +5,11 @@
 class_name BaseLevel
 extends Node2D # Both main.gd and town.gd extend Node2D
 
+# --- Common Level Properties ---
+@export var floor_tilemap: TileMapLayer
+@export var wall_tilemap: TileMapLayer
+@export var level_music: MusicTrackData
+
 # --- Player Spawning Properties ---
 # These nodes are now required by any scene using BaseLevel.
 @onready var player_container: Node2D = $PlayerContainer
@@ -18,8 +23,15 @@ func _ready() -> void:
 	# CRITICAL: Give the server ownership of the spawners FIRST.
 	player_spawner.set_multiplayer_authority(1)
 	
+	# When the level loads, tell the GridManager about our tilemaps.
+	Grid.register_level_tilemaps(floor_tilemap, wall_tilemap)
+	
 	# Get all the spawn point children into an array when the level loads.
 	player_spawn_points = player_spawn_points_container.get_children()
+	
+	# Play the music track that has been assigned in the Inspector.
+	if level_music:
+		Music.play_music(level_music)
 	
 	# Connect our listener FIRST, so we are ready to receive requests.
 	NetworkManager.player_spawn_requested.connect(_on_player_spawn_requested)
