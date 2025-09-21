@@ -53,4 +53,7 @@ func request_scene_transition(scene_path: String, player_id: int) -> void:
 func transition_to_scene(scene_path: String) -> void:
 	# Each client (and the server) will run this code locally.
 	# We can add fade-out/fade-in logic here later.
-	get_tree().change_scene_to_file(scene_path)
+	
+	# Defer the scene change to an idle moment, preventing physics conflicts
+	# and giving the network time to sync before nodes are deleted.
+	get_tree().call_deferred("change_scene_to_file", scene_path)
