@@ -1,5 +1,5 @@
-# main.gd
-extends Node2D
+# scripts/levels/main.gd
+extends BaseLevel
 
 # preloads
 const SKELETON_SCENE = preload("res://scenes/enemies/skeleton.tscn")

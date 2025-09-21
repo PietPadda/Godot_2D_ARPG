@@ -1,4 +1,4 @@
-# player.gd
+# scripts/player/player.gd
 extends CharacterBody2D
 
 # preload scenes to instance
