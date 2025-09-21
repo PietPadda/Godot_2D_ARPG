@@ -39,6 +39,9 @@ func _ready() -> void:
 	# If we are the server, we are ready, so spawn ourselves.
 	if multiplayer.is_server():
 		_on_player_spawn_requested(1)
+		# Now, iterate through all connected clients and spawn them too.
+		for peer_id in multiplayer.get_peers():
+			_on_player_spawn_requested(peer_id)
 
 # -- Signal Handlers --
 # This function will run when the signal is received.
