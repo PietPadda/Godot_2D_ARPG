@@ -29,7 +29,7 @@ func _physics_process(_delta: float) -> void:
 	if not grid_movement_component.is_moving:
 		# Check for attack range. This is now safe because we are stationary.
 		# This guarantees the check only happens when we are perfectly centered.
-		var distance = owner_node.global_position.distance_to(target.global_position)
+		var distance = owner.global_position.distance_to(target.global_position)
 		if distance <= owner.get_total_stat("range"):
 			# Use get_state() with the ENUM to get a reference.
 			var attack_state: EnemyAttackState = state_machine.get_state(States.ENEMY.ATTACK)
@@ -49,8 +49,8 @@ func _recalculate_path() -> void:
 		return
 
 	# If not in range, then proceed with finding the next step.
-	var start = Grid.world_to_map(owner_node.global_position)
+	var start = Grid.world_to_map(owner.global_position)
 	var end = Grid.world_to_map(target.global_position)
 	
 	# Enemies also use the new unified request system.
-	Grid.request_path(start, end, owner_node)
+	Grid.request_path(start, end, owner)

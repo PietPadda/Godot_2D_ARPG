@@ -128,6 +128,13 @@ func get_total_stat(stat_name: String) -> float:
 				total_value += item.stat_modifiers[stat_name]
 				
 	return total_value
+	
+# This is the entity's public interface for taking damage.
+func handle_damage(damage_amount: int, attacker_id: int) -> void:
+	if stats_component:
+		# The entity is responsible for communicating with its own components.
+		var my_multiplayer_authority = get_multiplayer_authority()
+		stats_component.server_take_damage.rpc_id(my_multiplayer_authority, damage_amount, attacker_id)
 
 # This function is called when the StatsComponent emits the "died" signal.
 ## Player death function for Player

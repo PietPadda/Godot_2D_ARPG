@@ -91,7 +91,7 @@ func add_xp(amount: int) -> void:
 		_level_up() # level up ONLY if more than req
 		
 		# If we are the client with authority, tell the server we have leveled up.
-		if get_owner().is_multiplayer_authority():
+		if owner.is_multiplayer_authority():
 			server_level_up.rpc_id(1, stats_data.level)
 
 # Public function to add gold to the player's stats.
@@ -156,7 +156,6 @@ func client_add_gold(amount: int):
 @rpc("any_peer", "call_local", "reliable")
 func server_level_up(new_level: int):
 	# This function only runs on the server.
-	# get_owner() is the server's puppet for the client who called this RPC.
 	
 	# Update the puppet's stats data.
 	stats_data.level = new_level

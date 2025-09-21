@@ -7,9 +7,7 @@ signal cast_finished
 
 # This creates a dedicated slot in the Inspector for our skill.
 @export var secondary_attack_skill: SkillData
-
-# scene nodes
-@onready var stats_component: StatsComponent = get_owner().get_node("StatsComponent") # sibling
+@export var stats_component: StatsComponent
 # Add a timer to manage the cast duration.
 @onready var duration_timer: Timer = Timer.new()
 
@@ -48,13 +46,9 @@ func server_request_cast(target_position: Vector2):
 	if not skill_data: 
 		return
 		
-	# The server re-validates the mana cost as a security check.
-	# Note: get_owner() here is the server's puppet of the casting player.
-	var caster_stats = get_owner().get_node("StatsComponent")
-	
 	# Only the server validates mana for remote players.
 	# The host (server, ID 1) already paid mana locally in the 'cast' function.
-	if get_owner().get_multiplayer_authority() != 1:
+	if owner.get_multiplayer_authority() != 1:
 		# Server-side validation (prevents cheating)
 		if not stats_component.use_mana(skill_data.mana_cost):
 			return # The server determined they couldn't cast.
@@ -80,13 +74,8 @@ func server_request_cast(target_position: Vector2):
 	
 	# The projectile needs to know where it's going.
 	# get the caster's network ID
-	var caster_id = get_owner().get_multiplayer_authority()
-	var caster_pos = get_owner().global_position
-	
-	# THE FIX: We no longer set position or initialize locally.
-	# projectile.global_position = get_owner().global_position
-	# projectile.look_at(target_position)
-	# projectile.initialize(skill_data, caster_id)
+	var caster_id = owner.get_multiplayer_authority()
+	var caster_pos = owner.global_position
 	
 	# we call our unified RPC to do everything on all clients at once.
 	# Instead of passing the whole 'skill_data' object,

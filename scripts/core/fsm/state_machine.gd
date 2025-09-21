@@ -59,7 +59,7 @@ func change_state(new_state_name: String) -> void:
 func get_state(state_enum: int) -> State:
 	# First, determine if we are the player or an enemy FSM
 	var state_names_array = States.PLAYER_STATE_NAMES
-	if get_owner().is_in_group("enemies"):
+	if owner.is_in_group("enemies"):
 		state_names_array = States.ENEMY_STATE_NAMES
 		
 	# Use the enum to look up the string name from our global manager

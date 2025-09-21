@@ -3,7 +3,7 @@
 class_name AnimationComponent
 extends Node
 
-@onready var animation_player: AnimationPlayer = get_parent().get_node("AnimationPlayer")
+@export var animation_player: AnimationPlayer
 
 # A public function to play a named animation.
 func play_animation(anim_name: String) -> void:

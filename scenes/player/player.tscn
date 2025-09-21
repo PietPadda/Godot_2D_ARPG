@@ -159,8 +159,9 @@ stats_component = NodePath("StatsComponent")
 state_machine = NodePath("StateMachine")
 camera = NodePath("Camera2D")
 
-[node name="AnimationComponent" type="Node" parent="."]
+[node name="AnimationComponent" type="Node" parent="." node_paths=PackedStringArray("animation_player")]
 script = ExtResource("13_gx1jg")
+animation_player = NodePath("../AnimationPlayer")
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
 libraries = {
@@ -245,17 +246,19 @@ script = ExtResource("15_ioxgp")
 [node name="GridMovementComponent" type="Node" parent="."]
 script = ExtResource("15_yj68g")
 
-[node name="AttackComponent" type="Node" parent="."]
+[node name="AttackComponent" type="Node" parent="." node_paths=PackedStringArray("animation_component")]
 script = ExtResource("10_je7p5")
 attack_data = ExtResource("11_fm80t")
+animation_component = NodePath("../AnimationComponent")
 
 [node name="PlayerTargetingComponent" type="Node" parent="."]
 script = ExtResource("17_kvlxm")
 target_layer_mask = 2
 
-[node name="SkillCasterComponent" type="Node" parent="."]
+[node name="SkillCasterComponent" type="Node" parent="." node_paths=PackedStringArray("stats_component")]
 script = ExtResource("18_uf5tr")
 secondary_attack_skill = ExtResource("20_8ydkj")
+stats_component = NodePath("../StatsComponent")
 
 [node name="EquipmentComponent" type="Node" parent="."]
 script = ExtResource("21_3j4b4")

@@ -5,12 +5,10 @@ extends Node
 # This exposes a clickable list of physics layers in the Inspector!
 @export_flags_2d_physics var target_layer_mask: int
 
-@onready var player: CharacterBody2D = get_owner()
-
 # This is our centralized, reusable targeting function.
 func get_target_under_mouse() -> Node2D:
-	var world_space = player.get_world_2d().direct_space_state
-	var mouse_pos = player.get_global_mouse_position()
+	var world_space = owner.get_world_2d().direct_space_state
+	var mouse_pos = owner.get_global_mouse_position()
 	
 	# Set up the query.
 	var query = PhysicsPointQueryParameters2D.new()
