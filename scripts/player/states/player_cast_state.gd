@@ -8,7 +8,7 @@ var cast_target_position: Vector2
 
 func enter() -> void:
 	# For now, we'll reuse the Attack animation for casting.
-	animation_component.play_animation("Attack")
+	animation_component.play_animation(Anims.PLAYER_NAMES[Anims.PLAYER.ATTACK])
 	# Tell the skill caster to perform the action.
 	skill_caster_component.cast(skill_to_cast, cast_target_position)
 	# Connect to the signal from our component.

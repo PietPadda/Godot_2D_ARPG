@@ -18,7 +18,7 @@ func enter() -> void:
 		state_machine.change_state(States.PLAYER_STATE_NAMES[States.PLAYER.IDLE]) # just idle if invalid target
 		return # early exit
 	
-	player.get_node("AnimationComponent").play_animation("Move")
+	player.get_node("AnimationComponent").play_animation(Anims.PLAYER_NAMES[Anims.PLAYER.MOVE])
 	
 	# Connect to ALL necessary signals for responsive control.
 	grid_movement_component.path_finished.connect(_on_path_finished) # Key change!

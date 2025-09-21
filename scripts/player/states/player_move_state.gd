@@ -7,7 +7,7 @@ extends PlayerState # Changed from 'State'
 var destination_tile: Vector2i
 
 func enter() -> void:
-	player.get_node("AnimationComponent").play_animation("Move")
+	player.get_node("AnimationComponent").play_animation(Anims.PLAYER_NAMES[Anims.PLAYER.MOVE])
 	# When we enter, start listening for the component to finish a step.
 	grid_movement_component.path_finished.connect(_on_path_finished)
 	# THIS IS THE KEY: We now listen for waypoints to recalculate our path.
