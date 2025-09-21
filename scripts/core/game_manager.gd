@@ -12,6 +12,15 @@ var loaded_player_data: SaveData = null
 # This variable will hold our player's data during a normal scene transition.
 var player_data_on_transition: SaveData = null
 
+# This dictionary will store the data for all players during a transition.
+# The key will be the player's ID.
+var all_players_transition_data: Dictionary = {}
+
+# The ID of the player who triggered the scene transition.
+var requesting_player_id: int = 0
+# The target spawn location in the next scene for the requesting player.
+var target_spawn_position: Vector2 = Vector2.INF
+
 func _ready() -> void:
 	# Listen for when the player we control has spawned into a scene.
 	EventBus.local_player_spawned.connect(_on_local_player_spawned)
@@ -93,6 +102,34 @@ func load_game() -> void:
 	# Now, reload the entire level. Diablo 2 style!!
 	get_tree().change_scene_to_file("res://scenes/levels/main.tscn")
 	print("Game loaded!")
+	
+# This function is called by the server to gather data from all players.
+func carry_player_data_for_all() -> void:
+	# Clear any old data first.
+	all_players_transition_data.clear()
+	
+	# Get a reference to the currently active scene.
+	var current_scene = get_tree().current_scene
+	if not current_scene: return
+	
+	# Find all nodes in the "player" group.
+	for player in current_scene.get_tree().get_nodes_in_group("player"):
+		var player_id = int(player.name)
+		var data = SaveData.new() # Create a new data container.
+		
+		# Populate the data from the player's components.
+		data.player_stats_data = player.stats_component.stats_data
+		data.current_health = player.stats_component.current_health
+		data.current_mana = player.stats_component.current_mana
+		data.player_inventory_data = player.inventory_component.inventory_data
+		data.player_equipment_data = player.equipment_component.equipment_data
+		
+		# If this player is the one who used the portal, save their target spawn position.
+		if player_id == requesting_player_id:
+			data.target_spawn_position = target_spawn_position
+			
+		# Store the populated data in our dictionary.
+		all_players_transition_data[player_id] = data
 
 # -- Signal Handlers --
 # This function is called by the EventBus when the player is ready.
