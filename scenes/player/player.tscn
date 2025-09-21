@@ -232,8 +232,6 @@ shape = SubResource("CircleShape2D_yj68g")
 [node name="StatsComponent" type="Node" parent="."]
 script = ExtResource("3_lvxji")
 stats_data = ExtResource("4_p47bc")
-current_health = null
-current_mana = null
 
 [node name="InventoryComponent" type="Node" parent="."]
 script = ExtResource("15_myrg7")

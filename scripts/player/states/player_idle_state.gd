@@ -7,7 +7,7 @@ func enter() -> void:
 		# Explicitly stop all movement when entering the Idle state.
 	player.velocity = Vector2.ZERO
 	# Play Idle Anim on Entering
-	animation_component.play_animation("Idle")
+	animation_component.play_animation(Anims.PLAYER_NAMES[Anims.PLAYER.IDLE])
 	
 	# Connect to the input component's signals when entering the idle state.
 	input_component.move_to_requested.connect(_on_move_to_requested)

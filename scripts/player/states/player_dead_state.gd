@@ -4,7 +4,7 @@ extends PlayerState
 
 func enter() -> void:
 	print("Player has entered the Dead state.")
-	animation_component.play_animation("Dead")
+	animation_component.play_animation(Anims.PLAYER_NAMES[Anims.PLAYER.DEAD])
 
 	# Disable the player's collision so enemies can walk past the body.
 	var collision_shape = player.get_node("CollisionShape2D")
