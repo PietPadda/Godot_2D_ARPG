@@ -22,7 +22,7 @@ func exit() -> void:
 	input_component.cast_requested.disconnect(_on_cast_requested)
 
 # IdleState no longer needs a prcess_input. It doesn't do any input.
-func process_input(event: InputEvent) -> void:
+func process_input(_event: InputEvent) -> void:
 	pass
 		
 # IdleState no longer needs a physics_process. It doesn't do anything continuously.

@@ -51,7 +51,7 @@ func exit() -> void:
 	# Crucial cleanup to stop movement when exiting the state.
 	grid_movement_component.stop()
 
-func _physics_process(delta: float) -> void:
+func _physics_process(_delta: float) -> void:
 	# Wrap the entire logic in a check against our flag.
 	if _has_made_decision:
 		return # We've already told the FSM what to do. Do nothing.

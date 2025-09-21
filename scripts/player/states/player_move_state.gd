@@ -32,7 +32,7 @@ func exit() -> void:
 	input_component.target_requested.disconnect(_on_target_requested)
 	input_component.cast_requested.disconnect(_on_cast_requested)
 	
-func _physics_process(delta: float) -> void:
+func _physics_process(_delta: float) -> void:
 	pass
 	
 # We've moved the pathfinding logic into its own function for reuse.

@@ -22,7 +22,7 @@ func exit() -> void:
 	if attack_component.attack_finished.is_connected(on_attack_finished):
 		attack_component.attack_finished.disconnect(on_attack_finished)
 
-func _physics_process(delta: float) -> void:
+func _physics_process(_delta: float) -> void:
 	pass
 
 func on_attack_finished() -> void:

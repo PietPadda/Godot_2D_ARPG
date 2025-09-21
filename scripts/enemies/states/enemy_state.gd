@@ -15,5 +15,5 @@ extends State
 func is_target_valid(target: Node2D) -> bool:
 	return is_instance_valid(target)
 
-func _physics_process(delta: float) -> void:
+func _physics_process(_delta: float) -> void:
 	pass

@@ -5,11 +5,11 @@ extends CharacterBody2D
 const GameOverScreen = preload("res://scenes/ui/game_over_screen.tscn")
 
 # get components
-@onready var stats_component: StatsComponent = $StatsComponent
-@onready var inventory_component: InventoryComponent = $InventoryComponent
-@onready var equipment_component: EquipmentComponent = $EquipmentComponent
-@onready var state_machine: StateMachine = $StateMachine
-@onready var camera: Camera2D = $Camera2D
+@export var stats_component: StatsComponent
+@export var inventory_component: InventoryComponent
+@export var equipment_component: EquipmentComponent
+@export var state_machine: StateMachine
+@export var camera: Camera2D
 
 # consts and vars
 var _first_physics_frame_checked: bool = false
@@ -49,10 +49,8 @@ func _ready() -> void:
 		# Swap our default resources with the loaded ones.
 		stats_component.stats_data = GameManager.loaded_player_data.player_stats_data
 		# Apply the loaded inventory data
-		var inventory_component = get_node("InventoryComponent")
 		inventory_component.inventory_data = GameManager.loaded_player_data.player_inventory_data
 		# Apply the loaded equipment data
-		var equipment_component = get_node("EquipmentComponent")
 		equipment_component.equipment_data = GameManager.loaded_player_data.player_equipment_data
 		
 		# On SAVE LOAD, restore to full health and mana (Diablo II style).
@@ -74,8 +72,8 @@ func _ready() -> void:
 	elif is_instance_valid(GameManager.player_data_on_transition):
 		var transition_data = GameManager.player_data_on_transition
 		stats_component.stats_data = transition_data.player_stats_data
-		get_node("InventoryComponent").inventory_data = transition_data.player_inventory_data
-		get_node("EquipmentComponent").equipment_data = transition_data.player_equipment_data
+		inventory_component.inventory_data = transition_data.player_inventory_data
+		equipment_component.equipment_data = transition_data.player_equipment_data
 		
 		# Check if a target spawn position was carried over.
 		if transition_data.target_spawn_position != Vector2.INF:
@@ -104,7 +102,7 @@ func _ready() -> void:
 	_on_game_state_changed(EventBus.current_game_state)
 
 # We need to add _physics_process to see the position on the first frame of gameplay.
-func _physics_process(delta: float) -> void:
+func _physics_process(_delta: float) -> void:
 	# This code will only run once for our controlled character.
 	if is_multiplayer_authority() and not _first_physics_frame_checked:
 		_first_physics_frame_checked = true

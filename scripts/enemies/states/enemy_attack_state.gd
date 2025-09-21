@@ -16,7 +16,7 @@ func enter() -> void:
 	attack_component.execute(target)
 	attack_component.attack_finished.connect(on_attack_finished, CONNECT_ONE_SHOT)
 
-func _physics_process(delta: float) -> void:
+func _physics_process(_delta: float) -> void:
 	pass
 
 func on_attack_finished() -> void:

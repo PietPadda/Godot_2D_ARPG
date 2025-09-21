@@ -70,7 +70,7 @@ func _ready():
 	EventBus.debug_respawn_enemies_requested.connect(_on_debug_respawn_enemies)
 
 # This function can now be left empty or used for other inputs.
-func _unhandled_input(event: InputEvent) -> void:
+func _unhandled_input(_event: InputEvent) -> void:
 	pass
 
 # -- Signal Handlers --
@@ -136,7 +136,7 @@ func _on_enemy_died(stats_data: CharacterStats, attacker_id: int):
 
 	# Find the player node associated with the attacker's ID.
 	var player_path = "PlayerContainer/" + str(attacker_id)
-	var player_node = get_node_or_null("PlayerContainer/" + str(attacker_id))
+	var player_node = get_node_or_null(player_path)
 	
 	if is_instance_valid(player_node):
 		var xp_reward = stats_data.xp_reward
