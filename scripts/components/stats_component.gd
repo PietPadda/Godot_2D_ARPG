@@ -20,9 +20,9 @@ signal stats_changed
 # Link to the resource file that holds the base stats.
 @export var stats_data: CharacterStats
 
-# get sibling components
-@onready var equipment_component: EquipmentComponent = get_parent().get_node_or_null("EquipmentComponent")
-@onready var attack_component: AttackComponent = get_parent().get_node_or_null("AttackComponent")
+# REMOVE SIBLING COMPONENT REFERENCES
+# @onready var equipment_component: EquipmentComponent = get_parent().get_node_or_null("EquipmentComponent")
+# @onready var attack_component: AttackComponent = get_parent().get_node_or_null("AttackComponent")
 
 # The entity's current, in-game stats.
 @export var current_health: int # entity hp tracker
@@ -109,25 +109,8 @@ func refresh_stats() -> void:
 	emit_signal("xp_changed", stats_data.level, stats_data.current_xp, stats_data.xp_to_next_level)
 	emit_signal("gold_changed", stats_data.gold)
 
-## Calculates a final stat value by combining base stats with equipment modifiers.
-func get_total_stat(stat_name: String) -> float:
-	var total_value: float = 0.0 # init 0
-
-	# If we're calculating "damage", get the base value from the AttackComponent.
-	if (stat_name == "damage" or stat_name == "range") and attack_component and attack_component.attack_data:
-		# Base damage and range come from the equipped attack.
-		total_value = attack_component.attack_data.get(stat_name)
-	# Start with the base value from the CharacterStats resource, if it exists.
-	elif stat_name in stats_data:
-		total_value = stats_data.get(stat_name)
-
-	# Add modifiers from equipped items.
-	if equipment_component: # if something equipped
-		for item in equipment_component.equipment_data.equipped_items.values(): # loop each
-			if item and item.stat_modifiers.has(stat_name): # if has same stat
-				total_value += item.stat_modifiers[stat_name] # add to our total value
-
-	return total_value # calculaed value
+# REMOVE THIS ENTIRE FUNCTION. Its logic will be moved to the entity script.
+# func get_total_stat(stat_name: String) -> float:
 
 ## level up player on sufficient xp
 func _level_up() -> void:

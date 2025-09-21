@@ -48,7 +48,7 @@ func execute(target: Node2D) -> void:
 	# Only attempt to deal damage if the target is still valid.
 	if is_instance_valid(target):
 		# Get the character's total damage from the StatCalculator.
-		var total_damage = get_owner().get_node("StatsComponent").get_total_stat("damage")
+		var total_damage = owner.get_total_stat("damage")
 		# Find the target's StatsComponent and deal damage.
 		var target_stats: StatsComponent = target.get_node("StatsComponent")
 		if target_stats:

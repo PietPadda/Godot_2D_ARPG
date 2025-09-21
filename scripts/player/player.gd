@@ -107,6 +107,27 @@ func _physics_process(_delta: float) -> void:
 	if is_multiplayer_authority() and not _first_physics_frame_checked:
 		_first_physics_frame_checked = true
 
+# --- Public Methods ---
+# Calculates a final stat value by orchestrating its components.
+func get_total_stat(stat_name: String) -> float:
+	var total_value: float = 0.0
+
+	# If we're calculating attack stats, get the base value from the AttackComponent.
+	var attack_component = get_node_or_null("AttackComponent") # We'll improve this later
+	if (stat_name == "damage" or stat_name == "range") and attack_component and attack_component.attack_data:
+		total_value = attack_component.attack_data.get(stat_name)
+	# Otherwise, start with the base value from the CharacterStats resource.
+	elif stat_name in stats_component.stats_data:
+		total_value = stats_component.stats_data.get(stat_name)
+
+	# Add modifiers from equipped items.
+	if equipment_component:
+		for item in equipment_component.equipment_data.equipped_items.values():
+			if item and item.stat_modifiers.has(stat_name):
+				total_value += item.stat_modifiers[stat_name]
+				
+	return total_value
+
 # This function is called when the StatsComponent emits the "died" signal.
 ## Player death function for Player
 func _on_death(_attacker_id: int) -> void:
