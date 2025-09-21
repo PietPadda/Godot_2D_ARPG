@@ -111,7 +111,7 @@ func _start_next_move_step() -> bool:
 	var target_world_pos = move_path[0]
 	move_path.remove_at(0)
 	
-	var move_speed = stats_component.get_total_stat("move_speed")
+	var move_speed = owner.get_total_stat("move_speed")
 	var distance = owner.global_position.distance_to(target_world_pos)
 	
 	# Prevent division by zero.
