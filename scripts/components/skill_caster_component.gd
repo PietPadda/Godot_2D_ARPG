@@ -55,13 +55,19 @@ func server_request_cast(target_position: Vector2):
 	
 	# Find the projectile scene
 	var projectile_scene = skill_data.projectile_scene
+	
 	# if no projectile scene, do not cast!
 	if not projectile_scene:
 		push_error("SkillData is missing a projectile scene!")
 		return # do not cast
-		
+	
+	# Find the projectile container within the currently active level.
+	var level = Scene.current_level
+	if not is_instance_valid(level):
+		return
+	
 	# Find the spawner and container
-	var projectile_container = get_tree().get_root().get_node_or_null("Main/ProjectileContainer")
+	var projectile_container = level.get_node_or_null("ProjectileContainer")
 	if not projectile_container:
 		return
 

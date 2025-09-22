@@ -86,13 +86,19 @@ func build_level_graph():
 				
 	# Update the debug visualization to use the floor_tilemap.
 	if debug_tile_scene:
-		var main_scene = get_tree().current_scene
+		# --- THE FIX ---
+		# Get the actual active level from our SceneManager.
+		var level = Scene.current_level
+		if not is_instance_valid(level):
+			push_error("GridManager: Cannot spawn debug tiles, Scene.current_level is invalid.")
+			return
+			
 		for x in range(map_rect.position.x, map_rect.end.x):
 			for y in range(map_rect.position.y, map_rect.end.y):
 				var cell = Vector2i(x, y)
 				if not astar_grid.is_point_solid(cell):
 					var tile_instance = debug_tile_scene.instantiate()
-					main_scene.add_child(tile_instance)
+					level.add_child(tile_instance)
 					# Use the floor_tilemap for coordinate conversion.
 					var tile_size = floor_tilemap.tile_set.tile_size
 					tile_instance.global_position = map_to_world(cell) - (Vector2(tile_size) / 2)
