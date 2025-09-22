@@ -18,13 +18,14 @@ func _on_body_entered(body: Node2D) -> void:
 	# This check is vital for multiplayer. It ensures only the player who
 	# actually controls their character can trigger the portal action.
 	if body.is_multiplayer_authority():
-		print("Player entered portal. Requesting transition to: ", target_scene_path)
+		# Instead of calling the RPC directly, we defer a helper function.
+		call_deferred("_request_transition")
 		
-		# --- BEFORE (Single-player logic) ---
-		# Scene.change_scene(target_scene_path, spawn_point.global_position)
-		
-		# --- AFTER (Multiplayer logic) ---
-		# Get our unique ID and send an RPC to the server (peer 1)
+# This new function contains our original RPC call.
+func _request_transition() -> void:
+	print("Player entered portal. Requesting transition to: ", target_scene_path)
+	
+	# Get our unique ID and send an RPC to the server (peer 1)
 		# asking it to handle the scene change.
-		var my_id = multiplayer.get_unique_id()
-		Scene.request_scene_transition.rpc_id(1, target_scene_path, my_id)
+	var my_id = multiplayer.get_unique_id()
+	Scene.request_scene_transition.rpc_id(1, target_scene_path, my_id)

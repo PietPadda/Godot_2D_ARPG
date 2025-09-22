@@ -25,10 +25,10 @@ func _on_body_entered(body: Node2D) -> void:
 	_is_processing_impact = true # otherwise, we are handling an impact
 
 	# Instead of dealing damage, we report the hit to the server.
-	# The server's Main node will handle the rest.
-	var main_node = get_tree().get_root().get_node("Main")
-	if main_node:
-		main_node.server_process_projectile_hit.rpc_id(1, get_path(), body.get_path())
+	# Instead of a hardcoded path, we get the active level from the SceneManager.
+	var level = Scene.current_level
+	if is_instance_valid(level) and level.has_method("server_process_projectile_hit"):
+		level.server_process_projectile_hit.rpc_id(1, get_path(), body.get_path())
 		
 # function to handle projecile timeout
 func on_timeout():

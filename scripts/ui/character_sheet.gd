@@ -29,20 +29,34 @@ func initialize(inv_comp: InventoryComponent, equip_comp: EquipmentComponent, st
 	inventory_panel.initialize_inventory(inventory_component.inventory_data)
 	# Connect to the UI slots now that they've been created
 	for slot in inventory_panel.grid_container.get_children():
-		slot.slot_clicked.connect(_on_inventory_slot_clicked)
+		# Invetory slot calls
+		# Only connect the signals if they aren't connected already.
+		if not slot.slot_clicked.is_connected(_on_inventory_slot_clicked):
+			slot.slot_clicked.connect(_on_inventory_slot_clicked)
+			
 		# Inventory Tooltip calls
-		slot.show_tooltip.connect(Tooltip.show_tooltip)
-		slot.hide_tooltip.connect(Tooltip.hide_tooltip.bind(slot)) # Bind the slot node as an argument
+		if not slot.show_tooltip.is_connected(Tooltip.show_tooltip):
+			slot.show_tooltip.connect(Tooltip.show_tooltip)
+		if not slot.hide_tooltip.is_connected(Tooltip.hide_tooltip):
+			slot.hide_tooltip.connect(Tooltip.hide_tooltip.bind(slot)) # Bind the slot node as an argument
 	
 	# Equipment Tooltip calls
-	weapon_slot.show_tooltip.connect(Tooltip.show_tooltip)
-	weapon_slot.hide_tooltip.connect(Tooltip.hide_tooltip.bind(weapon_slot))
-	armor_slot.show_tooltip.connect(Tooltip.show_tooltip)
-	armor_slot.hide_tooltip.connect(Tooltip.hide_tooltip.bind(armor_slot))
-	helm_slot.show_tooltip.connect(Tooltip.show_tooltip)
-	helm_slot.hide_tooltip.connect(Tooltip.hide_tooltip.bind(helm_slot))
-	boots_slot.show_tooltip.connect(Tooltip.show_tooltip)
-	boots_slot.hide_tooltip.connect(Tooltip.hide_tooltip.bind(boots_slot))
+	if not weapon_slot.show_tooltip.is_connected(Tooltip.show_tooltip):
+		weapon_slot.show_tooltip.connect(Tooltip.show_tooltip)
+	if not weapon_slot.hide_tooltip.is_connected(Tooltip.hide_tooltip):
+		weapon_slot.hide_tooltip.connect(Tooltip.hide_tooltip.bind(weapon_slot))
+	if not armor_slot.show_tooltip.is_connected(Tooltip.show_tooltip):
+		armor_slot.show_tooltip.connect(Tooltip.show_tooltip)
+	if not armor_slot.hide_tooltip.is_connected(Tooltip.hide_tooltip):
+		armor_slot.hide_tooltip.connect(Tooltip.hide_tooltip.bind(armor_slot))
+	if not helm_slot.show_tooltip.is_connected(Tooltip.show_tooltip):
+		helm_slot.show_tooltip.connect(Tooltip.show_tooltip)
+	if not helm_slot.hide_tooltip.is_connected(Tooltip.hide_tooltip):
+		helm_slot.hide_tooltip.connect(Tooltip.hide_tooltip.bind(helm_slot))
+	if not boots_slot.show_tooltip.is_connected(Tooltip.show_tooltip):
+		boots_slot.show_tooltip.connect(Tooltip.show_tooltip)
+	if not boots_slot.hide_tooltip.is_connected(Tooltip.hide_tooltip):
+		boots_slot.hide_tooltip.connect(Tooltip.hide_tooltip.bind(boots_slot))
 	
 	# Manually draw once on init to show initial state
 	redraw()
