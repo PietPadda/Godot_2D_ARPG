@@ -28,10 +28,12 @@ func _enter_tree() -> void:
 	if multiplayer.is_server():
 		GameManager.register_player(self)
 		
-func _exit_tree() -> void:
-	# When the player is removed, the server unregisters them.
-	if multiplayer.is_server():
-		GameManager.unregister_player(self)
+# We can now REMOVE the entire _exit_tree() function from player.gd.
+# It is causing the player to be removed from our central list during transitions.
+
+# func _exit_tree() -> void:
+# 	if multiplayer.is_server():
+# 		GameManager.unregister_player(self)
 	
 func _ready() -> void:
 	# Duplicate the data resources to make them unique to this player instance.
