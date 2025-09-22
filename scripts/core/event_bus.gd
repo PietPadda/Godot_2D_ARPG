@@ -9,6 +9,7 @@ signal shop_panel_requested # This signal is emitted when any NPC requests a sho
 signal local_player_spawned(player_node) # Player joined annouce with player node reference
 # A signal for our server-side debug command to respawn enemies.
 signal debug_respawn_enemies_requested
+signal server_requesting_transition(scene_path)
 
 # An Enum provides clear, readable names for our states and prevents errors from typos.
 enum GameState {

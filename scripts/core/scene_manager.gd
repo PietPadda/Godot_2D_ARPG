@@ -45,8 +45,8 @@ func request_scene_transition(scene_path: String, player_id: int) -> void:
 		GameManager.requesting_player_id = player_id
 	GameManager.carry_player_data_for_all()
 
-	# Command all clients to transition.
-	transition_to_scene.rpc(scene_path)
+	# Instead of calling the RPC directly, tell the current level to clean up.
+	EventBus.emit_signal("server_requesting_transition", scene_path)
 	
 # This RPC is called BY the server ON all clients to execute the change.
 @rpc("any_peer", "call_local", "reliable")

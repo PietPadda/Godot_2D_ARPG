@@ -42,6 +42,9 @@ func _ready() -> void:
 		# Now, iterate through all connected clients and spawn them too.
 		for peer_id in multiplayer.get_peers():
 			_on_player_spawn_requested(peer_id)
+	
+	# Listen for the signal to start the cleanup process.
+	EventBus.server_requesting_transition.connect(_on_server_requesting_transition)
 
 # -- Signal Handlers --
 # This function will run when the signal is received.
@@ -70,3 +73,19 @@ func _on_player_spawn_requested(id: int):
 	
 	# Re-add this line to tell the owning client their starting position.
 	player_instance.set_initial_position.rpc_id(id, spawn_pos)
+	
+# This function only runs on the server's instance of the level.
+func _on_server_requesting_transition(scene_path: String) -> void:
+	print("[SERVER] Level is gracefully despawning all players.")
+	
+	# Use our spawner to gracefully despawn each player.
+	for player in player_container.get_children():
+		# The server calling queue_free() on a replicated node
+		# is the correct way to despawn it across all clients.
+		player.queue_free()
+	
+	# Wait for the next frame to allow the despawn network packets to be sent and processed.
+	await get_tree().process_frame
+	
+	# Now that the slate is clean, tell the SceneManager to proceed with the transition.
+	Scene.transition_to_scene.rpc(scene_path)
