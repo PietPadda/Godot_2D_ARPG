@@ -27,6 +27,8 @@ var active_players: Dictionary = {} # Format: { player_id: player_node }
 func _ready() -> void:
 	# Listen for when the player we control has spawned into a scene.
 	EventBus.local_player_spawned.connect(_on_local_player_spawned)
+	#Listen for when a player disconnects from the server.
+	NetworkManager.player_disconnected.connect(_on_player_disconnected)
 
 # --- Public API ---
 #  This function grabs the current player's data and stores it for the transition.
@@ -163,3 +165,11 @@ func _on_local_player_spawned(player: Player) -> void:
 		player.apply_persistent_data(player_data_on_transition, true)
 		# Clear the data after it's been used.
 		player_data_on_transition = null
+		
+# This function will only be called on the server when a client disconnects.
+func _on_player_disconnected(player_id: int) -> void:
+	# Find the player's node using our existing registry function.
+	var player_node = get_player(player_id)
+	if is_instance_valid(player_node):
+		# Now, unregister them from the central list.
+		unregister_player(player_node)
