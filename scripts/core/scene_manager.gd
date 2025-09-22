@@ -3,6 +3,9 @@
 class_name SceneManager
 extends Node
 
+# This will hold a reference to the currently instanced level node.
+var current_level: Node = null
+
 # ---Public API---
 # Changes the active scene to the one at the given path.
 # We now accept an optional target_spawn_position.
@@ -37,23 +40,32 @@ func request_scene_transition(scene_path: String, player_id: int) -> void:
 	print("[SERVER] Received request from player %s to transition to scene: %s" % [player_id, scene_path])
 	print("[SERVER] Initiating transition...")
 	
-	# Persist the data for ALL players before we leave the scene.
-	# We need to find the portal's target spawn point for the requesting player.
-	var portal = get_tree().get_first_node_in_group("Portal") # A simple way to find the portal
-	if portal:
-		GameManager.target_spawn_position = portal.spawn_point.global_position
-		GameManager.requesting_player_id = player_id
-	GameManager.carry_player_data_for_all()
-
-	# Command all clients to transition.
+	# Persist player data (this is still necessary).
+	GameManager.carry_player_data_for_all() # This should be updated slightly
+	
+	# Immediately command all clients to run the new, stable transition logic.
 	transition_to_scene.rpc(scene_path)
 	
 # This RPC is called BY the server ON all clients to execute the change.
 @rpc("any_peer", "call_local", "reliable")
 func transition_to_scene(scene_path: String) -> void:
-	# Each client (and the server) will run this code locally.
-	# We can add fade-out/fade-in logic here later.
-	
-	# Defer the scene change to an idle moment, preventing physics conflicts
-	# and giving the network time to sync before nodes are deleted.
-	get_tree().call_deferred("change_scene_to_file", scene_path)
+	# If there's an old level instance, free it.
+	if is_instance_valid(current_level):
+		current_level.queue_free()
+
+	# Load the new level scene resource from the provided path.
+	var new_level_scene = load(scene_path)
+	if not new_level_scene:
+		push_error("Failed to load scene: %s" % scene_path)
+		return
+
+	# Create an instance of the new level.
+	current_level = new_level_scene.instantiate()
+
+	# Find our persistent container and add the new level there.
+	var container = get_tree().get_first_node_in_group("level_container")
+	if container:
+		container.add_child(current_level)
+	else:
+		# This should never happen if the World scene is set up correctly.
+		push_error("SceneManager could not find a 'level_container' node!")
