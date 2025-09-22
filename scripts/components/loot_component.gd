@@ -23,14 +23,20 @@ func drop_loot(position: Vector2) -> void:
 		# Set the loot drops position
 		loot_instance.global_position = position
 		
-		# Add the "blank" loot drop to the scene for everyone first.
-		var loot_container = get_tree().get_root().get_node("Main/LootContainer")
+		# Get the current level from the SceneManager.
+		var level = Scene.current_level
+		if not is_instance_valid(level): return
+		
+		# Find the LootContainer within the active level.
+		var loot_container = level.get_node_or_null("LootContainer")
+		
+		if not loot_container:
+			push_error("Could not find 'LootContainer' node in the current level!")
+			return
 		
 		# The LootSpawner will see this action and replicate it for all clients.
-		if loot_container:
-			# Add 'true' to force a network-safe name.
-			loot_container.add_child(loot_instance, true)
-			
-			# Call our new, unified RPC to tell all clients to
-			# set the position, item data, and make it visible.
-			loot_instance.initialize.rpc(item_to_drop.resource_path, position)
+		loot_container.add_child(loot_instance, true) # Add 'true' to force a network-safe name.
+		
+		# Call our RPC to tell all clients to
+		# set the position, item data, and make it visible.
+		loot_instance.initialize.rpc(item_to_drop.resource_path, position)
