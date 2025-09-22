@@ -139,9 +139,12 @@ func carry_player_data_for_all() -> void:
 		
 func register_player(player_node: Node) -> void:
 	var player_id = int(player_node.name)
-	if not active_players.has(player_id):
-		active_players[player_id] = player_node
-		print("[SERVER] Player %s registered." % player_id)
+	
+	# REMOVE the 'if not active_players.has(player_id):' check.
+	# We MUST always update the dictionary with the newest player instance
+	# to overwrite any stale reference from a previous scene.
+	active_players[player_id] = player_node
+	print("[SERVER] Player %s registered." % player_id)
 
 func unregister_player(player_node: Node) -> void:
 	var player_id = int(player_node.name)
