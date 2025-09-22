@@ -108,12 +108,13 @@ func carry_player_data_for_all() -> void:
 	# Clear any old data first.
 	all_players_transition_data.clear()
 	
-	# Get a reference to the currently active scene.
-	var current_scene = get_tree().current_scene
-	if not current_scene: return
+	# Instead of searching the whole tree, we look inside the current level.
+	var level = Scene.current_level
+	if  not is_instance_valid(level): 
+		return
 	
-	# Find all nodes in the "player" group.
-	for player in current_scene.get_tree().get_nodes_in_group("player"):
+	# Find all nodes in the "player" group within the current level.
+	for player in level.get_tree().get_nodes_in_group("player"):
 		var player_id = int(player.name)
 		var data = SaveData.new() # Create a new data container.
 		
