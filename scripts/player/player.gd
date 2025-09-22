@@ -24,6 +24,15 @@ func _enter_tree() -> void:
 	# The engine error log specifically tells us to set authority here.
 	set_multiplayer_authority(int(name))
 	
+	# The server is responsible for managing the registry.
+	if multiplayer.is_server():
+		GameManager.register_player(self)
+		
+func _exit_tree() -> void:
+	# When the player is removed, the server unregisters them.
+	if multiplayer.is_server():
+		GameManager.unregister_player(self)
+	
 func _ready() -> void:
 	# Duplicate the data resources to make them unique to this player instance.
 	# This prevents players from sharing inventories, stats, or equipment.

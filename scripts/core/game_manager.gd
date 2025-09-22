@@ -21,6 +21,9 @@ var requesting_player_id: int = 0
 # The target spawn location in the next scene for the requesting player.
 var target_spawn_position: Vector2 = Vector2.INF
 
+# This will be our central, authoritative list of all players in the game.
+var active_players: Dictionary = {} # Format: { player_id: player_node }
+
 func _ready() -> void:
 	# Listen for when the player we control has spawned into a scene.
 	EventBus.local_player_spawned.connect(_on_local_player_spawned)
@@ -131,6 +134,21 @@ func carry_player_data_for_all() -> void:
 			
 		# Store the populated data in our dictionary.
 		all_players_transition_data[player_id] = data
+		
+func register_player(player_node: Node) -> void:
+	var player_id = int(player_node.name)
+	if not active_players.has(player_id):
+		active_players[player_id] = player_node
+		print("[SERVER] Player %s registered." % player_id)
+
+func unregister_player(player_node: Node) -> void:
+	var player_id = int(player_node.name)
+	if active_players.has(player_id):
+		active_players.erase(player_id)
+		print("[SERVER] Player %s unregistered." % player_id)
+
+func get_player(player_id: int) -> Node:
+	return active_players.get(player_id, null)
 
 # -- Signal Handlers --
 # This function is called by the EventBus when the player is ready.

@@ -51,8 +51,9 @@ func server_request_pickup(picker_id: int):
 	if not item_data:
 		return
 		
-	#Find the player node using the ID we received.
-	var player_node = get_tree().get_root().get_node_or_null("Main/PlayerContainer/" + str(picker_id))
+	# Instead of searching the scene tree, we ask our manager for the player.
+	var player_node = GameManager.get_player(picker_id)
+	
 	if not is_instance_valid(player_node):
 		return
 		
