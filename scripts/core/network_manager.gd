@@ -9,8 +9,8 @@ signal connection_failed
 signal player_connected(player_id)
 # Signal emitted on the server when a player disconnects.
 signal player_disconnected(player_id)
-# Signal to tell the game world that a player needs to be spawned.
-signal player_spawn_requested(player_id)
+# THE FIX: We are removing this signal. The level will handle its own spawn requests.
+# signal player_spawn_requested(player_id) 
 
 # --- Constants & Vars ---
 const PLAYER_SCENE = preload("res://scenes/player/player.tscn")
@@ -53,10 +53,6 @@ func join_game(ip_address: String):
 
 	multiplayer.multiplayer_peer = peer
 	print("Joining game at %s..." % ip_address)
-	
-# DELETE THE ENTIRE spawn_existing_players() FUNCTION:
-# func spawn_existing_players():
-#	...
 
 # --- Signal Callbacks ---
 func _on_peer_connected(id: int):
@@ -68,9 +64,10 @@ func _on_peer_connected(id: int):
 	players[id] = { "name": "Player " + str(id) }
 	player_connected.emit(id)
 	
-	# Request a spawn for the newly connected client.
-	player_spawn_requested.emit(id)
-
+	# THE FIX: We remove the spawn request. The server's only job is to tell the new
+	# client what the current level is. The client will ask to be spawned once it's ready.
+	var current_scene_path = Scene.current_level.scene_file_path
+	Scene.transition_to_scene.rpc_id(id, current_scene_path)
 
 func _on_peer_disconnected(id: int):
 	print("Player disconnected: %d" % id)

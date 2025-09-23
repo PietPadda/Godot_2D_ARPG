@@ -27,6 +27,28 @@ func change_scene(scene_path: String, target_spawn_position: Vector2 = Vector2.I
 		
 	# defer the call to a safe time at the end of the current physics frame.
 	get_tree().call_deferred("change_scene_to_file", scene_path)
+	
+# --- Private Functions ---
+# This new function will be called by the server to clear old entities.
+func _clear_persistent_containers():
+	# Get the root World node.
+	var world = get_tree().get_root().get_node("World")
+	if not is_instance_valid(world): 
+		return
+	
+	# Define the paths to our persistent containers.
+	var containers_to_clear = [
+		world.get_node("PlayerContainer"),
+		world.get_node("EnemyContainer"),
+		world.get_node("LootContainer"),
+		world.get_node("ProjectileContainer")
+	]
+	
+	# Loop through each container and delete all of its children.
+	for container in containers_to_clear:
+		if is_instance_valid(container):
+			for child in container.get_children():
+				child.queue_free()
 
 # --- RPCs ---
 # This function can be called by any client, but will only run on the server (peer 1).
@@ -35,6 +57,10 @@ func request_scene_transition(scene_path: String, player_id: int) -> void:
 	# This is a guard clause. If a non-server peer somehow tries to run this, stop.
 	if not multiplayer.is_server():
 		return
+		
+	# THE FIX: Clean up the persistent containers before transitioning.
+	# This RPC will run on the server and all clients simultaneously.
+	_clear_persistent_containers()
 
 	# Server Log
 	print("[SERVER] Received request from player %s to transition to scene: %s" % [player_id, scene_path])
@@ -43,8 +69,9 @@ func request_scene_transition(scene_path: String, player_id: int) -> void:
 	# Persist player data (this is still necessary).
 	GameManager.carry_player_data_for_all() # This should be updated slightly
 	
-	# Immediately command all clients to run the new, stable transition logic.
-	transition_to_scene.rpc(scene_path)
+	# Use call_deferred to give the queue_free calls a frame to process
+	# before we broadcast the command to load the new scene.
+	transition_to_scene.rpc.call_deferred(scene_path)
 	
 # This RPC is called BY the server ON all clients to execute the change.
 @rpc("any_peer", "call_local", "reliable")
