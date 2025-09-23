@@ -5,16 +5,14 @@ extends BaseLevel
 const SKELETON_SCENE = preload("res://scenes/enemies/skeleton.tscn")
 
 # scene nodes
-# Add a reference to our bunch of enemies.
-@onready var enemies_container: Node2D = $EnemyContainer
-# Add a reference to our new spawn points container.
+# REMOVE all the old @onready vars for nodes we moved to the World scene.
+# @onready var enemies_container: Node2D = $EnemyContainer
+# @onready var enemy_spawner: MultiplayerSpawner = $EnemySpawner
+# @onready var loot_spawner: MultiplayerSpawner = $LootSpawner
+# @onready var projectile_spawner: MultiplayerSpawner = $ProjectileSpawner
+
+# We still need a reference to the spawn points, which are still in the level.
 @onready var enemy_spawn_points_container: Node2D = $EnemySpawnPoints
-# Add a reference to our enemy spawner.
-@onready var enemy_spawner: MultiplayerSpawner = $EnemySpawner
-# Add a reference to our loot spawner.
-@onready var loot_spawner: MultiplayerSpawner = $LootSpawner
-# Add a reference to our projectile spawner.
-@onready var projectile_spawner: MultiplayerSpawner = $ProjectileSpawner
 
 # Consts and vars
 var enemy_spawn_points: Array = []
@@ -23,22 +21,32 @@ var enemy_spawn_points: Array = []
 func _ready():
 	super() # This runs all the logic from BaseLevel._ready()
 	
-	# CRITICAL: Give the server ownership of the spawners FIRST.
-	enemy_spawner.set_multiplayer_authority(1)
-	loot_spawner.set_multiplayer_authority(1)
-	projectile_spawner.set_multiplayer_authority(1)
+	# THE FIX: Find and configure the persistent spawners from the World scene.
+	var world = get_tree().get_root().get_node("World")
+	var enemy_spawner = world.get_node("EnemySpawner")
+	var loot_spawner = world.get_node("LootSpawner")
+	var projectile_spawner = world.get_node("ProjectileSpawner")
+	
+	# Point the spawners to their persistent containers.
+	enemy_spawner.spawn_path = world.get_node("EnemyContainer").get_path()
+	loot_spawner.spawn_path = world.get_node("LootContainer").get_path()
+	projectile_spawner.spawn_path = world.get_node("ProjectileContainer").get_path()
 	
 	# Get all the spawn point children into an array when the level loads.
 	enemy_spawn_points = enemy_spawn_points_container.get_children()
 	
 	# If we are the server, call a new function to spawn enemies for everyone.
 	if multiplayer.is_server():
-		# The server is ready, so it spawns itself.
-		_spawn_initial_enemies() # then enemies
+		# Set authority on the persistent spawners.
+		enemy_spawner.set_multiplayer_authority(1)
+		loot_spawner.set_multiplayer_authority(1)
+		projectile_spawner.set_multiplayer_authority(1)
+		
+		# Defer the initial spawn to ensure everything is ready.
+		call_deferred("_spawn_initial_enemies")
 		
 	# The server will listen for any enemy dying in its world.
 	EventBus.enemy_died.connect(_on_enemy_died)
-	# THE FIX: Connect to our new debug signal.
 	EventBus.debug_respawn_enemies_requested.connect(_on_debug_respawn_enemies)
 
 # This function can now be left empty or used for other inputs.
@@ -51,6 +59,8 @@ func _spawn_initial_enemies():
 	# This debug print helps confirm the server is running this code.
 	print("[HOST] Spawning initial enemies...")
 	
+	# THE FIX: Get the persistent EnemyContainer from the World.
+	var enemies_container = get_tree().get_root().get_node("World/EnemyContainer")
 	# We need a counter to create unique names.
 	var enemy_counter = 0
 	
