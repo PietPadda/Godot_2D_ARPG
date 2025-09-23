@@ -11,18 +11,17 @@ extends Node2D # Both main.gd and town.gd extend Node2D
 @export var level_music: MusicTrackData
 
 # --- Player Spawning Properties ---
-# These nodes are now required by any scene using BaseLevel.
-@onready var player_container: Node2D = $PlayerContainer
+# REMOVE the old @onready vars. They no longer exist in this scene.
+# @onready var player_container: Node2D = $PlayerContainer 
+# @onready var player_spawner: MultiplayerSpawner = $PlayerSpawner
+
+# --- Player Spawning Properties ---
 @onready var player_spawn_points_container: Node2D = $PlayerSpawnPoints
-@onready var player_spawner: MultiplayerSpawner = $PlayerSpawner
 
 var player_spawn_points: Array = []
 var current_player_spawn_index: int = 0
 
 func _ready() -> void:
-	# CRITICAL: Give the server ownership of the spawners FIRST.
-	player_spawner.set_multiplayer_authority(1)
-	
 	# When the level loads, tell the GridManager about our tilemaps.
 	Grid.register_level_tilemaps(floor_tilemap, wall_tilemap)
 	
@@ -33,23 +32,29 @@ func _ready() -> void:
 	if level_music:
 		Music.play_music(level_music)
 	
-	# Connect our listener FIRST, so we are ready to receive requests.
-	NetworkManager.player_spawn_requested.connect(_on_player_spawn_requested)
+	# REMOVE the connection to the old NetworkManager signal.
+	# NetworkManager.player_spawn_requested.connect(_on_player_spawn_requested)
 	
 	# If we are the server, we are ready, so spawn ourselves.
 	if multiplayer.is_server():
+		# The server is ready, so it spawns itself immediately.
 		_on_player_spawn_requested(1)
-		# Now, iterate through all connected clients and spawn them too.
-		for peer_id in multiplayer.get_peers():
-			_on_player_spawn_requested(peer_id)
+	else:
+		# A client is ready, so it waits a frame to be safe,
+		# then calls a new RPC to ask the server to spawn its character.
+		await get_tree().process_frame
+		server_spawn_my_player.rpc_id(1)
 	
-	# Listen for the signal to start the cleanup process.
-	EventBus.server_requesting_transition.connect(_on_server_requesting_transition)
+#	# Listen for the signal to start the cleanup process.
+#	EventBus.server_requesting_transition.connect(_on_server_requesting_transition)
 
 # -- Signal Handlers --
 # This function will run when the signal is received.
 # It contains the logic we moved from the NetworkManager.
 func _on_player_spawn_requested(id: int):
+	# THE FIX: Get the persistent container from the World scene.
+	var player_container = get_tree().get_root().get_node("World/PlayerContainer")
+	
 	#  Add a guard clause to prevent spawning duplicates.
 	if player_container.has_node(str(id)):
 		return # This player has already been spawned, so we do nothing.
@@ -75,20 +80,20 @@ func _on_player_spawn_requested(id: int):
 	player_instance.set_initial_position.rpc_id(id, spawn_pos)
 	
 # This function only runs on the server's instance of the level.
-func _on_server_requesting_transition(scene_path: String) -> void:
-	print("[SERVER] Level is gracefully despawning all players.")
-	
-	# Use our spawner to gracefully despawn each player.
-	for player in player_container.get_children():
-		# The server calling queue_free() on a replicated node
-		# is the correct way to despawn it across all clients.
-		player.queue_free()
-	
-	# Wait for the next frame to allow the despawn network packets to be sent and processed.
-	await get_tree().process_frame
-	
-	# Now that the slate is clean, tell the SceneManager to proceed with the transition.
-	Scene.transition_to_scene.rpc(scene_path)
+# func _on_server_requesting_transition(scene_path: String) -> void:
+#	print("[SERVER] Level is gracefully despawning all players.")
+#	
+#	# Use our spawner to gracefully despawn each player.
+#	for player in player_container.get_children():
+#		# The server calling queue_free() on a replicated node
+#		# is the correct way to despawn it across all clients.
+#		player.queue_free()
+#	
+#	# Wait for the next frame to allow the despawn network packets to be sent and processed.
+#	await get_tree().process_frame
+#	
+#	# Now that the slate is clean, tell the SceneManager to proceed with the transition.
+#	Scene.transition_to_scene.rpc(scene_path)
 
 # -- RPCs --
 @rpc("any_peer", "call_local", "reliable")
@@ -112,3 +117,12 @@ func server_process_projectile_hit(projectile_path: NodePath, target_path: NodeP
 	
 	# The server authoritatively destroys the projectile after the hit is processed.
 	projectile.queue_free()
+	
+# This function is called BY a client, but runs ON the server.
+@rpc("any_peer", "call_local", "reliable")
+func server_spawn_my_player():
+	if not multiplayer.is_server(): return
+
+	var client_id = multiplayer.get_remote_sender_id()
+	print("[SERVER] Received spawn request from client %s." % client_id)
+	_on_player_spawn_requested(client_id)
