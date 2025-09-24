@@ -23,9 +23,10 @@ func drop_loot(position: Vector2) -> void:
 		# Set the loot drops position
 		loot_instance.global_position = position
 		
-		# Get the current level from the SceneManager.
-		var level = Scene.current_level
-		if not is_instance_valid(level): return
+		# THE FIX: Get the current level from our reliable LevelManager service.
+		var level = LevelManager.get_current_level()
+		if not is_instance_valid(level): 
+			return
 		
 		# Find the LootContainer within the active level.
 		var loot_container = level.get_node_or_null("LootContainer")
