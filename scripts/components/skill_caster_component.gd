@@ -61,8 +61,8 @@ func server_request_cast(target_position: Vector2):
 		push_error("SkillData is missing a projectile scene!")
 		return # do not cast
 	
-	# Find the projectile container within the currently active level.
-	var level = Scene.current_level
+	# THE FIX: Get the current level from our reliable LevelManager service.
+	var level = LevelManager.get_current_level()
 	if not is_instance_valid(level):
 		return
 	
