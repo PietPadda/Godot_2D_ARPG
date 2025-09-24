@@ -10,3 +10,5 @@ starting_level = "uid://cefwayew7ouqs"
 [node name="HUD" parent="." instance=ExtResource("1_dphjl")]
 
 [node name="LevelContainer" type="Node" parent="." groups=["level_container"]]
+
+[node name="PlayerLimboContainer" type="Node2D" parent="."]

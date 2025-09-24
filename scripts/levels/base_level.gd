@@ -132,40 +132,40 @@ func server_spawn_my_player():
 	print("[SERVER] Received spawn request from client %s." % client_id)
 	_on_player_spawn_requested(client_id)
 	
-# This is now the SINGLE entry point for spawning players and initializing the world.
+# This RPC is called by the client to signal it's ready.
 @rpc("any_peer", "call_local")
 func server_confirm_level_loaded():
 	# This function only runs on the server.
 	if not multiplayer.is_server(): 
 		return
 	
-	# Determine if this call is from a client or the host running it locally.
-	var peer_id = multiplayer.get_remote_sender_id()
-	if peer_id == 0: # This means the server called it for itself.
-		peer_id = 1
+	var client_id = multiplayer.get_remote_sender_id()
+	print("[SERVER] Client %s confirmed level loaded. Moving player from limbo." % client_id)
 	
-	print("[SERVER] Peer %s confirmed level loaded. Spawning necessary entities." % peer_id)
+	var world = get_tree().get_root().get_node("World")
+	var limbo_container = world.get_node("PlayerLimboContainer")
+	var player_node = limbo_container.get_node_or_null(str(client_id))
 	
-	# Get a reference to the PlayerContainer from the active level.
-	var level = LevelManager.get_current_level()
-	if not is_instance_valid(level): 
-		return
+	if is_instance_valid(player_node):
+		# Get a reference to the PlayerContainer from the active level.
+		var level = LevelManager.get_current_level()
+		if not is_instance_valid(level): 
+			return
 		
-	var player_container = level.get_node_or_null("PlayerContainer")
-	if not is_instance_valid(player_container): 
-		return
-	
-	# CRITICAL: Check if this is the very first player (the host).
-	if not player_container.has_node("1"):
-		# The host player doesn't exist yet, so this is the initial world setup.
-		# Spawn the host player first. This populates the spawner.
-		_on_player_spawn_requested(1)
-		# Now spawn the initial enemies.
-		if self.has_method("_spawn_initial_enemies"):
-			call_deferred("_spawn_initial_enemies")
-	
-	# If the requesting peer was a client, spawn their character now.
-	# The spawners will now automatically sync the already-existing host and enemies
-	# to this newly connected and ready client.
-	if peer_id != 1:
-		_on_player_spawn_requested(peer_id)
+		var player_container = level.get_node_or_null("PlayerContainer")
+		if not is_instance_valid(player_container): 
+			return
+		
+		if is_instance_valid(player_container):
+			player_node.reparent(player_container)
+			print("[SERVER] Moved player %s to the active level." % client_id)
+			
+			# Restore the spawner's path for the next player.
+			var player_spawner = level.get_node_or_null("PlayerSpawner")
+			if is_instance_valid(player_spawner):
+				player_spawner.spawn_path = player_container.get_path()
+			else:
+				push_error("Could not find PlayerContainer in the active level!")
+	else:
+		# This can happen if the host player is in limbo, which is fine.
+		pass

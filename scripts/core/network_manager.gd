@@ -9,8 +9,8 @@ signal connection_failed
 signal player_connected(player_id)
 # Signal emitted on the server when a player disconnects.
 signal player_disconnected(player_id)
-# THE FIX: We are removing this signal. The level will handle its own spawn requests.
-# signal player_spawn_requested(player_id) 
+# Signal emitted on the server when a player needs to spawn..
+signal player_spawn_requested(player_id) 
 
 # --- Constants & Vars ---
 const PLAYER_SCENE = preload("res://scenes/player/player.tscn")
@@ -61,8 +61,17 @@ func _on_peer_connected(id: int):
 		return
 		
 	print("Player connected: %d" % id)
-	# THE FIX: The server NO LONGER tries to spawn the player here.
-	# It only tells the client which scene to load.
+	
+	# THE FIX: Temporarily re-route the spawner to the limbo container.
+	var level = LevelManager.get_current_level()
+	if is_instance_valid(level):
+		var player_spawner = level.get_node_or_null("PlayerSpawner")
+		if is_instance_valid(player_spawner):
+			var world = get_tree().get_root().get_node("World")
+			player_spawner.spawn_path = world.get_node("PlayerLimboContainer").get_path()
+
+	# Now it's safe to spawn the player, they will go into limbo.
+	player_spawn_requested.emit(id)
 	
 	# Find the current scene the server is in.
 	var current_scene_path = get_tree().current_scene.scene_file_path
