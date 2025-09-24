@@ -53,8 +53,17 @@ func _ready() -> void:
 # This function will run when the signal is received.
 # It contains the logic we moved from the NetworkManager.
 func _on_player_spawn_requested(id: int):
-	# THE FIX: Get the persistent container from the World scene.
-	var player_container = get_tree().get_root().get_node("PlayerContainer")
+	# THE FIX: Get the currently active level from our service locator.
+	var level = LevelManager.get_current_level()
+	if not is_instance_valid(level): return
+	
+	# Now, find the PlayerContainer WITHIN that active level.
+	var player_container = level.get_node_or_null("PlayerContainer")
+	
+	# Add a safety check in case the container is missing from the scene.
+	if not is_instance_valid(player_container):
+		push_error("Could not find 'PlayerContainer' in the current level!")
+		return
 	
 	#  Add a guard clause to prevent spawning duplicates.
 	if player_container.has_node(str(id)):
