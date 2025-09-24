@@ -22,6 +22,9 @@ var player_spawn_points: Array = []
 var current_player_spawn_index: int = 0
 
 func _ready() -> void:
+	# Announce to our new service that this is the active level.
+	LevelManager.register_active_level(self)
+	
 	# When the level loads, tell the GridManager about our tilemaps.
 	Grid.register_level_tilemaps(floor_tilemap, wall_tilemap)
 	
@@ -35,15 +38,13 @@ func _ready() -> void:
 	# REMOVE the connection to the old NetworkManager signal.
 	# NetworkManager.player_spawn_requested.connect(_on_player_spawn_requested)
 	
-	# If we are the server, we are ready, so spawn ourselves.
+	# THE FIX: Implement the handshake.
 	if multiplayer.is_server():
-		# The server is ready, so it spawns itself immediately.
+		# The server is ready, so it can spawn itself.
 		_on_player_spawn_requested(1)
 	else:
-		# A client is ready, so it waits a frame to be safe,
-		# then calls a new RPC to ask the server to spawn its character.
-		await get_tree().process_frame
-		server_spawn_my_player.rpc_id(1)
+		# The client has loaded the level. Now, tell the server it's ready for content.
+		server_confirm_level_loaded.rpc_id(1)
 	
 #	# Listen for the signal to start the cleanup process.
 #	EventBus.server_requesting_transition.connect(_on_server_requesting_transition)
@@ -126,3 +127,18 @@ func server_spawn_my_player():
 	var client_id = multiplayer.get_remote_sender_id()
 	print("[SERVER] Received spawn request from client %s." % client_id)
 	_on_player_spawn_requested(client_id)
+	
+# NEW RPC for the client to call on the server.
+@rpc("any_peer", "call_local")
+func server_confirm_level_loaded():
+	# This function only runs on the server.
+	var client_id = multiplayer.get_remote_sender_id()
+	print("[SERVER] Client %s confirmed level loaded. Spawning entities for them." % client_id)
+	
+	# Now it's safe to spawn the existing host player for the new client.
+	_on_player_spawn_requested(1)
+	
+	# And now it's safe to spawn the new client's own player.
+	_on_player_spawn_requested(client_id)
+	
+	# In the future, we'll also spawn existing enemies here.
