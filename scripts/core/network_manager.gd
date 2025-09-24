@@ -61,13 +61,13 @@ func _on_peer_connected(id: int):
 		return
 		
 	print("Player connected: %d" % id)
-	players[id] = { "name": "Player " + str(id) }
-	player_connected.emit(id)
+	# THE FIX: The server NO LONGER tries to spawn the player here.
+	# It only tells the client which scene to load.
 	
-	# THE FIX: We remove the spawn request. The server's only job is to tell the new
-	# client what the current level is. The client will ask to be spawned once it's ready.
-	var current_scene_path = Scene.current_level.scene_file_path
-	Scene.transition_to_scene.rpc_id(id, current_scene_path)
+	# Find the current scene the server is in.
+	var current_scene_path = get_tree().current_scene.scene_file_path
+	# Tell ONLY the new client to load that scene.
+	_client_load_scene.rpc_id(id, current_scene_path)
 
 func _on_peer_disconnected(id: int):
 	print("Player disconnected: %d" % id)
@@ -84,3 +84,10 @@ func _on_connection_failed():
 
 # --- Private Functions ---
 # We DELETE the entire _spawn_player(id) function from this script.
+
+# --- RPCs ---
+# RPC for the server to call on a client.
+@rpc("authority")
+func _client_load_scene(scene_path: String):
+	# The client receives the command and changes scenes.
+	get_tree().change_scene_to_file(scene_path)

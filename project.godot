@@ -27,6 +27,7 @@ Tooltip="*res://scenes/core/tooltip_manager.tscn"
 Scene="*res://scripts/core/scene_manager.gd"
 NetworkManager="*res://scripts/core/network_manager.gd"
 DebugManager="*res://scripts/core/debug_manager.gd"
+LevelManager="*res://scripts/core/level_manager.gd"
 
 [input]
 
