@@ -54,7 +54,7 @@ func _ready() -> void:
 # It contains the logic we moved from the NetworkManager.
 func _on_player_spawn_requested(id: int):
 	# THE FIX: Get the persistent container from the World scene.
-	var player_container = get_tree().get_root().get_node("World/PlayerContainer")
+	var player_container = get_tree().get_root().get_node("PlayerContainer")
 	
 	#  Add a guard clause to prevent spawning duplicates.
 	if player_container.has_node(str(id)):
