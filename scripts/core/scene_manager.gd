@@ -29,26 +29,9 @@ func change_scene(scene_path: String, target_spawn_position: Vector2 = Vector2.I
 	get_tree().call_deferred("change_scene_to_file", scene_path)
 	
 # --- Private Functions ---
-# This new function will be called by the server to clear old entities.
-func _clear_persistent_containers():
-	# Get the root World node.
-	var world = get_tree().get_root().get_node("World")
-	if not is_instance_valid(world): 
-		return
-	
-	# Define the paths to our persistent containers.
-	var containers_to_clear = [
-		world.get_node("PlayerContainer"),
-		world.get_node("EnemyContainer"),
-		world.get_node("LootContainer"),
-		world.get_node("ProjectileContainer")
-	]
-	
-	# Loop through each container and delete all of its children.
-	for container in containers_to_clear:
-		if is_instance_valid(container):
-			for child in container.get_children():
-				child.queue_free()
+# THE FIX: Delete this entire function. It is no longer needed.
+# func _clear_persistent_containers():
+# 	# ... (all of this code can be remove
 
 # --- RPCs ---
 # This function can be called by any client, but will only run on the server (peer 1).
@@ -58,9 +41,8 @@ func request_scene_transition(scene_path: String, player_id: int) -> void:
 	if not multiplayer.is_server():
 		return
 		
-	# THE FIX: Clean up the persistent containers before transitioning.
-	# This RPC will run on the server and all clients simultaneously.
-	_clear_persistent_containers()
+	# THE FIX: Remove this call. Cleanup is now automatic.
+	# _clear_persistent_containers()
 
 	# Server Log
 	print("[SERVER] Received request from player %s to transition to scene: %s" % [player_id, scene_path])
