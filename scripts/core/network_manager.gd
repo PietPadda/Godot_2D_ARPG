@@ -68,6 +68,7 @@ func _on_peer_connected(id: int):
 	var current_scene_path = get_tree().current_scene.scene_file_path
 	# Tell ONLY the new client to load that scene.
 	_client_load_scene.rpc_id(id, current_scene_path)
+	player_connected.emit(id)
 
 func _on_peer_disconnected(id: int):
 	print("Player disconnected: %d" % id)
