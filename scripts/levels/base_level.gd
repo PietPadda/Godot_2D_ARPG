@@ -35,20 +35,15 @@ func _ready() -> void:
 	if level_music:
 		Music.play_music(level_music)
 	
-	# REMOVE the connection to the old NetworkManager signal.
-	# NetworkManager.player_spawn_requested.connect(_on_player_spawn_requested)
-	
-	# THE FIX: Implement the handshake.
+	# THE FIX: The host no longer spawns itself immediately.
+	# It will now join the same handshake process as the clients.
 	if multiplayer.is_server():
-		# The server is ready, so it can spawn itself.
-		_on_player_spawn_requested(1)
+		# The server calls the "ready" function for itself to kick things off.
+		server_confirm_level_loaded()
 	else:
-		# The client has loaded the level. Now, tell the server it's ready for content.
+		# Clients call the "ready" function via RPC after loading the scene.
 		server_confirm_level_loaded.rpc_id(1)
 	
-#	# Listen for the signal to start the cleanup process.
-#	EventBus.server_requesting_transition.connect(_on_server_requesting_transition)
-
 # -- Signal Handlers --
 # This function will run when the signal is received.
 # It contains the logic we moved from the NetworkManager.
@@ -137,17 +132,40 @@ func server_spawn_my_player():
 	print("[SERVER] Received spawn request from client %s." % client_id)
 	_on_player_spawn_requested(client_id)
 	
-# NEW RPC for the client to call on the server.
+# This is now the SINGLE entry point for spawning players and initializing the world.
 @rpc("any_peer", "call_local")
 func server_confirm_level_loaded():
 	# This function only runs on the server.
-	var client_id = multiplayer.get_remote_sender_id()
-	print("[SERVER] Client %s confirmed level loaded. Spawning entities for them." % client_id)
+	if not multiplayer.is_server(): 
+		return
 	
-	# Now it's safe to spawn the existing host player for the new client.
-	_on_player_spawn_requested(1)
+	# Determine if this call is from a client or the host running it locally.
+	var peer_id = multiplayer.get_remote_sender_id()
+	if peer_id == 0: # This means the server called it for itself.
+		peer_id = 1
 	
-	# And now it's safe to spawn the new client's own player.
-	_on_player_spawn_requested(client_id)
+	print("[SERVER] Peer %s confirmed level loaded. Spawning necessary entities." % peer_id)
 	
-	# In the future, we'll also spawn existing enemies here.
+	# Get a reference to the PlayerContainer from the active level.
+	var level = LevelManager.get_current_level()
+	if not is_instance_valid(level): 
+		return
+		
+	var player_container = level.get_node_or_null("PlayerContainer")
+	if not is_instance_valid(player_container): 
+		return
+	
+	# CRITICAL: Check if this is the very first player (the host).
+	if not player_container.has_node("1"):
+		# The host player doesn't exist yet, so this is the initial world setup.
+		# Spawn the host player first. This populates the spawner.
+		_on_player_spawn_requested(1)
+		# Now spawn the initial enemies.
+		if self.has_method("_spawn_initial_enemies"):
+			call_deferred("_spawn_initial_enemies")
+	
+	# If the requesting peer was a client, spawn their character now.
+	# The spawners will now automatically sync the already-existing host and enemies
+	# to this newly connected and ready client.
+	if peer_id != 1:
+		_on_player_spawn_requested(peer_id)
