@@ -154,3 +154,19 @@ func server_confirm_level_loaded():
 				push_error("Could not find PlayerContainer in the active level!")
 	else:
 		push_error("Could not find player %s in the limbo container!" % client_id)
+
+# This RPC is called by the server to run on all clients (and the server itself).
+# Its only job is to safely move a node from one parent to another.
+@rpc("any_peer", "call_local", "reliable")
+func _reparent_node(node_to_move_path: NodePath, new_parent_path: NodePath) -> void:
+	var node_to_move = get_node_or_null(node_to_move_path)
+	var new_parent = get_node_or_null(new_parent_path)
+	
+	# These safety checks are critical. It's possible for this command to arrive
+	# on a laggy client a moment before the node has finished spawning in Limbo.
+	# If that happens, we simply do nothing, and the system will catch up.
+	if not is_instance_valid(node_to_move) or not is_instance_valid(new_parent):
+		return
+		
+	# This is the core of the operation.
+	node_to_move.reparent(new_parent)
