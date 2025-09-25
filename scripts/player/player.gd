@@ -152,8 +152,8 @@ func award_xp_rpc(amount: int):
 	# When this RPC is called by the server, award the XP.
 	stats_component.add_xp(amount)
 	
-# Re-add this function. It allows the server to tell an owning client where to start.
-@rpc("any_peer", "call_local")
+# This RPC is called by the server on the specific client that owns this player.
+# It sets the character's starting position in the level.
+@rpc("authority", "call_local", "reliable")
 func set_initial_position(pos: Vector2):
-	if multiplayer.get_remote_sender_id() == 1:
-		global_position = pos
+	global_position = pos

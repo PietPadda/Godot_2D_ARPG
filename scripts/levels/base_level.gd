@@ -35,55 +35,51 @@ func _ready() -> void:
 	if level_music:
 		Music.play_music(level_music)
 	
-	# THE FIX: The host no longer spawns itself immediately.
-	# It will now join the same handshake process as the clients.
+	# The server spawns itself, while clients request to be spawned.
 	if multiplayer.is_server():
-		# THE FIX: The server (host) should spawn itself directly into the level.
-		# The limbo container is only for clients connecting later.
-		_on_player_spawn_requested(1)
+		_spawn_player(1) # Spawn the host (player ID 1).
 	else:
-		# Clients call the "ready" function via RPC after loading the scene.
-		server_confirm_level_loaded.rpc_id(1)
+		# Tell the server we have loaded the level and are ready to be spawned.
+		server_request_spawn.rpc_id(1)
 	
-# -- Signal Handlers --
-# This function will run when the signal is received.
-# It contains the logic we moved from the NetworkManager.
-func _on_player_spawn_requested(id: int):
-	# THE FIX: Get the currently active level from our service locator.
-	var level = LevelManager.get_current_level()
-	if not is_instance_valid(level): return
-	
-	# Now, find the PlayerContainer WITHIN that active level.
-	var player_container = level.get_node_or_null("PlayerContainer")
-	
-	# Add a safety check in case the container is missing from the scene.
-	if not is_instance_valid(player_container):
-		push_error("Could not find 'PlayerContainer' in the current level!")
-		return
-	
-	#  Add a guard clause to prevent spawning duplicates.
+# This function contains the core spawning logic and is ONLY ever run on the server.
+func _spawn_player(id: int):
+	var spawner = get_tree().get_root().get_node("World/MasterSpawner")
+	var player_container = get_node("PlayerContainer")
+
+	# Prevent spawning a player that already exists.
 	if player_container.has_node(str(id)):
-		return # This player has already been spawned, so we do nothing.
-	
-	var player_instance = NetworkManager.PLAYER_SCENE.instantiate()
-	player_instance.name = str(id)
-	
-	var spawn_pos = Vector2.ZERO # Default in case we have no spawn points
-	# Check if we have any spawn points defined.
+		return
+
+	# Instantiate the player and set its name, which is crucial for replication.
+	var player = NetworkManager.PLAYER_SCENE.instantiate()
+	player.name = str(id)
+
+	# SPAWN: Create the player inside /root/World/Limbo on all clients.
+	spawner.spawn(player)
+
+	# MOVE: Tell all clients to move the new player from Limbo into this level's container.
+	var player_in_limbo_path = "/root/World/Limbo/" + str(id)
+	_reparent_node.rpc(player_in_limbo_path, player_container.get_path())
+
+	# POSITION: Determine a spawn point and tell the owning client where to place their character.
+	var spawn_pos = Vector2.ZERO
 	if not player_spawn_points.is_empty():
-		# Get the position of the next spawn point in the cycle.
 		spawn_pos = player_spawn_points[current_player_spawn_index].global_position
-		# Move to the next index, wrapping around if we reach the end.
 		current_player_spawn_index = (current_player_spawn_index + 1) % player_spawn_points.size()
 	
-	# We still set the position on the server instance.
-	player_instance.global_position = spawn_pos
+	# We must wait one frame for the reparent to complete across the network
+	# before we can reliably find the node and tell it where to go.
+	call_deferred("_set_player_initial_position", id, spawn_pos)
 	
-	# Add the player to the container that the MultiplayerSpawner is watching.
-	player_container.add_child(player_instance)
-	
-	# Re-add this line to tell the owning client their starting position.
-	player_instance.set_initial_position.rpc_id(id, spawn_pos)
+# -- Signal Handlers --
+# Helper function to set the position after one frame.
+func _set_player_initial_position(id: int, pos: Vector2):
+	var player_node = get_node_or_null("PlayerContainer/" + str(id))
+	if is_instance_valid(player_node):
+		player_node.set_initial_position.rpc_id(id, pos)
+
+# REMOVE the old _on_player_spawn_requested function if it still exists.
 
 # -- RPCs --
 @rpc("any_peer", "call_local", "reliable")
@@ -115,7 +111,7 @@ func server_spawn_my_player():
 
 	var client_id = multiplayer.get_remote_sender_id()
 	print("[SERVER] Received spawn request from client %s." % client_id)
-	_on_player_spawn_requested(client_id)
+	#_on_player_spawn_requested(client_id)
 	
 # This RPC is called by the client to signal it's ready.
 @rpc("any_peer", "call_local")
@@ -170,3 +166,9 @@ func _reparent_node(node_to_move_path: NodePath, new_parent_path: NodePath) -> v
 		
 	# This is the core of the operation.
 	node_to_move.reparent(new_parent)
+
+# This RPC is called BY a client and runs ON the server.
+@rpc("any_peer", "call_local", "reliable")
+func server_request_spawn():
+	var client_id = multiplayer.get_remote_sender_id()
+	_spawn_player(client_id)
