@@ -38,8 +38,9 @@ func _ready() -> void:
 	# THE FIX: The host no longer spawns itself immediately.
 	# It will now join the same handshake process as the clients.
 	if multiplayer.is_server():
-		# The server calls the "ready" function for itself to kick things off.
-		server_confirm_level_loaded()
+		# THE FIX: The server (host) should spawn itself directly into the level.
+		# The limbo container is only for clients connecting later.
+		_on_player_spawn_requested(1)
 	else:
 		# Clients call the "ready" function via RPC after loading the scene.
 		server_confirm_level_loaded.rpc_id(1)
@@ -83,22 +84,6 @@ func _on_player_spawn_requested(id: int):
 	
 	# Re-add this line to tell the owning client their starting position.
 	player_instance.set_initial_position.rpc_id(id, spawn_pos)
-	
-# This function only runs on the server's instance of the level.
-# func _on_server_requesting_transition(scene_path: String) -> void:
-#	print("[SERVER] Level is gracefully despawning all players.")
-#	
-#	# Use our spawner to gracefully despawn each player.
-#	for player in player_container.get_children():
-#		# The server calling queue_free() on a replicated node
-#		# is the correct way to despawn it across all clients.
-#		player.queue_free()
-#	
-#	# Wait for the next frame to allow the despawn network packets to be sent and processed.
-#	await get_tree().process_frame
-#	
-#	# Now that the slate is clean, tell the SceneManager to proceed with the transition.
-#	Scene.transition_to_scene.rpc(scene_path)
 
 # -- RPCs --
 @rpc("any_peer", "call_local", "reliable")
@@ -139,6 +124,7 @@ func server_confirm_level_loaded():
 	if not multiplayer.is_server(): 
 		return
 	
+	# This will now always be a valid client ID.
 	var client_id = multiplayer.get_remote_sender_id()
 	print("[SERVER] Client %s confirmed level loaded. Moving player from limbo." % client_id)
 	
@@ -167,5 +153,4 @@ func server_confirm_level_loaded():
 			else:
 				push_error("Could not find PlayerContainer in the active level!")
 	else:
-		# This can happen if the host player is in limbo, which is fine.
-		pass
+		push_error("Could not find player %s in the limbo container!" % client_id)
