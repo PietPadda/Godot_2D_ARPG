@@ -166,3 +166,8 @@ func client_spawn_player(id: int, pos: Vector2):
 	player_container.add_child(player)
 	# We set the position AFTER adding it to the scene tree.
 	player.global_position = pos
+	
+	# THE FIX: After the node is in the scene tree, we explicitly
+	# set its authority. The engine handles making sure only the
+	# correct peer (the one with the matching ID) actually takes control.
+	player.set_multiplayer_authority(id)
