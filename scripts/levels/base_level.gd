@@ -55,8 +55,10 @@ func _spawn_player(id: int):
 	var player = NetworkManager.PLAYER_SCENE.instantiate()
 	player.name = str(id)
 
-	# SPAWN: Create the player inside /root/World/Limbo on all clients.
-	spawner.spawn(player)
+	# SPAWN: Get the Limbo node and add the player as a child. 
+	# The MasterSpawner will see this and replicate it on all clients automatically.
+	var limbo = get_tree().get_root().get_node("World/Limbo")
+	limbo.add_child(player)
 
 	# MOVE: Tell all clients to move the new player from Limbo into this level's container.
 	var player_in_limbo_path = "/root/World/Limbo/" + str(id)

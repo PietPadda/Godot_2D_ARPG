@@ -9,8 +9,9 @@ signal connection_failed
 signal player_connected(player_id)
 # Signal emitted on the server when a player disconnects.
 signal player_disconnected(player_id)
-# Signal emitted on the server when a player needs to spawn..
-signal player_spawn_requested(player_id) 
+
+# REMOVED: The player_spawn_requested signal is no longer needed.
+# The level itself will now handle the spawn request handshake.
 
 # --- Constants & Vars ---
 const PLAYER_SCENE = preload("res://scenes/player/player.tscn")
@@ -62,21 +63,11 @@ func _on_peer_connected(id: int):
 		
 	print("Player connected: %d" % id)
 	
-	# THE FIX: Temporarily re-route the spawner to the limbo container.
-	var level = LevelManager.get_current_level()
-	if is_instance_valid(level):
-		var player_spawner = level.get_node_or_null("PlayerSpawner")
-		if is_instance_valid(player_spawner):
-			var world = get_tree().get_root().get_node("World")
-			player_spawner.spawn_path = world.get_node("PlayerLimboContainer").get_path()
-
-	# Now it's safe to spawn the player, they will go into limbo.
-	player_spawn_requested.emit(id)
-	
-	# Find the current scene the server is in.
+	# The server's only job is to tell the new client which level to load.
+	# We use our robust SceneManager for this, not a local RPC.
 	var current_scene_path = get_tree().current_scene.scene_file_path
-	# Tell ONLY the new client to load that scene.
-	_client_load_scene.rpc_id(id, current_scene_path)
+	Scene.transition_to_scene.rpc_id(id, current_scene_path)
+	
 	player_connected.emit(id)
 
 func _on_peer_disconnected(id: int):
@@ -96,8 +87,4 @@ func _on_connection_failed():
 # We DELETE the entire _spawn_player(id) function from this script.
 
 # --- RPCs ---
-# RPC for the server to call on a client.
-@rpc("authority")
-func _client_load_scene(scene_path: String):
-	# The client receives the command and changes scenes.
-	get_tree().change_scene_to_file(scene_path)
+# REMOVED: The old _client_load_scene RPC is no longer needed.
