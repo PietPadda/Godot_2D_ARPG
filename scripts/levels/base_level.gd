@@ -44,7 +44,6 @@ func _ready() -> void:
 	
 # This function contains the core spawning logic and is ONLY ever run on the server.
 func _spawn_player(id: int):
-	var spawner = get_tree().get_root().get_node("World/MasterSpawner")
 	var player_container = get_node("PlayerContainer")
 
 	# Prevent spawning a player that already exists.
@@ -59,6 +58,10 @@ func _spawn_player(id: int):
 	# The MasterSpawner will see this and replicate it on all clients automatically.
 	var limbo = get_tree().get_root().get_node("World/Limbo")
 	limbo.add_child(player)
+	
+	# Wait for the end of the current frame. This gives the replication system
+	# time to create the node on all clients before we try to move it.
+	await get_tree().process_frame
 
 	# MOVE: Tell all clients to move the new player from Limbo into this level's container.
 	var player_in_limbo_path = "/root/World/Limbo/" + str(id)
@@ -70,9 +73,8 @@ func _spawn_player(id: int):
 		spawn_pos = player_spawn_points[current_player_spawn_index].global_position
 		current_player_spawn_index = (current_player_spawn_index + 1) % player_spawn_points.size()
 	
-	# We must wait one frame for the reparent to complete across the network
-	# before we can reliably find the node and tell it where to go.
-	call_deferred("_set_player_initial_position", id, spawn_pos)
+	# This can now be called directly instead of deferred.
+	_set_player_initial_position(id, spawn_pos)
 	
 # -- Signal Handlers --
 # Helper function to set the position after one frame.

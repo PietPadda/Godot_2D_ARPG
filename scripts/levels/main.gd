@@ -5,42 +5,31 @@ extends BaseLevel
 const SKELETON_SCENE = preload("res://scenes/enemies/skeleton.tscn")
 
 # scene nodes
-# THE FIX: Restore @onready vars to find nodes within this scene.
+# REMOVE all @onready vars for spawners. They no longer exist in this scene.
 @onready var enemies_container: Node2D = $EnemyContainer
-@onready var player_spawner: MultiplayerSpawner = $PlayerSpawner
-@onready var enemy_spawner: MultiplayerSpawner = $EnemySpawner
-@onready var loot_spawner: MultiplayerSpawner = $LootSpawner
-@onready var projectile_spawner: MultiplayerSpawner = $ProjectileSpawner
-
 # We still need a reference to the spawn points, which are still in the level.
 @onready var enemy_spawn_points_container: Node2D = $EnemySpawnPoints
 
 # Consts and vars
 var enemy_spawn_points: Array = []
-# Add a new array to hold all spawners in this level for easy management.
-var _spawners: Array = []
 
 # The setup logic MUST be in _ready() to run once at the start.
 func _ready():
 	super() # This runs all the logic from BaseLevel._ready()
 	
-	# Populate our array with all the spawners in this scene.
-	_spawners = [player_spawner, enemy_spawner, loot_spawner, projectile_spawner]
-	
-	# THE FIX: This logic is now self-contained. No need to search the World.
-	enemy_spawner.set_multiplayer_authority(1)
-	loot_spawner.set_multiplayer_authority(1)
-	projectile_spawner.set_multiplayer_authority(1)
+	# REMOVE all the spawner setup logic. It's now handled by the MasterSpawner.
 	
 	# Get all the spawn point children into an array when the level loads.
 	enemy_spawn_points = enemy_spawn_points_container.get_children()
 	
-	# Set spawner authority, but DO NOT spawn enemies yet.
+	if multiplayer.is_server():
+		# The server will listen for any enemy dying in its world.
+		EventBus.enemy_died.connect(_on_enemy_died)
+		EventBus.debug_respawn_enemies_requested.connect(_on_debug_respawn_enemies)
+		# We will fix enemy spawning in the next step.
+		# For now, comment this out so we can test player spawning.
+		# _spawn_initial_enemies()
 		
-	# The server will listen for any enemy dying in its world.
-	EventBus.enemy_died.connect(_on_enemy_died)
-	EventBus.debug_respawn_enemies_requested.connect(_on_debug_respawn_enemies)
-
 # This function can now be left empty or used for other inputs.
 func _unhandled_input(_event: InputEvent) -> void:
 	pass
