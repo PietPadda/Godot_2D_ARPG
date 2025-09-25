@@ -21,10 +21,9 @@ var _first_physics_frame_checked: bool = false
 func _enter_tree() -> void:
 	# The player's name is its multiplayer ID, set by the server upon creation.
 	# We convert the name (which is a String) to an integer.
-	
-	# THE FIX: We are REMOVING this line. Authority will now be set by the spawner RPC.
-	# set_multiplayer_authority(int(name))
-	
+	# This is the crucial line. When the node is added to the scene,
+	# it uses its name (which the server gives it) to claim authority.
+	set_multiplayer_authority(int(name))
 	
 	# The server is responsible for managing the registry.
 	if multiplayer.is_server():

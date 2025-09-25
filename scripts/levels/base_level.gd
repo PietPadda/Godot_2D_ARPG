@@ -44,16 +44,22 @@ func _ready() -> void:
 	
 # This function contains the core spawning logic and is ONLY ever run on the server.
 func _spawn_player(id: int):
-	# POSITION: Determine a spawn point and tell the owning client where to place their character.
+	# The server determines the position...
 	var spawn_pos = Vector2.ZERO
 	if not player_spawn_points.is_empty():
 		spawn_pos = player_spawn_points[current_player_spawn_index].global_position
 		current_player_spawn_index = (current_player_spawn_index + 1) % player_spawn_points.size()
 	
-	# The server calls an RPC to tell everyone (including itself) to create the player.
-	client_spawn_player.rpc(id, spawn_pos)
+	# ...and then tells everyone to spawn a player with the correct ID.
+	# We no longer need to send the position in the RPC.
+	client_spawn_player.rpc(id)
 	
-# -- Signal Handlers --
+	# After sending the RPC, the server sets the position on its LOCAL instance.
+	# The MultiplayerSynchronizer will automatically send this new position to the client.
+	var player_node = get_node_or_null("PlayerContainer/" + str(id))
+	if is_instance_valid(player_node):
+		player_node.global_position = spawn_pos
+	
 # -- Signal Handlers --
 # We no longer need _set_player_initial_position, so you can delete that as well.
 
@@ -151,7 +157,7 @@ func server_request_spawn():
 
 # This is our new spawner. It runs on the server AND all clients.
 @rpc("any_peer", "call_local", "reliable")
-func client_spawn_player(id: int, pos: Vector2):
+func client_spawn_player(id: int):
 	var player_container = get_node("PlayerContainer")
 	
 	# A guard to prevent creating the same player twice if messages get crossed.
@@ -165,9 +171,4 @@ func client_spawn_player(id: int, pos: Vector2):
 	
 	player_container.add_child(player)
 	# We set the position AFTER adding it to the scene tree.
-	player.global_position = pos
-	
-	# THE FIX: After the node is in the scene tree, we explicitly
-	# set its authority. The engine handles making sure only the
-	# correct peer (the one with the matching ID) actually takes control.
-	player.set_multiplayer_authority(id)
+	# We DO NOT set the position here. The synchronizer will do it.
