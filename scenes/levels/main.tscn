@@ -44,10 +44,6 @@ destination_map = NodePath("../ShadowTileMap")
 position = Vector2(1668, 347)
 target_scene_path = "uid://d3xic0inlmby0"
 
-[node name="PlayerSpawner" type="MultiplayerSpawner" parent="."]
-_spawnable_scenes = PackedStringArray("uid://c04jx6vcgex1j")
-spawn_path = NodePath("../PlayerContainer")
-
 [node name="PlayerContainer" type="Node2D" parent="."]
 
 [node name="PlayerSpawnPoints" type="Node2D" parent="."]
@@ -63,10 +59,6 @@ position = Vector2(-85, -133)
 
 [node name="PlayerSpawnPoint4" type="Marker2D" parent="PlayerSpawnPoints"]
 position = Vector2(175, -94)
-
-[node name="EnemySpawner" type="MultiplayerSpawner" parent="."]
-_spawnable_scenes = PackedStringArray("uid://dg2sqch3jtd3h")
-spawn_path = NodePath("../EnemyContainer")
 
 [node name="EnemyContainer" type="Node2D" parent="."]
 
@@ -615,15 +607,7 @@ position = Vector2(-3135, 995)
 [node name="EnemySpawnPoint181" type="Marker2D" parent="EnemySpawnPoints"]
 position = Vector2(-2887, 899)
 
-[node name="LootSpawner" type="MultiplayerSpawner" parent="."]
-_spawnable_scenes = PackedStringArray("uid://boxuys3wl2v3p")
-spawn_path = NodePath("../LootContainer")
-
 [node name="LootContainer" type="Node2D" parent="."]
-
-[node name="ProjectileSpawner" type="MultiplayerSpawner" parent="."]
-_spawnable_scenes = PackedStringArray("uid://dfce8t7pklgpr")
-spawn_path = NodePath("../ProjectileContainer")
 
 [node name="ProjectileContainer" type="Node2D" parent="."]
 

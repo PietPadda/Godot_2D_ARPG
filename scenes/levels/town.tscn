@@ -33,10 +33,6 @@ target_scene_path = "uid://cys1ord7jy672"
 [node name="ShopNpc" parent="." instance=ExtResource("7_0x67q")]
 position = Vector2(1270, 152)
 
-[node name="PlayerSpawner" type="MultiplayerSpawner" parent="."]
-_spawnable_scenes = PackedStringArray("uid://c04jx6vcgex1j")
-spawn_path = NodePath("../PlayerContainer")
-
 [node name="PlayerContainer" type="Node2D" parent="."]
 
 [node name="PlayerSpawnPoints" type="Node2D" parent="."]
@@ -52,10 +48,6 @@ position = Vector2(1332, 589)
 
 [node name="PlayerSpawnPoint4" type="Marker2D" parent="PlayerSpawnPoints"]
 position = Vector2(1069, 594)
-
-[node name="LootSpawner" type="MultiplayerSpawner" parent="."]
-_spawnable_scenes = PackedStringArray("uid://boxuys3wl2v3p")
-spawn_path = NodePath("../LootContainer")
 
 [node name="LootContainer" type="Node2D" parent="."]
 
