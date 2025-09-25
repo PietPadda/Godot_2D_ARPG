@@ -10,9 +10,3 @@ starting_level = "uid://cefwayew7ouqs"
 [node name="HUD" parent="." instance=ExtResource("1_dphjl")]
 
 [node name="LevelContainer" type="Node" parent="." groups=["level_container"]]
-
-[node name="Limbo" type="Node2D" parent="."]
-
-[node name="MasterSpawner" type="MultiplayerSpawner" parent="."]
-_spawnable_scenes = PackedStringArray("uid://c04jx6vcgex1j", "uid://dg2sqch3jtd3h", "uid://boxuys3wl2v3p", "uid://dfce8t7pklgpr")
-spawn_path = NodePath("../Limbo")

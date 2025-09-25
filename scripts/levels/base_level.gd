@@ -44,46 +44,18 @@ func _ready() -> void:
 	
 # This function contains the core spawning logic and is ONLY ever run on the server.
 func _spawn_player(id: int):
-	var player_container = get_node("PlayerContainer")
-
-	# Prevent spawning a player that already exists.
-	if player_container.has_node(str(id)):
-		return
-
-	# Instantiate the player and set its name, which is crucial for replication.
-	var player = NetworkManager.PLAYER_SCENE.instantiate()
-	player.name = str(id)
-
-	# SPAWN: Get the Limbo node and add the player as a child. 
-	# The MasterSpawner will see this and replicate it on all clients automatically.
-	var limbo = get_tree().get_root().get_node("World/Limbo")
-	limbo.add_child(player)
-	
-	# Wait for the end of the current frame. This gives the replication system
-	# time to create the node on all clients before we try to move it.
-	await get_tree().process_frame
-
-	# MOVE: Tell all clients to move the new player from Limbo into this level's container.
-	var player_in_limbo_path = "/root/World/Limbo/" + str(id)
-	_reparent_node.rpc(player_in_limbo_path, player_container.get_path())
-
 	# POSITION: Determine a spawn point and tell the owning client where to place their character.
 	var spawn_pos = Vector2.ZERO
 	if not player_spawn_points.is_empty():
 		spawn_pos = player_spawn_points[current_player_spawn_index].global_position
 		current_player_spawn_index = (current_player_spawn_index + 1) % player_spawn_points.size()
 	
-	# This can now be called directly instead of deferred.
-	_set_player_initial_position(id, spawn_pos)
+	# The server calls an RPC to tell everyone (including itself) to create the player.
+	client_spawn_player.rpc(id, spawn_pos)
 	
 # -- Signal Handlers --
-# Helper function to set the position after one frame.
-func _set_player_initial_position(id: int, pos: Vector2):
-	var player_node = get_node_or_null("PlayerContainer/" + str(id))
-	if is_instance_valid(player_node):
-		player_node.set_initial_position.rpc_id(id, pos)
-
-# REMOVE the old _on_player_spawn_requested function if it still exists.
+# -- Signal Handlers --
+# We no longer need _set_player_initial_position, so you can delete that as well.
 
 # -- RPCs --
 @rpc("any_peer", "call_local", "reliable")
@@ -176,3 +148,21 @@ func _reparent_node(node_to_move_path: NodePath, new_parent_path: NodePath) -> v
 func server_request_spawn():
 	var client_id = multiplayer.get_remote_sender_id()
 	_spawn_player(client_id)
+
+# This is our new spawner. It runs on the server AND all clients.
+@rpc("any_peer", "call_local", "reliable")
+func client_spawn_player(id: int, pos: Vector2):
+	var player_container = get_node("PlayerContainer")
+	
+	# A guard to prevent creating the same player twice if messages get crossed.
+	if player_container.has_node(str(id)):
+		return
+
+	var player = NetworkManager.PLAYER_SCENE.instantiate()
+	# We set the name BEFORE adding to the scene. This is critical.
+	# The player's _enter_tree() function uses this name to set its own authority.
+	player.name = str(id)
+	
+	player_container.add_child(player)
+	# We set the position AFTER adding it to the scene tree.
+	player.global_position = pos
