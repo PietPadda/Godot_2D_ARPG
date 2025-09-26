@@ -91,7 +91,12 @@ func _spawn_player(id: int):
 	if is_instance_valid(new_player_sync):
 		# Make the NEW player visible to EVERYONE.
 		new_player_sync.set_visibility_for(id, true)
-		for peer_id in multiplayer.get_peers():
+		
+		# Get all peers, including the server
+		var all_peers = multiplayer.get_peers()
+		all_peers.append(1) # Add the server's ID
+		
+		for peer_id in all_peers:
 			new_player_sync.set_visibility_for(peer_id, true)
 		new_player_sync.set_visibility_for(1, true) # Also for the server
 		
