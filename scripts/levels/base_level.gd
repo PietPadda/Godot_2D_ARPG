@@ -42,47 +42,67 @@ func _ready() -> void:
 		server_peer_ready.rpc_id(1, multiplayer.get_unique_id()) # Clients send an RPC.
 	
 # This function contains the core spawning logic and is ONLY ever run on the server.
+# It now uses the Auto Spawn List feature by manually instancing and adding as a child.
 # This function now also makes the new player visible to everyone.
 func _spawn_player(id: int):
-	# THE FIX: We get the container directly. No need to check for the old spawner.
+	# Find the spawner and container nodes.
+	var player_spawner = get_node_or_null("PlayerSpawner")
 	var container = get_node_or_null("PlayerContainer")
-	if not is_instance_valid(container): 
+	if not is_instance_valid(player_spawner) or not is_instance_valid(container):
+		push_error("BaseLevel: PlayerSpawner or PlayerContainer not found!")
 		return
 
-	# Prevent spawning the same player twice.
+	# Prevent spawning the same player twice (a safeguard).
 	if container.has_node(str(id)): 
 		return
 	
-	var player = NetworkManager.PLAYER_SCENE.instantiate()
-	player.name = str(id)
-	
-	# CRITICAL: Set authority BEFORE adding to the scene. This makes RPCs safe.
-	player.set_multiplayer_authority(id)
-	
-	# Determine the spawn position on the server.
+	# Determine the spawn position and store it.
+	var spawn_position = Vector2.ZERO
 	if not player_spawn_points.is_empty():
-		player.global_position = player_spawn_points[current_player_spawn_index].global_position
+		spawn_position = player_spawn_points[current_player_spawn_index].global_position
 		current_player_spawn_index = (current_player_spawn_index + 1) % player_spawn_points.size()
 	
+	# FIX: Switch back to manual instantiation + add_child() for Auto Spawn List feature.
+	var player = NetworkManager.PLAYER_SCENE.instantiate()
+	
+	# CRITICAL: We set the authority BEFORE adding it to the scene tree.
+	# This prevents conflicts with the MultiplayerSynchronizer.
+	player.set_multiplayer_authority(id)
+	
+	# CRITICAL: We rename the local server's copy. The GameManager relies on the name 
+	# being the player's ID for its registration logic.
+	player.name = str(id)
+	
+	# Set the position on the server's instance.
+	player.global_position = spawn_position
+	
+	# Add the player to the Spawn Path (PlayerContainer).
+	# The MultiplayerSpawner detects this and replicates the spawn event to all clients.
 	container.add_child(player)
 	
-	# Now that authority is set and the node is in the tree, we can safely call the RPC.
-	player.set_initial_position.rpc_id(id, player.global_position)
+	# The spawned node's position is synchronized via the MultiplayerSynchronizer/RPC.
+	# We call the RPC on the client to ensure its local position is set correctly.
+	player.set_initial_position.rpc_id(id, spawn_position)
 	
-	# --- The FULL Visibility Handshake ---
-	var new_player_sync = player.get_node("MultiplayerSynchronizer")
+	# Simplified Visibility Handshake
+	var new_player_sync = player.get_node_or_null("MultiplayerSynchronizer")
 	
 	# Make the NEW player visible to EVERYONE (including the server).
 	if is_instance_valid(new_player_sync):
+		# Make the NEW player visible to EVERYONE.
+		new_player_sync.set_visibility_for(id, true)
 		for peer_id in multiplayer.get_peers():
 			new_player_sync.set_visibility_for(peer_id, true)
 		new_player_sync.set_visibility_for(1, true) # Also for the server
 		
 	# Make ALL EXISTING players visible to the NEW player.
-	for existing_player in container.get_children():
-		if existing_player.name != str(id):
-			var existing_sync = existing_player.get_node("MultiplayerSynchronizer")
-			existing_sync.set_visibility_for(id, true)
+	if is_instance_valid(container):
+		for existing_player in container.get_children():
+			# We check the name against our target name 'str(id)'
+			if existing_player.name != str(id) and existing_player != player:
+				var existing_sync = existing_player.get_node_or_null("MultiplayerSynchronizer")
+				if is_instance_valid(existing_sync):
+						existing_sync.set_visibility_for(id, true)
 	
 # -- Signal Handlers --
 # Add this new helper function to make the deferred call cleaner.

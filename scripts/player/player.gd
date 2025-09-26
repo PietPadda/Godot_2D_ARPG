@@ -19,22 +19,11 @@ var _first_physics_frame_checked: bool = false
 
 # This is a built-in Godot function.
 func _enter_tree() -> void:
-	# The player's name is its multiplayer ID, set by the server upon creation.
-	# We convert the name (which is a String) to an integer.
-	# This is the crucial line. When the node is added to the scene,
-	# it uses its name (which the server gives it) to claim authority.
-	set_multiplayer_authority(int(name))
-	
+	# This used to be set_multiplayer_authority(int(name)), but is now gone.
+	# The authority is correctly set on the server just before add_child().
 	# The server is responsible for managing the registry.
 	if multiplayer.is_server():
 		GameManager.register_player(self)
-		
-# We can now REMOVE the entire _exit_tree() function from player.gd.
-# It is causing the player to be removed from our central list during transitions.
-
-# func _exit_tree() -> void:
-# 	if multiplayer.is_server():
-# 		GameManager.unregister_player(self)
 	
 func _ready() -> void:
 	# Duplicate the data resources to make them unique to this player instance.
@@ -155,6 +144,6 @@ func award_xp_rpc(amount: int):
 	
 # This RPC is called by the server on the specific client that owns this player.
 # It sets the character's starting position in the level.
-@rpc("authority", "call_local", "reliable")
+@rpc("any_peer", "call_local", "reliable")
 func set_initial_position(pos: Vector2):
 	global_position = pos

@@ -21,7 +21,7 @@ var enemy_spawn_points: Array = []
 # The setup logic MUST be in _ready() to run once at the start.
 func _ready():
 	super() # This runs all the logic from BaseLevel._ready()
-	
+
 	# Get all the spawn point children into an array when the level loads.
 	enemy_spawn_points = enemy_spawn_points_container.get_children()
 	
