@@ -54,14 +54,7 @@ func _spawn_player(id: int):
 	
 	var player = NetworkManager.PLAYER_SCENE.instantiate()
 	player.name = str(id)
-	
-	# The server determines the position...
-	var spawn_pos = Vector2.ZERO
-	if not player_spawn_points.is_empty():
-		spawn_pos = player_spawn_points[current_player_spawn_index].global_position
-		current_player_spawn_index = (current_player_spawn_index + 1) % player_spawn_points.size()
-	
-	player.global_position = spawn_pos
+
 	container.add_child(player)
 	
 	# After spawning the new player, make its synchronizer visible to ALL peers.
@@ -70,9 +63,24 @@ func _spawn_player(id: int):
 		for peer_id in multiplayer.get_peers():
 			sync.set_visibility_for(peer_id, true)
 		sync.set_visibility_for(1, true) # Also for the server
+		
+		
+	# The server determines the position...
+	var spawn_pos = Vector2.ZERO
+	if not player_spawn_points.is_empty():
+		spawn_pos = player_spawn_points[current_player_spawn_index].global_position
+		current_player_spawn_index = (current_player_spawn_index + 1) % player_spawn_points.size()
+	
+	# Use call_deferred to wait for the node to be ready on the client
+	# before telling it where to position itself via our new RPC.
+	call_deferred("_set_player_initial_position", player.get_path(), id, spawn_pos)
 	
 # -- Signal Handlers --
-# We no longer need _set_player_initial_position, so you can delete that as well.
+# Add this new helper function to make the deferred call cleaner.
+func _set_player_initial_position(player_path: NodePath, id: int, pos: Vector2):
+	var player_node = get_node_or_null(player_path)
+	if is_instance_valid(player_node):
+		player_node.set_initial_position.rpc_id(id, pos)
 
 # -- RPCs --
 @rpc("any_peer", "call_local", "reliable")
