@@ -44,36 +44,45 @@ func _ready() -> void:
 # This function contains the core spawning logic and is ONLY ever run on the server.
 # This function now also makes the new player visible to everyone.
 func _spawn_player(id: int):
+	# THE FIX: We get the container directly. No need to check for the old spawner.
 	var container = get_node_or_null("PlayerContainer")
-	var spawner = get_node_or_null("PlayerSpawner")
-	if not is_instance_valid(container) or not is_instance_valid(spawner): 
+	if not is_instance_valid(container): 
 		return
 
+	# Prevent spawning the same player twice.
 	if container.has_node(str(id)): 
 		return
 	
 	var player = NetworkManager.PLAYER_SCENE.instantiate()
 	player.name = str(id)
-
-	container.add_child(player)
 	
-	# After spawning the new player, make its synchronizer visible to ALL peers.
-	var sync = player.get_node_or_null("MultiplayerSynchronizer")
-	if is_instance_valid(sync):
-		for peer_id in multiplayer.get_peers():
-			sync.set_visibility_for(peer_id, true)
-		sync.set_visibility_for(1, true) # Also for the server
-		
-		
-	# The server determines the position...
-	var spawn_pos = Vector2.ZERO
+	# CRITICAL: Set authority BEFORE adding to the scene. This makes RPCs safe.
+	player.set_multiplayer_authority(id)
+	
+	# Determine the spawn position on the server.
 	if not player_spawn_points.is_empty():
-		spawn_pos = player_spawn_points[current_player_spawn_index].global_position
+		player.global_position = player_spawn_points[current_player_spawn_index].global_position
 		current_player_spawn_index = (current_player_spawn_index + 1) % player_spawn_points.size()
 	
-	# Use call_deferred to wait for the node to be ready on the client
-	# before telling it where to position itself via our new RPC.
-	call_deferred("_set_player_initial_position", player.get_path(), id, spawn_pos)
+	container.add_child(player)
+	
+	# Now that authority is set and the node is in the tree, we can safely call the RPC.
+	player.set_initial_position.rpc_id(id, player.global_position)
+	
+	# --- The FULL Visibility Handshake ---
+	var new_player_sync = player.get_node("MultiplayerSynchronizer")
+	
+	# Make the NEW player visible to EVERYONE (including the server).
+	if is_instance_valid(new_player_sync):
+		for peer_id in multiplayer.get_peers():
+			new_player_sync.set_visibility_for(peer_id, true)
+		new_player_sync.set_visibility_for(1, true) # Also for the server
+		
+	# Make ALL EXISTING players visible to the NEW player.
+	for existing_player in container.get_children():
+		if existing_player.name != str(id):
+			var existing_sync = existing_player.get_node("MultiplayerSynchronizer")
+			existing_sync.set_visibility_for(id, true)
 	
 # -- Signal Handlers --
 # Add this new helper function to make the deferred call cleaner.
