@@ -66,7 +66,7 @@ func _on_peer_connected(id: int):
 	
 	# The server tells the new client what the current level is.
 	# It does NOT try to spawn anything.
-	var current_scene_path = Scene.current_scene.scene_file_path
+	var current_scene_path = Scene.current_level.scene_file_path
 	Scene.transition_to_scene.rpc_id(id, current_scene_path)
 	
 	player_connected.emit(id)
