@@ -19,8 +19,11 @@ var _first_physics_frame_checked: bool = false
 
 # This is a built-in Godot function.
 func _enter_tree() -> void:
-	# This used to be set_multiplayer_authority(int(name)), but is now gone.
-	# The authority is correctly set on the server just before add_child().
+	# The player's name is its multiplayer ID, set by the server upon creation.
+	# We convert the name (which is a String) to an integer.
+	# This is the crucial line: it assigns the network authority immediately.
+	set_multiplayer_authority(int(name))
+	
 	# The server is responsible for managing the registry.
 	if multiplayer.is_server():
 		GameManager.register_player(self)
