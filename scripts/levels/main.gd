@@ -5,6 +5,11 @@ extends BaseLevel
 const SKELETON_SCENE = preload("res://scenes/enemies/skeleton.tscn")
 
 # scene nodes
+# Onready vars for spawners and containers are now needed here.
+@onready var player_spawner = $PlayerSpawner
+@onready var enemy_spawner = $EnemySpawner
+@onready var loot_spawner = $LootSpawner
+@onready var projectile_spawner = $ProjectileSpawner
 # REMOVE all @onready vars for spawners. They no longer exist in this scene.
 @onready var enemies_container: Node2D = $EnemyContainer
 # We still need a reference to the spawn points, which are still in the level.
@@ -17,8 +22,6 @@ var enemy_spawn_points: Array = []
 func _ready():
 	super() # This runs all the logic from BaseLevel._ready()
 	
-	# REMOVE all the spawner setup logic. It's now handled by the MasterSpawner.
-	
 	# Get all the spawn point children into an array when the level loads.
 	enemy_spawn_points = enemy_spawn_points_container.get_children()
 	
@@ -26,9 +29,11 @@ func _ready():
 		# The server will listen for any enemy dying in its world.
 		EventBus.enemy_died.connect(_on_enemy_died)
 		EventBus.debug_respawn_enemies_requested.connect(_on_debug_respawn_enemies)
-		# We will fix enemy spawning in the next step.
-		# For now, comment this out so we can test player spawning.
-		# _spawn_initial_enemies()
+		
+		# THE FIX: Now that the base level has finished its setup,
+		# if we are the server, we can safely spawn our enemies.
+		if get_tree().get_nodes_in_group("enemies").is_empty():
+			_spawn_initial_enemies()
 		
 # This function can now be left empty or used for other inputs.
 func _unhandled_input(_event: InputEvent) -> void:
@@ -95,5 +100,4 @@ func _on_debug_respawn_enemies() -> void:
 		enemy.queue_free()
 		
 	# Call our original spawning function to create new ones.
-	# (Assuming your spawn function is named _spawn_initial_enemies)
 	_spawn_initial_enemies()
