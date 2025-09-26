@@ -56,6 +56,7 @@ func join_game(ip_address: String):
 	print("Joining game at %s..." % ip_address)
 
 # --- Signal Callbacks ---
+# This function's only job is to tell a new client which level to load.
 func _on_peer_connected(id: int):
 	# Only the server should ever spawn new players.
 	if not multiplayer.is_server():
@@ -63,9 +64,9 @@ func _on_peer_connected(id: int):
 		
 	print("Player connected: %d" % id)
 	
-	# The server's only job is to tell the new client which level to load.
-	# We use our robust SceneManager for this, not a local RPC.
-	var current_scene_path = get_tree().current_scene.scene_file_path
+	# The server tells the new client what the current level is.
+	# It does NOT try to spawn anything.
+	var current_scene_path = Scene.current_scene.scene_file_path
 	Scene.transition_to_scene.rpc_id(id, current_scene_path)
 	
 	player_connected.emit(id)

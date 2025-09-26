@@ -33,6 +33,10 @@ target_scene_path = "uid://cys1ord7jy672"
 [node name="ShopNpc" parent="." instance=ExtResource("7_0x67q")]
 position = Vector2(1270, 152)
 
+[node name="PlayerSpawner" type="MultiplayerSpawner" parent="."]
+_spawnable_scenes = PackedStringArray("uid://c04jx6vcgex1j")
+spawn_path = NodePath("../PlayerContainer")
+
 [node name="PlayerContainer" type="Node2D" parent="."]
 
 [node name="PlayerSpawnPoints" type="Node2D" parent="."]

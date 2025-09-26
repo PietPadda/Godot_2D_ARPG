@@ -35,30 +35,41 @@ func _ready() -> void:
 	if level_music:
 		Music.play_music(level_music)
 	
-	# The server spawns itself, while clients request to be spawned.
+	# Both host and client will report to the server when they are ready.
 	if multiplayer.is_server():
-		_spawn_player(1) # Spawn the host (player ID 1).
+		server_peer_ready(1) # The host is always ready for itself.
 	else:
-		# Tell the server we have loaded the level and are ready to be spawned.
-		server_request_spawn.rpc_id(1)
+		server_peer_ready.rpc_id(1, multiplayer.get_unique_id()) # Clients send an RPC.
 	
 # This function contains the core spawning logic and is ONLY ever run on the server.
+# This function now also makes the new player visible to everyone.
 func _spawn_player(id: int):
+	var container = get_node_or_null("PlayerContainer")
+	var spawner = get_node_or_null("PlayerSpawner")
+	if not is_instance_valid(container) or not is_instance_valid(spawner): 
+		return
+
+	if container.has_node(str(id)): 
+		return
+	
+	var player = NetworkManager.PLAYER_SCENE.instantiate()
+	player.name = str(id)
+	
 	# The server determines the position...
 	var spawn_pos = Vector2.ZERO
 	if not player_spawn_points.is_empty():
 		spawn_pos = player_spawn_points[current_player_spawn_index].global_position
 		current_player_spawn_index = (current_player_spawn_index + 1) % player_spawn_points.size()
 	
-	# ...and then tells everyone to spawn a player with the correct ID.
-	# We no longer need to send the position in the RPC.
-	client_spawn_player.rpc(id)
+	player.global_position = spawn_pos
+	container.add_child(player)
 	
-	# After sending the RPC, the server sets the position on its LOCAL instance.
-	# The MultiplayerSynchronizer will automatically send this new position to the client.
-	var player_node = get_node_or_null("PlayerContainer/" + str(id))
-	if is_instance_valid(player_node):
-		player_node.global_position = spawn_pos
+	# After spawning the new player, make its synchronizer visible to ALL peers.
+	var sync = player.get_node_or_null("MultiplayerSynchronizer")
+	if is_instance_valid(sync):
+		for peer_id in multiplayer.get_peers():
+			sync.set_visibility_for(peer_id, true)
+		sync.set_visibility_for(1, true) # Also for the server
 	
 # -- Signal Handlers --
 # We no longer need _set_player_initial_position, so you can delete that as well.
@@ -172,3 +183,20 @@ func client_spawn_player(id: int):
 	player_container.add_child(player)
 	# We set the position AFTER adding it to the scene tree.
 	# We DO NOT set the position here. The synchronizer will do it.
+
+# This RPC is the single entry point for making the world visible. Runs ONLY on the server.
+@rpc("any_peer", "call_local", "reliable")
+func server_peer_ready(id: int):
+	if not multiplayer.is_server(): 
+		return
+
+	print("[SERVER] Peer %s confirmed level is loaded. Revealing world..." % id)
+	
+	# Make all existing players and enemies visible to the new peer.
+	for node in get_tree().get_nodes_in_group("characters"):
+		var sync = node.get_node_or_null("MultiplayerSynchronizer")
+		if is_instance_valid(sync):
+			sync.set_visibility_for(id, true)
+			
+	# Finally, spawn the player character FOR the peer that just reported ready.
+	_spawn_player(id)
