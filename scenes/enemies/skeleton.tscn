@@ -164,6 +164,7 @@ attack_component = NodePath("../AttackComponent")
 
 [node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
 replication_config = SubResource("SceneReplicationConfig_f0dbl")
+public_visibility = false
 
 [node name="RayCast2D" type="RayCast2D" parent="."]
 target_position = Vector2(0, 0)
