@@ -276,6 +276,7 @@ equipment_component = NodePath("../EquipmentComponent")
 
 [node name="MultiplayerSynchronizer" type="MultiplayerSynchronizer" parent="."]
 replication_config = SubResource("SceneReplicationConfig_ioxgp")
+public_visibility = false
 
 [node name="PointLight2D" type="PointLight2D" parent="."]
 position = Vector2(0, -1)
