@@ -84,30 +84,30 @@ func _spawn_player(id: int):
 	# We call the RPC on the client to ensure its local position is set correctly.
 	player.set_initial_position.rpc_id(id, spawn_position)
 	
-	# Simplified Visibility Handshake
+	# --- CORRECTED VISIBILITY HANDSHAKE ---
 	var new_player_sync = player.get_node_or_null("MultiplayerSynchronizer")
-	
-	# Make the NEW player visible to EVERYONE (including the server).
-	if is_instance_valid(new_player_sync):
-		# Make the NEW player visible to EVERYONE.
-		new_player_sync.set_visibility_for(id, true)
-		
-		# Get all peers, including the server
-		var all_peers = multiplayer.get_peers()
-		all_peers.append(1) # Add the server's ID
-		
-		for peer_id in all_peers:
-			new_player_sync.set_visibility_for(peer_id, true)
-		new_player_sync.set_visibility_for(1, true) # Also for the server
-		
-	# Make ALL EXISTING players visible to the NEW player.
-	if is_instance_valid(container):
-		for existing_player in container.get_children():
-			# We check the name against our target name 'str(id)'
-			if existing_player.name != str(id) and existing_player != player:
-				var existing_sync = existing_player.get_node_or_null("MultiplayerSynchronizer")
-				if is_instance_valid(existing_sync):
-						existing_sync.set_visibility_for(id, true)
+	if not is_instance_valid(new_player_sync):
+		return # Cannot set visibility without a synchronizer
+
+	# Make all EXISTING players visible to the NEW player,
+	# and the NEW player visible to all EXISTING players.
+	for existing_player in container.get_children():
+		if existing_player == player:
+			continue # Skip doing this for ourself.
+
+		# Make the existing player visible to our new player.
+		var existing_sync = existing_player.get_node_or_null("MultiplayerSynchronizer")
+		if is_instance_valid(existing_sync):
+			existing_sync.set_visibility_for(id, true)
+
+		# Make our new player visible to the existing player.
+		var existing_player_id = int(existing_player.name)
+		new_player_sync.set_visibility_for(existing_player_id, true)
+
+	# Finally, ensure the new player is visible to itself and the server.
+	# This covers the host player and the very first client to join.
+	new_player_sync.set_visibility_for(id, true) # For itself
+	new_player_sync.set_visibility_for(1, true)  # For the server/host
 	
 # -- Signal Handlers --
 # Add this new helper function to make the deferred call cleaner.
