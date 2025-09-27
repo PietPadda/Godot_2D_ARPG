@@ -116,7 +116,19 @@ func _perform_handshake_for_player(new_player_id: int) -> void:
 	# Make all EXISTING enemies visible to the NEW player.
 	for enemy in get_tree().get_nodes_in_group("enemies"):
 		_rpc_force_visibility_update.rpc(enemy.get_path(), new_player_id, true)
-	
+
+# A reusable function to make a specific node visible to all current players.
+# This will be used by projectiles and loot drops.
+func make_node_visible_to_all(node_path: NodePath) -> void:
+	# This function must only be called on the server.
+	if not multiplayer.is_server(): return
+
+	var all_peers = multiplayer.get_peers()
+	all_peers.append(1) # Include the server itself
+
+	for peer_id in all_peers:
+		_rpc_force_visibility_update.rpc(node_path, peer_id, true)
+		
 # -- Signal Handlers --
 # Add this new helper function to make the deferred call cleaner.
 func _set_player_initial_position(player_path: NodePath, id: int, pos: Vector2):

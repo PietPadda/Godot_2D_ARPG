@@ -61,7 +61,7 @@ func server_request_cast(target_position: Vector2):
 		push_error("SkillData is missing a projectile scene!")
 		return # do not cast
 	
-	# THE FIX: Get the current level from our reliable LevelManager service.
+	# Get the current level from our reliable LevelManager service.
 	var level = LevelManager.get_current_level()
 	if not is_instance_valid(level):
 		return
@@ -87,4 +87,8 @@ func server_request_cast(target_position: Vector2):
 	# Instead of passing the whole 'skill_data' object,
 	# we pass its 'resource_path', which is just a string.
 	projectile.initialize.rpc(skill_data.resource_path, caster_id, caster_pos, target_position)
+	
+	# --- THIS IS THE FIX ---
+	# Get the level and tell it to make our new projectile visible to everyone.
+	level.call_deferred("make_node_visible_to_all", projectile.get_path())
 	
