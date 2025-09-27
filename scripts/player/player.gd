@@ -52,11 +52,6 @@ func _ready() -> void:
 		state_machine.set_physics_process(false)
 		state_machine.set_process_unhandled_input(false)
 		
-		# --- THIS IS THE FIX ---
-		# Disable the physics on the CharacterBody2D for this puppet.
-		# Its movement will now be driven ONLY by the MultiplayerSynchronizer.
-		set_physics_process(false)
-		
 		# Do nothing else
 		return # This is the most important part!
 	
