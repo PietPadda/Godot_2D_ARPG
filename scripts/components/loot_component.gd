@@ -23,7 +23,7 @@ func drop_loot(position: Vector2) -> void:
 		# Set the loot drops position
 		loot_instance.global_position = position
 		
-		# THE FIX: Get the current level from our reliable LevelManager service.
+		# Get the current level from our reliable LevelManager service.
 		var level = LevelManager.get_current_level()
 		if not is_instance_valid(level): 
 			return
@@ -41,3 +41,7 @@ func drop_loot(position: Vector2) -> void:
 		# Call our RPC to tell all clients to
 		# set the position, item data, and make it visible.
 		loot_instance.initialize.rpc(item_to_drop.resource_path, position)
+		
+		# --- THIS IS THE FIX ---
+		# Get the level and tell it to make our new loot drop visible to everyone.
+		level.call_deferred("make_node_visible_to_all", loot_instance.get_path())
