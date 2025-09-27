@@ -19,6 +19,9 @@ var _first_physics_frame_checked: bool = false
 
 # This is a built-in Godot function.
 func _enter_tree() -> void:
+	# DEBUG: Trace when a player node enters the scene tree.
+	print("[%s] PLAYER _enter_tree: Node '%s' is entering the tree. Setting authority to %s." % [multiplayer.get_unique_id(), name, int(name)])
+	
 	# The player's name is its multiplayer ID, set by the server upon creation.
 	# We convert the name (which is a String) to an integer.
 	# This is the crucial line: it assigns the network authority immediately.
@@ -29,6 +32,9 @@ func _enter_tree() -> void:
 		GameManager.register_player(self)
 	
 func _ready() -> void:
+	# DEBUG: Trace when a player node is ready.
+	print("[%s] PLAYER _ready: Node '%s' is ready. Is it mine to control? %s" % [multiplayer.get_unique_id(), name, is_multiplayer_authority()])
+	
 	# Duplicate the data resources to make them unique to this player instance.
 	# This prevents players from sharing inventories, stats, or equipment.
 	if stats_component.stats_data:
@@ -45,6 +51,12 @@ func _ready() -> void:
 		# Deactivate its StateMachine so it doesn't try to run logic.
 		state_machine.set_physics_process(false)
 		state_machine.set_process_unhandled_input(false)
+		
+		# --- THIS IS THE FIX ---
+		# Disable the physics on the CharacterBody2D for this puppet.
+		# Its movement will now be driven ONLY by the MultiplayerSynchronizer.
+		set_physics_process(false)
+		
 		# Do nothing else
 		return # This is the most important part!
 	

@@ -45,6 +45,9 @@ func _ready() -> void:
 # It now uses the Auto Spawn List feature by manually instancing and adding as a child.
 # This function now also makes the new player visible to everyone.
 func _spawn_player(id: int):
+	# DEBUG: Trace the start of the spawning process on the HOST.
+	print("[HOST] _spawn_player: Spawning character for ID: %s" % id)
+	
 	# Find the spawner and container nodes.
 	var player_spawner = get_node_or_null("PlayerSpawner")
 	var container = get_node_or_null("PlayerContainer")
@@ -84,30 +87,36 @@ func _spawn_player(id: int):
 	# We call the RPC on the client to ensure its local position is set correctly.
 	player.set_initial_position.rpc_id(id, spawn_position)
 	
-	# --- CORRECTED VISIBILITY HANDSHAKE ---
-	var new_player_sync = player.get_node_or_null("MultiplayerSynchronizer")
-	if not is_instance_valid(new_player_sync):
-		return # Cannot set visibility without a synchronizer
+	# We no longer need to await. We will use call_deferred to ensure the
+	# player node exists everywhere before we start the handshake.
+	call_deferred("_perform_handshake_for_player", id)
+	
+func _perform_handshake_for_player(new_player_id: int) -> void:
+	var container = get_node_or_null("PlayerContainer")
+	if not container: return
+	
+	var new_player = container.get_node_or_null(str(new_player_id))
+	if not is_instance_valid(new_player): return
 
-	# Make all EXISTING players visible to the NEW player,
-	# and the NEW player visible to all EXISTING players.
+	# --- COMMAND-BASED VISIBILITY HANDSHAKE ---
+	print("[HOST] Handshake: Starting for new player %s" % new_player_id)
+
+	# 1. Make all existing players visible to the new player
 	for existing_player in container.get_children():
-		if existing_player == player:
-			continue # Skip doing this for ourself.
+		if existing_player == new_player:
+			continue
+		
+		# Command everyone to make the existing player visible to the new player
+		_rpc_force_visibility_update.rpc(existing_player.get_path(), new_player_id, true)
+		print("  - RPC: Make existing player '%s' visible to new player '%s'" % [existing_player.name, new_player_id])
+		
+		# 2. Make the new player visible to all existing players
+		_rpc_force_visibility_update.rpc(new_player.get_path(), int(existing_player.name), true)
+		print("  - RPC: Make new player '%s' visible to existing player '%s'" % [new_player_id, existing_player.name])
 
-		# Make the existing player visible to our new player.
-		var existing_sync = existing_player.get_node_or_null("MultiplayerSynchronizer")
-		if is_instance_valid(existing_sync):
-			existing_sync.set_visibility_for(id, true)
-
-		# Make our new player visible to the existing player.
-		var existing_player_id = int(existing_player.name)
-		new_player_sync.set_visibility_for(existing_player_id, true)
-
-	# Finally, ensure the new player is visible to itself and the server.
-	# This covers the host player and the very first client to join.
-	new_player_sync.set_visibility_for(id, true) # For itself
-	new_player_sync.set_visibility_for(1, true)  # For the server/host
+	# 3. Make the new player visible to themself
+	_rpc_force_visibility_update.rpc(new_player.get_path(), new_player_id, true)
+	print("  - RPC: Make new player '%s' visible to themself" % new_player_id)
 	
 # -- Signal Handlers --
 # Add this new helper function to make the deferred call cleaner.
@@ -231,14 +240,26 @@ func client_spawn_player(id: int):
 func server_peer_ready(id: int):
 	if not multiplayer.is_server(): 
 		return
+		
+	# DEBUG: Trace when a peer reports that it has loaded the level.
+	print("[HOST] server_peer_ready: Received 'ready' signal from peer: %s. Spawning their character." % id)
 
 	print("[SERVER] Peer %s confirmed level is loaded. Revealing world..." % id)
 	
-	# Make all existing players and enemies visible to the new peer.
-	for node in get_tree().get_nodes_in_group("characters"):
-		var sync = node.get_node_or_null("MultiplayerSynchronizer")
-		if is_instance_valid(sync):
-			sync.set_visibility_for(id, true)
+	# THIS IS THE CHANGE: We remove the loop from this function.
+	# The _spawn_player function will now handle ALL visibility setup.
 			
 	# Finally, spawn the player character FOR the peer that just reported ready.
 	_spawn_player(id)
+	
+# This RPC is a COMMAND from the server to a client telling it
+# to update the visibility of a specific node's synchronizer.
+@rpc("any_peer", "call_local", "reliable")
+func _rpc_force_visibility_update(node_path: NodePath, for_peer_id: int, is_visible: bool) -> void:
+	var node = get_node_or_null(node_path)
+	if not is_instance_valid(node):
+		return
+	
+	var sync = node.get_node_or_null("MultiplayerSynchronizer")
+	if is_instance_valid(sync):
+		sync.set_visibility_for(for_peer_id, is_visible)
