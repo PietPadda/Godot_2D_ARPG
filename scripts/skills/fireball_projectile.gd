@@ -58,8 +58,8 @@ func initialize(skill_data_path: String, _owner_id: int, start_pos: Vector2, tar
 	global_position = start_pos
 	look_at(target_pos)
 	
-	# Now that everything is perfect, make it visible.
-	# The node's regular visibility must be true for it to be drawn.
+	# The server sets its local copy to visible. The synchronizer will now
+	# automatically replicate this change to all clients that can see this node.
 	visible = true
 	
 	# After all setup, if we are the server, we are responsible for telling

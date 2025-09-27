@@ -88,7 +88,3 @@ func server_request_cast(target_position: Vector2):
 	# we pass its 'resource_path', which is just a string.
 	projectile.initialize.rpc(skill_data.resource_path, caster_id, caster_pos, target_position)
 	
-	# --- REMOVE THE OLD CODE ---
-	# Get the level and tell it to make our new projectile visible to everyone.
-	# level.call_deferred("make_node_visible_to_all", projectile.get_path())
-	

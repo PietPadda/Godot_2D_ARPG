@@ -40,6 +40,12 @@ func initialize(item_path: String, pos: Vector2):
 		
 	# Now that everything is perfectly set up, make it visible.
 	visible = true
+	
+	# If we are the server, kick off the synchronizer handshake.
+	if multiplayer.is_server():
+		var level = LevelManager.get_current_level()
+		if is_instance_valid(level):
+			level.make_node_visible_to_all(get_path())
 
 ## Networked loot pickup
 @rpc("any_peer", "call_local", "reliable")
