@@ -8,6 +8,13 @@ extends Area2D
 # This will be set via RPC after the node is spawned.
 var item_data: ItemData
 
+# Add a _physics_process function to this script
+func _physics_process(_delta: float) -> void:
+	# --- ADD THIS DEBUG CODE ---
+	if not multiplayer.is_server():
+		# This print statement will only run on the client's machine.
+		print("CLIENT LOOT: visible property is %s, is_visible_in_tree() is %s" % [visible, is_visible_in_tree()])
+
 # --- Signal Handlers ---
 ## Player enters the body of loot on the floor
 func _on_body_entered(body: Node2D) -> void:
