@@ -99,24 +99,23 @@ func _perform_handshake_for_player(new_player_id: int) -> void:
 	if not is_instance_valid(new_player): return
 
 	# --- COMMAND-BASED VISIBILITY HANDSHAKE ---
-	print("[HOST] Handshake: Starting for new player %s" % new_player_id)
-
-	# 1. Make all existing players visible to the new player
+	# Handle Player-to-Player visibility
 	for existing_player in container.get_children():
 		if existing_player == new_player:
 			continue
 		
+		var existing_player_id = int(existing_player.name)
 		# Command everyone to make the existing player visible to the new player
 		_rpc_force_visibility_update.rpc(existing_player.get_path(), new_player_id, true)
-		print("  - RPC: Make existing player '%s' visible to new player '%s'" % [existing_player.name, new_player_id])
-		
-		# 2. Make the new player visible to all existing players
-		_rpc_force_visibility_update.rpc(new_player.get_path(), int(existing_player.name), true)
-		print("  - RPC: Make new player '%s' visible to existing player '%s'" % [new_player_id, existing_player.name])
+		# Make the new player visible to all existing players
+		_rpc_force_visibility_update.rpc(new_player.get_path(), int(existing_player_id), true)
 
-	# 3. Make the new player visible to themself
+	# Make the new player visible to themself
 	_rpc_force_visibility_update.rpc(new_player.get_path(), new_player_id, true)
-	print("  - RPC: Make new player '%s' visible to themself" % new_player_id)
+	
+	# Make all EXISTING enemies visible to the NEW player.
+	for enemy in get_tree().get_nodes_in_group("enemies"):
+		_rpc_force_visibility_update.rpc(enemy.get_path(), new_player_id, true)
 	
 # -- Signal Handlers --
 # Add this new helper function to make the deferred call cleaner.
