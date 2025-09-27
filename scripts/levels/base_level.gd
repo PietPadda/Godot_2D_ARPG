@@ -267,6 +267,9 @@ func server_peer_ready(id: int):
 # to update the visibility of a specific node's synchronizer.
 @rpc("any_peer", "call_local", "reliable")
 func _rpc_force_visibility_update(node_path: NodePath, for_peer_id: int, is_visible: bool) -> void:
+	# --- THIS IS THE NEW LINE ---
+	print("[%s] Received visibility command: Node '%s' should be visible to peer '%s': %s" % [multiplayer.get_unique_id(), node_path, for_peer_id, is_visible])
+	
 	var node = get_node_or_null(node_path)
 	if not is_instance_valid(node):
 		return

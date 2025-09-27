@@ -59,4 +59,12 @@ func initialize(skill_data_path: String, _owner_id: int, start_pos: Vector2, tar
 	look_at(target_pos)
 	
 	# Now that everything is perfect, make it visible.
+	# The node's regular visibility must be true for it to be drawn.
 	visible = true
+	
+	# After all setup, if we are the server, we are responsible for telling
+	# the level to make this newly spawned node visible to everyone's synchronizer.
+	if multiplayer.is_server():
+		var level = LevelManager.get_current_level()
+		if is_instance_valid(level):
+			level.make_node_visible_to_all(get_path())
