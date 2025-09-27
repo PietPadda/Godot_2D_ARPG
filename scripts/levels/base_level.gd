@@ -5,6 +5,9 @@
 class_name BaseLevel
 extends Node2D # Both main.gd and town.gd extend Node2D
 
+# Preload the LootDrop scene at the top of the script
+const LootDropScene = preload("res://scenes/items/loot_drop.tscn")
+
 # --- Common Level Properties ---
 @export var floor_tilemap: TileMapLayer
 @export var wall_tilemap: TileMapLayer
@@ -40,6 +43,10 @@ func _ready() -> void:
 		server_peer_ready(1) # The host is always ready for itself.
 	else:
 		server_peer_ready.rpc_id(1, multiplayer.get_unique_id()) # Clients send an RPC.
+		
+	# The level will listen for loot drop requests. This only needs to happen on the server.
+	if multiplayer.is_server():
+		EventBus.loot_drop_requested.connect(_on_loot_drop_requested)
 	
 # This function contains the core spawning logic and is ONLY ever run on the server.
 # It now uses the Auto Spawn List feature by manually instancing and adding as a child.
@@ -135,6 +142,26 @@ func _set_player_initial_position(player_path: NodePath, id: int, pos: Vector2):
 	var player_node = get_node_or_null(player_path)
 	if is_instance_valid(player_node):
 		player_node.set_initial_position.rpc_id(id, pos)
+		
+# This function runs on the server when an enemy requests a loot drop.
+# We've moved the logic from LootComponent here, to a safe location.
+func _on_loot_drop_requested(loot_table: LootTableData, position: Vector2) -> void:
+	if not loot_table:
+		return
+		
+	var item_to_drop = loot_table.get_drop()
+
+	if item_to_drop:
+		var loot_instance = LootDropScene.instantiate()
+		
+		var loot_container = get_node_or_null("LootContainer")
+		if not loot_container: return # Safety check
+		
+		loot_container.add_child(loot_instance, true)
+		
+		# Now that the instance is safely in the scene tree, call its initialize RPC.
+		# This pattern is now identical to the working projectile pattern.
+		loot_instance.initialize.rpc_id(1, item_to_drop.resource_path, position)
 
 # -- RPCs --
 @rpc("any_peer", "call_local", "reliable")

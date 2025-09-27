@@ -87,13 +87,16 @@ func _on_death(attacker_id: int) -> void:
 
 # This new function contains the logic that modifies the scene tree.
 func _spawn_loot_and_die():
-	# Tell the LootComponent to handle the drop at our current position.
-	loot_component.drop_loot(global_position)
+	# --- THIS IS THE FIX ---
+	# Instead of calling the component directly, the enemy announces its death
+	# and requests that its loot be dropped via the EventBus.
+	EventBus.loot_drop_requested.emit(loot_component.loot_table, global_position)
+
 	
 	# We explicitly tell the GridManager to remove us before we delete ourselves.
 	# Only the machine with authority over the skeleton should send this RPC.
 	if is_multiplayer_authority():
 		Grid.clear_character_from_grid.rpc_id(1, get_path())
 		
-	# When this enemy dies, it should remove itself from the game.
+	# Now it's safe to queue_free(). The loot spawning is handled elsewhere.
 	queue_free()

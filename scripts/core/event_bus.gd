@@ -10,6 +10,8 @@ signal local_player_spawned(player_node) # Player joined annouce with player nod
 # A signal for our server-side debug command to respawn enemies.
 signal debug_respawn_enemies_requested
 signal server_requesting_transition(scene_path)
+# Emitted by an enemy on death, requesting that the level spawn its loot.
+signal loot_drop_requested(loot_table: LootTableData, global_position: Vector2)
 
 # An Enum provides clear, readable names for our states and prevents errors from typos.
 enum GameState {
