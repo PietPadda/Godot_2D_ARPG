@@ -17,6 +17,11 @@ func _ready() -> void:
 func _physics_process(delta: float) -> void:
 	# Move forward in the direction the projectile is facing.
 	position += transform.x * speed * delta
+	
+	# --- ADD THIS DEBUG CODE ---
+	if not multiplayer.is_server():
+		# This print statement will only run on the client's machine.
+		print("CLIENT PROJECTILE: visible property is %s, is_visible_in_tree() is %s" % [visible, is_visible_in_tree()])
 
 func _on_body_entered(body: Node2D) -> void:
 	# If we are already handling an impact, do nothing.
