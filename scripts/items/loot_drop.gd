@@ -2,8 +2,8 @@
 class_name LootDrop
 extends Area2D
 
-# scene nodes
-@onready var sprite: Sprite2D = $Sprite2D
+# We no longer need the @onready var here, as it can cause race conditions.
+# @onready var sprite: Sprite2D = $Sprite2D
 
 # This will be set via RPC after the node is spawned.
 var item_data: ItemData
@@ -43,6 +43,10 @@ func initialize(item_path: String, pos: Vector2, texture_path: String):
 	self.item_data = load(item_path)	
 	
 	# --- THIS IS THE FIX ---
+	# Get a direct reference to the sprite node inside the RPC.
+	# This avoids the @onready race condition.
+	var sprite: Sprite2D = $Sprite2D
+	
 	# We now load the texture from the explicit path sent via the RPC.
 	# This will run on the host AND the client, setting the correct texture.
 	if item_data and not texture_path.is_empty():
