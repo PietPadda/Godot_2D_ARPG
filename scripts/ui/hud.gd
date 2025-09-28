@@ -86,9 +86,9 @@ func _on_local_player_spawned(player: Node) -> void:
 	player_stats.mana_changed.connect(on_player_mana_changed)
 	player_stats.xp_changed.connect(on_player_xp_changed)
 	
-	# Manually update bars once on startup to get the initial value.
-	on_player_health_changed(player_stats.current_health, player_stats.stats_data.max_health)
-	on_player_mana_changed(player_stats.current_mana, player_stats.stats_data.max_mana)
+	# Manually update bars once using the component's final, calculated values.
+	on_player_health_changed(player_stats.current_health, player_stats.total_max_health)
+	on_player_mana_changed(player_stats.current_mana, player_stats.total_max_mana)
 	on_player_xp_changed(player_stats.stats_data.level, player_stats.stats_data.current_xp, player_stats.stats_data.xp_to_next_level)
 	
 	# We only need to pass the components to the character sheet now.

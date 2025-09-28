@@ -15,8 +15,6 @@ signal mana_changed(current_mana, max_mana) # mana update
 signal xp_changed(level, current_xp, xp_to_next_level)
 ## gold update signal
 signal gold_changed(total_gold) # Announce when gold total changes.
-## one or more stats changed signal
-signal stats_changed
 
 # --- Exports ---
 @export var stats_data: CharacterStats # resource file that holds the base stats.
@@ -36,13 +34,12 @@ func _ready() -> void:
 		push_error("StatsComponent needs a CharacterStats resource to function.")
 		return
 		
-	# Initialize our totals with the base stats first.
-	total_max_health = stats_data.max_health
-	total_max_mana = stats_data.max_mana
+	# Recalculate stats on ready to account for starting equipment.
+	recalculate_max_stats()
 	
 	# Current health starts at the maximum.
-	current_health = stats_data.max_health
-	current_mana = stats_data.max_mana
+	current_health = total_max_health
+	current_mana = total_max_mana
 	
 	# Use our single, reliable function to update the UI on the first frame.
 	refresh_stats()
@@ -56,13 +53,12 @@ func take_damage(damage_amount: int, attacker_id: int) -> void:
 	if is_dead or not stats_data:
 		return
 
-	current_health -= damage_amount # decr life
+	current_health = max(0, current_health - damage_amount) # decr life
 	# Emit the signal every time damage is taken.
-	emit_signal("health_changed", current_health, stats_data.max_health)
+	emit_signal("health_changed", current_health, total_max_health)
 
 	if current_health <= 0: # if dead
 		is_dead = true # flag entity as dead
-		current_health = 0 # set dead
 		# Emit the 'died' signal WITH the attacker's ID
 		emit_signal("died", attacker_id)
 
@@ -71,27 +67,31 @@ func take_damage(damage_amount: int, attacker_id: int) -> void:
 func use_mana(amount: int) -> bool:
 	if current_mana >= amount: # if sufficient
 		current_mana -= amount # decr
-		emit_signal("mana_changed", current_mana, stats_data.max_mana) # update
+		emit_signal("mana_changed", current_mana, total_max_mana) # update
 		return true # mana use
-	else:
-		return false # no mana used!
+	return false # no mana used!
 
 ## add xp to players
 func add_xp(amount: int) -> void:
 	if not stats_data: 
 		return # return if enemy doesn't have stats
 	stats_data.current_xp += amount # add xp
-
+	
+	var leveled_up = false # levelup tracker bool
 	# The level-up loop runs first, if applicable.
 	while stats_data.current_xp >= stats_data.xp_to_next_level:
+		leveled_up = true
 		_level_up() # level up ONLY if more than req		
 		# If we are the client with authority, tell the server we have leveled up.
 		if owner.is_multiplayer_authority():
 			server_level_up.rpc_id(1, stats_data.level)
 	
-	# After all calculations are done, emit the signal once with the final values.
-	# This correctly updates the UI both when we level up and when we don't.
-	emit_signal("xp_changed", stats_data.level, stats_data.current_xp, stats_data.xp_to_next_level)
+	# After all logic is done, update the UI once with the final state.
+	if leveled_up:
+		refresh_stats()
+	else:
+		# If we didn't level up, just update the XP bar.
+		emit_signal("xp_changed", stats_data.level, stats_data.current_xp, stats_data.xp_to_next_level)
 
 # Public function to add gold to the player's stats.
 ## add gold to player
@@ -128,6 +128,7 @@ func recalculate_max_stats() -> void:
 
 # --- Private Functions ---
 ## level up player on sufficient xp
+# This function now ONLY handles the math of leveling up. No signals.
 func _level_up() -> void:
 	# Use up the XP for the level up.
 	stats_data.current_xp -= stats_data.xp_to_next_level
@@ -135,7 +136,6 @@ func _level_up() -> void:
 	
 	# Increase the XP requirement for the next level (static addition for now)
 	stats_data.xp_to_next_level = int(stats_data.xp_to_next_level + 100)
-	emit_signal("xp_changed", stats_data.level, stats_data.current_xp, stats_data.xp_to_next_level)
 	
 	# Call new helper function to apply the stat gains.
 	_apply_stat_gains_for_level()
@@ -147,9 +147,6 @@ func _level_up() -> void:
 	# Heal to the new, fully calculated total maximums.
 	current_health = total_max_health
 	current_mana = total_max_mana
-	
-	# After all calculations, use our unified function to update the UI.
-	refresh_stats()
 	
 # reusable function for calculating stat gains.
 ## Applies stat increases based on the current level.
@@ -174,12 +171,10 @@ func client_add_gold(amount: int):
 	add_gold(amount)
 	
 # This RPC is called by a client to inform the server that they have leveled up.
+# The argument is removed to simplify the call and unify logic.
 @rpc("any_peer", "call_local", "reliable")
-func server_level_up(new_level: int):
+func server_level_up():
 	# This function now simply calls the same complete, correct logic.
 	# This ensures the server's version of the player stays in sync.
 	_level_up()
-	
-	# We can emit the stats_changed signal on the server as well,
-	# in case any server-side logic needs to react to the puppet's new stats.
-	stats_changed.emit()
+	refresh_stats()
