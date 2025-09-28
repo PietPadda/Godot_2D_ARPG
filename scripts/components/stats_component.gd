@@ -109,15 +109,24 @@ func refresh_stats() -> void:
 
 # This function will be called whenever we need to update our max stats.
 func recalculate_max_stats() -> void:
-	if not stat_calculator: return
+	if not stat_calculator: 
+		return
 
 	# Get the new totals from the one source of truth.
 	var total_max_health = stat_calculator.get_total_stat(Stats.STAT_NAMES[Stats.STAT.MAX_HEALTH])
 	var total_max_mana = stat_calculator.get_total_stat(Stats.STAT_NAMES[Stats.STAT.MAX_MANA])
 	
-	# --- DEBUG TRACE ---
-	# For now, just print the values to prove the calculation is correct.
-	print("Recalculating Max Stats -> Total Max Health: %s, Total Max Mana: %s" % [total_max_health, total_max_mana])
+	# Update the stats_data resource directly with the new calculated totals.
+	stats_data.max_health = total_max_health
+	stats_data.max_mana = total_max_mana
+	
+	# Ensure current health and mana do not exceed the new maximums.
+	current_health = min(current_health, stats_data.max_health)
+	current_mana = min(current_mana, stats_data.max_mana)
+
+	# Emit the signals to update the UI with the new values.
+	emit_signal("health_changed", current_health, stats_data.max_health)
+	emit_signal("mana_changed", current_mana, stats_data.max_mana)
 
 # --- Private Functions ---
 ## level up player on sufficient xp
