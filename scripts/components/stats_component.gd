@@ -32,7 +32,6 @@ var is_dead: bool = false # death tracker
 var total_max_health: int
 var total_max_mana: int
 
-
 func _ready() -> void:
 	# Ensure a stats resource has been assigned in the editor.
 	if not stats_data:
@@ -149,10 +148,19 @@ func _level_up() -> void:
 	# Call new helper function to apply the stat gains.
 	_apply_stat_gains_for_level()
 	
-	current_health = stats_data.max_health # Heal to full.
-	current_mana = stats_data.max_mana # Restore to full.
-	# Announce the stats changes so the UI updates.
-	refresh_stats()
+	# Now that the base stats have increased, trigger a full recalculation.
+	# This will factor in the new base stats AND all equipment bonuses.
+	recalculate_max_stats()
+	
+	# Heal to the new, fully calculated total maximums.
+	current_health = total_max_health
+	current_mana = total_max_mana
+	
+	# Announce all changes to the UI.
+	# The recalculate function already handles health/mana, so we just need to update XP.
+	emit_signal("xp_changed", stats_data.level, stats_data.current_xp, stats_data.xp_to_next_level)
+	emit_signal("health_changed", current_health, total_max_health)
+	emit_signal("mana_changed", current_mana, total_max_mana)
 	
 # reusable function for calculating stat gains.
 ## Applies stat increases based on the current level.
