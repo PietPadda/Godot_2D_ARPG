@@ -161,7 +161,11 @@ func _on_loot_drop_requested(loot_table: LootTableData, position: Vector2) -> vo
 		
 		# Now that the instance is safely in the scene tree, call its initialize RPC.
 		# This pattern is now identical to the working projectile pattern.
-		loot_instance.initialize.rpc(item_to_drop.resource_path, position)
+		loot_instance.initialize.rpc(
+			item_to_drop.resource_path,
+			position,
+			item_to_drop.texture.resource_path
+		)
 
 # -- RPCs --
 @rpc("any_peer", "call_local", "reliable")

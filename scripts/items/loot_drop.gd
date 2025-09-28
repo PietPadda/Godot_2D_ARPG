@@ -29,7 +29,7 @@ func _on_body_entered(body: Node2D) -> void:
 # This function will be called by the server on all clients to set up the loot.
 ## Generate networked loot for all players
 @rpc("any_peer", "call_local", "reliable")
-func initialize(item_path: String, pos: Vector2):
+func initialize(item_path: String, pos: Vector2, texture_path: String):
 	# This function will now run on the server and all clients.
 	if item_path.is_empty():
 		# If something went wrong, just delete this node to prevent ghost items.
@@ -41,9 +41,12 @@ func initialize(item_path: String, pos: Vector2):
 	
 	# Load the resource from the given path.
 	self.item_data = load(item_path)	
-	# If we successfully loaded the item data, apply its texture.
-	if item_data:
-		sprite.texture = item_data.texture
+	
+	# --- THIS IS THE FIX ---
+	# We now load the texture from the explicit path sent via the RPC.
+	# This will run on the host AND the client, setting the correct texture.
+	if item_data and not texture_path.is_empty():
+		sprite.texture = load(texture_path)
 		
 	# Now that everything is perfectly set up, make it visible.
 	visible = true
