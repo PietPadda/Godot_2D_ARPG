@@ -1,16 +1,18 @@
-[gd_resource type="Resource" script_class="ItemData" load_steps=3 format=3 uid="uid://bllc505jsueh7"]
+[gd_resource type="Resource" script_class="ItemData" load_steps=5 format=3 uid="uid://bllc505jsueh7"]
 
 [ext_resource type="Script" uid="uid://dsidci2l4yr4r" path="res://data/items/item_data.gd" id="1_jvapx"]
+[ext_resource type="Script" uid="uid://cw6u7dqyn8n7w" path="res://data/items/stat_modifier.gd" id="2_qlt1q"]
 [ext_resource type="Texture2D" uid="uid://djbpadgfwswic" path="res://assets/items/weapons/d1_short_sword.png" id="2_wi4uq"]
+
+[sub_resource type="Resource" id="Resource_oicgm"]
+script = ExtResource("2_qlt1q")
+value = 50.0
+metadata/_custom_type_script = "uid://cw6u7dqyn8n7w"
 
 [resource]
 script = ExtResource("1_jvapx")
 item_name = "Short Sword"
 texture = ExtResource("2_wi4uq")
 equipment_slot = 1
-item_type = 0
-value = 1
-stat_modifiers = {
-"damage": 10.0
-}
+stat_modifiers = Array[ExtResource("2_qlt1q")]([SubResource("Resource_oicgm")])
 metadata/_custom_type_script = "uid://dsidci2l4yr4r"
