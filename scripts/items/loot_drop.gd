@@ -62,60 +62,6 @@ func _setup_loot() -> void:
 			level.make_node_visible_to_all(get_path())
 
 # --- RPCs ---
-# This function will be called by the server on all clients to set up the loot.
-## Generate networked loot for all players
-@rpc("any_peer", "call_local", "reliable")
-func initialize(item_path: String, pos: Vector2, texture_path: String):
-	var peer_id = multiplayer.get_unique_id()
-	
-	# --- DEBUG TRACE 1 ---
-	# Did the RPC arrive with the correct item_path string?
-	print("[%s] Initialize RPC received. Attempting to load item_path: '%s'" % [peer_id, item_path])
-	
-	# This function will now run on the server and all clients.
-	if item_path.is_empty():
-		# If something went wrong, just delete this node to prevent ghost items.
-		queue_free()
-		return
-		
-	# Set the position FIRST, while the object is still invisible.
-	global_position = pos
-	
-	# --- DEBUG TRACE 2 ---
-	# Did `load()` work? What did it return?
-	var loaded_data = load(item_path)
-	print("[%s] Result of load(item_path): %s" % [peer_id, loaded_data])
-	
-	# Load the resource from the given path.
-	self.item_data = load(item_path)	
-	
-	# --- DEBUG TRACE 3 ---
-	# Did the assignment happen? What is the variable's value now?
-	print("[%s] self.item_data is now: %s" % [peer_id, self.item_data])
-	
-	# --- THIS IS THE FIX ---
-	# Get a direct reference to the sprite node inside the RPC.
-	# This avoids the @onready race condition.
-	var sprite: Sprite2D = $Sprite2D
-	
-	# We now load the texture from the explicit path sent via the RPC.
-	# This will run on the host AND the client, setting the correct texture.
-	if item_data and not texture_path.is_empty():
-		sprite.texture = load(texture_path)
-	else:
-		# --- DEBUG TRACE 4 ---
-		# If we can't set the texture, let's find out why.
-		print("[%s] Could not set texture. is_instance_valid(item_data): %s" % [peer_id, is_instance_valid(self.item_data)])
-		
-	# Now that everything is perfectly set up, make it visible.
-	visible = true
-	
-	# If we are the server, kick off the synchronizer handshake.
-	if multiplayer.is_server():
-		var level = LevelManager.get_current_level()
-		if is_instance_valid(level):
-			level.make_node_visible_to_all(get_path())
-
 ## Networked loot pickup
 @rpc("any_peer", "call_local", "reliable")
 func server_request_pickup(picker_id: int):

@@ -20,16 +20,10 @@ signal stats_changed
 # Link to the resource file that holds the base stats.
 @export var stats_data: CharacterStats
 
-# REMOVE SIBLING COMPONENT REFERENCES
-# @onready var equipment_component: EquipmentComponent = get_parent().get_node_or_null("EquipmentComponent")
-# @onready var attack_component: AttackComponent = get_parent().get_node_or_null("AttackComponent")
-
 # The entity's current, in-game stats.
 @export var current_health: int # entity hp tracker
 @export var current_mana: int # mana tracker
 var is_dead: bool = false # death tracker
-# REMOVE this variable, it's no longer needed.
-# var last_attacker_id: int = 0 # track the last attacker
 
 func _ready() -> void:
 	# Ensure a stats resource has been assigned in the editor.
@@ -108,9 +102,6 @@ func refresh_stats() -> void:
 	emit_signal("mana_changed", current_mana, stats_data.max_mana)
 	emit_signal("xp_changed", stats_data.level, stats_data.current_xp, stats_data.xp_to_next_level)
 	emit_signal("gold_changed", stats_data.gold)
-
-# REMOVE THIS ENTIRE FUNCTION. Its logic will be moved to the entity script.
-# func get_total_stat(stat_name: String) -> float:
 
 ## level up player on sufficient xp
 func _level_up() -> void:
