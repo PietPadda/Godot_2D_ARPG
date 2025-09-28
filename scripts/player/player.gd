@@ -66,8 +66,15 @@ func _ready() -> void:
 	# to announce that the local player is ready.
 	EventBus.emit_signal("local_player_spawned", self)
 	
+	# When equipment changes, tell the StatsComponent to recalculate.
+	if equipment_component:
+		equipment_component.equipment_changed.connect(stats_component.recalculate_max_stats)
+	
 	# Manually call the handler on startup to set the initial correct state.
 	_on_game_state_changed(EventBus.current_game_state)
+	
+	# This ensures our stats are correct for any starting equipment.
+	stats_component.recalculate_max_stats()
 
 # We need to add _physics_process to see the position on the first frame of gameplay.
 func _physics_process(_delta: float) -> void:

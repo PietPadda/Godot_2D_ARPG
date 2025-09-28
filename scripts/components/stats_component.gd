@@ -20,6 +20,9 @@ signal stats_changed
 # Link to the resource file that holds the base stats.
 @export var stats_data: CharacterStats
 
+# We need a reference to the calculator to get total stat values.
+@export var stat_calculator: StatCalculator
+
 # The entity's current, in-game stats.
 @export var current_health: int # entity hp tracker
 @export var current_mana: int # mana tracker
@@ -40,6 +43,7 @@ func _ready() -> void:
 	emit_signal("xp_changed", stats_data.level, stats_data.current_xp, stats_data.xp_to_next_level)
 	emit_signal("gold_changed", stats_data.gold) # ready the UI value
 
+# --- Public Functions ---
 # Public function to apply damage to this entity.
 # UPDATE the take_damage function to accept the attacker's ID.
 ## Lose life function
@@ -103,6 +107,19 @@ func refresh_stats() -> void:
 	emit_signal("xp_changed", stats_data.level, stats_data.current_xp, stats_data.xp_to_next_level)
 	emit_signal("gold_changed", stats_data.gold)
 
+# This function will be called whenever we need to update our max stats.
+func recalculate_max_stats() -> void:
+	if not stat_calculator: return
+
+	# Get the new totals from the one source of truth.
+	var total_max_health = stat_calculator.get_total_stat(Stats.STAT_NAMES[Stats.STAT.MAX_HEALTH])
+	var total_max_mana = stat_calculator.get_total_stat(Stats.STAT_NAMES[Stats.STAT.MAX_MANA])
+	
+	# --- DEBUG TRACE ---
+	# For now, just print the values to prove the calculation is correct.
+	print("Recalculating Max Stats -> Total Max Health: %s, Total Max Mana: %s" % [total_max_health, total_max_mana])
+
+# --- Private Functions ---
 ## level up player on sufficient xp
 func _level_up() -> void:
 	# Use up the XP for the level up.
