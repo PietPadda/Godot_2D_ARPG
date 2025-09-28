@@ -23,10 +23,14 @@ func update_tooltip(item_data: ItemData) -> void:
 	if not item_data.stat_modifiers.is_empty():
 		tooltip_label.append_text("\n") # Add a space before stats
 		
-		for stat in item_data.stat_modifiers:
-			var value = item_data.stat_modifiers[stat]
+		# "modifier" is now a StatModifier resource object.
+		for modifier in item_data.stat_modifiers:
+			# Get the value directly from the modifier resource.
+			var value = modifier.value
+			# Get the string name by looking up the enum in our global singleton.
+			var stat_name = Stats.STAT_NAMES[modifier.stat]
 			# Add a '+' for positive values.
-			var sign = "+" if value >= 0 else ""
+			var symbol = "+" if value >= 0 else ""
 			# We'll use a different color for stats to make them stand out.
 			# colour = [color=aqua]...[/color]
-			tooltip_label.append_text("[color=aqua]%s%s %s[/color]\n" % [sign, value, stat.capitalize()])
+			tooltip_label.append_text("[color=aqua]%s%s %s[/color]\n" % [symbol, value, stat_name.capitalize()])
