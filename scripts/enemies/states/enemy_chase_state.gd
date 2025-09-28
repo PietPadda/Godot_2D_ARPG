@@ -30,7 +30,7 @@ func _physics_process(_delta: float) -> void:
 		# Check for attack range. This is now safe because we are stationary.
 		# This guarantees the check only happens when we are perfectly centered.
 		var distance = owner.global_position.distance_to(target.global_position)
-		if distance <= owner.get_total_stat("range"):
+		if distance <= owner.get_total_stat(Stats.STAT_NAMES[Stats.STAT.RANGE]):
 			# Use get_state() with the ENUM to get a reference.
 			var attack_state: EnemyAttackState = state_machine.get_state(States.ENEMY.ATTACK)
 			if attack_state:

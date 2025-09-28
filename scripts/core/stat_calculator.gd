@@ -16,7 +16,7 @@ func get_total_stat(stat_name: String) -> float:
 	var total_value: float = 0.0
 	
 	# Get the base value from the Attack or Stats component.
-	if (stat_name == "damage" or stat_name == "range") and attack_component and attack_component.attack_data:
+	if (stat_name == Stats.STAT_NAMES[Stats.STAT.DAMAGE] or stat_name == Stats.STAT_NAMES[Stats.STAT.RANGE]) and attack_component and attack_component.attack_data:
 		total_value = attack_component.attack_data.get(stat_name)
 	elif stats_component and stats_component.stats_data and stat_name in stats_component.stats_data:
 		total_value = stats_component.stats_data.get(stat_name)

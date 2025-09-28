@@ -63,7 +63,7 @@ func _physics_process(_delta: float) -> void:
 		return # early exit
 	
 	var distance = player.global_position.distance_to(target.global_position)
-	var attack_range = owner.get_total_stat("range")
+	var attack_range = owner.get_total_stat(Stats.STAT_NAMES[Stats.STAT.RANGE])
 
 	# This is now our highest priority, checked every frame.
 	# Are we within attack range RIGHT NOW?
