@@ -3,7 +3,8 @@
 class_name StatsComponent
 extends Node
 
-# signals
+
+# --- Signals ---
 ## entity death signal
 signal died # death notification
 ## health update signal
@@ -17,17 +18,14 @@ signal gold_changed(total_gold) # Announce when gold total changes.
 ## one or more stats changed signal
 signal stats_changed
 
-# Link to the resource file that holds the base stats.
-@export var stats_data: CharacterStats
+# --- Exports ---
+@export var stats_data: CharacterStats # resource file that holds the base stats.
+@export var stat_calculator: StatCalculator # calculator to get total stat values
 
-# We need a reference to the calculator to get total stat values.
-@export var stat_calculator: StatCalculator
-
-# The entity's current, in-game stats.
+# --- State Variables ---
 @export var current_health: int # entity hp tracker
 @export var current_mana: int # mana tracker
 var is_dead: bool = false # death tracker
-
 # These will hold the final, calculated values including item bonuses.
 var total_max_health: int
 var total_max_mana: int
@@ -38,7 +36,7 @@ func _ready() -> void:
 		push_error("StatsComponent needs a CharacterStats resource to function.")
 		return
 		
-	# We initialize our totals with the base stats first.
+	# Initialize our totals with the base stats first.
 	total_max_health = stats_data.max_health
 	total_max_mana = stats_data.max_mana
 	
@@ -46,35 +44,25 @@ func _ready() -> void:
 	current_health = stats_data.max_health
 	current_mana = stats_data.max_mana
 	
-	# Emit the signals so the UI is correct on the first frame.
-	emit_signal("health_changed", current_health, stats_data.max_health)
-	emit_signal("mana_changed", current_mana, stats_data.max_mana)
-	emit_signal("xp_changed", stats_data.level, stats_data.current_xp, stats_data.xp_to_next_level)
-	emit_signal("gold_changed", stats_data.gold) # ready the UI value
+	# Use our single, reliable function to update the UI on the first frame.
+	refresh_stats()
 
 # --- Public Functions ---
 # Public function to apply damage to this entity.
-# UPDATE the take_damage function to accept the attacker's ID.
 ## Lose life function
 func take_damage(damage_amount: int, attacker_id: int) -> void:
 	# This is a "guard clause". If the entity is already dead,
 	# we stop the function immediately.
-	if is_dead:
+	if is_dead or not stats_data:
 		return
-		
-	# We need to make sure we have stats data before proceeding.
-	if not stats_data:
-		return # early exit
 
 	current_health -= damage_amount # decr life
-
 	# Emit the signal every time damage is taken.
 	emit_signal("health_changed", current_health, stats_data.max_health)
 
 	if current_health <= 0: # if dead
 		is_dead = true # flag entity as dead
 		current_health = 0 # set dead
-		
 		# Emit the 'died' signal WITH the attacker's ID
 		emit_signal("died", attacker_id)
 
@@ -90,16 +78,20 @@ func use_mana(amount: int) -> bool:
 
 ## add xp to players
 func add_xp(amount: int) -> void:
-	if not stats_data: return # return if enemy doesn't have stats
+	if not stats_data: 
+		return # return if enemy doesn't have stats
 	stats_data.current_xp += amount # add xp
-	emit_signal("xp_changed", stats_data.level, stats_data.current_xp, stats_data.xp_to_next_level)
-	# Check if we have enough XP to level up.
+
+	# The level-up loop runs first, if applicable.
 	while stats_data.current_xp >= stats_data.xp_to_next_level:
-		_level_up() # level up ONLY if more than req
-		
+		_level_up() # level up ONLY if more than req		
 		# If we are the client with authority, tell the server we have leveled up.
 		if owner.is_multiplayer_authority():
 			server_level_up.rpc_id(1, stats_data.level)
+	
+	# After all calculations are done, emit the signal once with the final values.
+	# This correctly updates the UI both when we level up and when we don't.
+	emit_signal("xp_changed", stats_data.level, stats_data.current_xp, stats_data.xp_to_next_level)
 
 # Public function to add gold to the player's stats.
 ## add gold to player
@@ -111,8 +103,8 @@ func add_gold(amount: int) -> void:
 
 ## Helper to Announce to UI stats update
 func refresh_stats() -> void:
-	emit_signal("health_changed", current_health, stats_data.max_health)
-	emit_signal("mana_changed", current_mana, stats_data.max_mana)
+	emit_signal("health_changed", current_health, total_max_health)
+	emit_signal("mana_changed", current_mana, total_max_mana)
 	emit_signal("xp_changed", stats_data.level, stats_data.current_xp, stats_data.xp_to_next_level)
 	emit_signal("gold_changed", stats_data.gold)
 
@@ -156,11 +148,8 @@ func _level_up() -> void:
 	current_health = total_max_health
 	current_mana = total_max_mana
 	
-	# Announce all changes to the UI.
-	# The recalculate function already handles health/mana, so we just need to update XP.
-	emit_signal("xp_changed", stats_data.level, stats_data.current_xp, stats_data.xp_to_next_level)
-	emit_signal("health_changed", current_health, total_max_health)
-	emit_signal("mana_changed", current_mana, total_max_mana)
+	# After all calculations, use our unified function to update the UI.
+	refresh_stats()
 	
 # reusable function for calculating stat gains.
 ## Applies stat increases based on the current level.
@@ -187,17 +176,9 @@ func client_add_gold(amount: int):
 # This RPC is called by a client to inform the server that they have leveled up.
 @rpc("any_peer", "call_local", "reliable")
 func server_level_up(new_level: int):
-	# This function only runs on the server.
-	
-	# Update the puppet's stats data.
-	stats_data.level = new_level
-	
-	# Recalculate derived stats like max health and mana on the server.
-	_apply_stat_gains_for_level()
-	
-	# Refill health/mana on level up, which is a common RPG mechanic.
-	current_health = stats_data.max_health
-	current_mana = stats_data.max_mana
+	# This function now simply calls the same complete, correct logic.
+	# This ensures the server's version of the player stays in sync.
+	_level_up()
 	
 	# We can emit the stats_changed signal on the server as well,
 	# in case any server-side logic needs to react to the puppet's new stats.
