@@ -14,11 +14,6 @@ const LootDropScene = preload("res://scenes/items/loot_drop.tscn")
 @export var level_music: MusicTrackData
 
 # --- Player Spawning Properties ---
-# REMOVE the old @onready vars. They no longer exist in this scene.
-# @onready var player_container: Node2D = $PlayerContainer 
-# @onready var player_spawner: MultiplayerSpawner = $PlayerSpawner
-
-# --- Player Spawning Properties ---
 @onready var player_spawn_points_container: Node2D = $PlayerSpawnPoints
 
 var player_spawn_points: Array = []
@@ -137,11 +132,6 @@ func make_node_visible_to_all(node_path: NodePath) -> void:
 		_rpc_force_visibility_update.rpc(node_path, peer_id, true)
 		
 # -- Signal Handlers --
-# Add this new helper function to make the deferred call cleaner.
-func _set_player_initial_position(player_path: NodePath, id: int, pos: Vector2):
-	var player_node = get_node_or_null(player_path)
-	if is_instance_valid(player_node):
-		player_node.set_initial_position.rpc_id(id, pos)
 		
 # This function runs on the server when an enemy requests a loot drop.
 # We've moved the logic from LootComponent here, to a safe location.
@@ -197,93 +187,6 @@ func server_process_projectile_hit(projectile_path: NodePath, target_path: NodeP
 	# The server authoritatively destroys the projectile after the hit is processed.
 	projectile.queue_free()
 	
-# This function is called BY a client, but runs ON the server.
-@rpc("any_peer", "call_local", "reliable")
-func server_spawn_my_player():
-	if not multiplayer.is_server(): return
-
-	var client_id = multiplayer.get_remote_sender_id()
-	print("[SERVER] Received spawn request from client %s." % client_id)
-	#_on_player_spawn_requested(client_id)
-	
-# This RPC is called by the client to signal it's ready.
-@rpc("any_peer", "call_local")
-func server_confirm_level_loaded():
-	# This function only runs on the server.
-	if not multiplayer.is_server(): 
-		return
-	
-	# This will now always be a valid client ID.
-	var client_id = multiplayer.get_remote_sender_id()
-	print("[SERVER] Client %s confirmed level loaded. Moving player from limbo." % client_id)
-	
-	var world = get_tree().get_root().get_node("World")
-	var limbo_container = world.get_node("PlayerLimboContainer")
-	var player_node = limbo_container.get_node_or_null(str(client_id))
-	
-	if is_instance_valid(player_node):
-		# Get a reference to the PlayerContainer from the active level.
-		var level = LevelManager.get_current_level()
-		if not is_instance_valid(level): 
-			return
-		
-		var player_container = level.get_node_or_null("PlayerContainer")
-		if not is_instance_valid(player_container): 
-			return
-		
-		if is_instance_valid(player_container):
-			player_node.reparent(player_container)
-			print("[SERVER] Moved player %s to the active level." % client_id)
-			
-			# Restore the spawner's path for the next player.
-			var player_spawner = level.get_node_or_null("PlayerSpawner")
-			if is_instance_valid(player_spawner):
-				player_spawner.spawn_path = player_container.get_path()
-			else:
-				push_error("Could not find PlayerContainer in the active level!")
-	else:
-		push_error("Could not find player %s in the limbo container!" % client_id)
-
-# This RPC is called by the server to run on all clients (and the server itself).
-# Its only job is to safely move a node from one parent to another.
-@rpc("any_peer", "call_local", "reliable")
-func _reparent_node(node_to_move_path: NodePath, new_parent_path: NodePath) -> void:
-	var node_to_move = get_node_or_null(node_to_move_path)
-	var new_parent = get_node_or_null(new_parent_path)
-	
-	# These safety checks are critical. It's possible for this command to arrive
-	# on a laggy client a moment before the node has finished spawning in Limbo.
-	# If that happens, we simply do nothing, and the system will catch up.
-	if not is_instance_valid(node_to_move) or not is_instance_valid(new_parent):
-		return
-		
-	# This is the core of the operation.
-	node_to_move.reparent(new_parent)
-
-# This RPC is called BY a client and runs ON the server.
-@rpc("any_peer", "call_local", "reliable")
-func server_request_spawn():
-	var client_id = multiplayer.get_remote_sender_id()
-	_spawn_player(client_id)
-
-# This is our new spawner. It runs on the server AND all clients.
-@rpc("any_peer", "call_local", "reliable")
-func client_spawn_player(id: int):
-	var player_container = get_node("PlayerContainer")
-	
-	# A guard to prevent creating the same player twice if messages get crossed.
-	if player_container.has_node(str(id)):
-		return
-
-	var player = NetworkManager.PLAYER_SCENE.instantiate()
-	# We set the name BEFORE adding to the scene. This is critical.
-	# The player's _enter_tree() function uses this name to set its own authority.
-	player.name = str(id)
-	
-	player_container.add_child(player)
-	# We set the position AFTER adding it to the scene tree.
-	# We DO NOT set the position here. The synchronizer will do it.
-
 # This RPC is the single entry point for making the world visible. Runs ONLY on the server.
 @rpc("any_peer", "call_local", "reliable")
 func server_peer_ready(id: int):
