@@ -28,16 +28,26 @@ signal stats_changed
 @export var current_mana: int # mana tracker
 var is_dead: bool = false # death tracker
 
+# These will hold the final, calculated values including item bonuses.
+var total_max_health: int
+var total_max_mana: int
+
+
 func _ready() -> void:
 	# Ensure a stats resource has been assigned in the editor.
 	if not stats_data:
 		push_error("StatsComponent needs a CharacterStats resource to function.")
 		return
+		
+	# We initialize our totals with the base stats first.
+	total_max_health = stats_data.max_health
+	total_max_mana = stats_data.max_mana
 	
-	# Initialize the current stats from the base stats data.
+	# Current health starts at the maximum.
 	current_health = stats_data.max_health
 	current_mana = stats_data.max_mana
-	# Emit the signals on ready to initialise current stats
+	
+	# Emit the signals so the UI is correct on the first frame.
 	emit_signal("health_changed", current_health, stats_data.max_health)
 	emit_signal("mana_changed", current_mana, stats_data.max_mana)
 	emit_signal("xp_changed", stats_data.level, stats_data.current_xp, stats_data.xp_to_next_level)
@@ -113,20 +123,17 @@ func recalculate_max_stats() -> void:
 		return
 
 	# Get the new totals from the one source of truth.
-	var total_max_health = stat_calculator.get_total_stat(Stats.STAT_NAMES[Stats.STAT.MAX_HEALTH])
-	var total_max_mana = stat_calculator.get_total_stat(Stats.STAT_NAMES[Stats.STAT.MAX_MANA])
-	
-	# Update the stats_data resource directly with the new calculated totals.
-	stats_data.max_health = total_max_health
-	stats_data.max_mana = total_max_mana
+	total_max_health = stat_calculator.get_total_stat(Stats.STAT_NAMES[Stats.STAT.MAX_HEALTH])
+	total_max_mana = stat_calculator.get_total_stat(Stats.STAT_NAMES[Stats.STAT.MAX_MANA])
+	# We no longer modify stats_data. We only update our internal variables.
 	
 	# Ensure current health and mana do not exceed the new maximums.
 	current_health = min(current_health, stats_data.max_health)
 	current_mana = min(current_mana, stats_data.max_mana)
 
 	# Emit the signals to update the UI with the new values.
-	emit_signal("health_changed", current_health, stats_data.max_health)
-	emit_signal("mana_changed", current_mana, stats_data.max_mana)
+	emit_signal("health_changed", current_health, total_max_health)
+	emit_signal("mana_changed", current_mana, total_max_mana)
 
 # --- Private Functions ---
 ## level up player on sufficient xp
