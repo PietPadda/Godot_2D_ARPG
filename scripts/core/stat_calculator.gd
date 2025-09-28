@@ -23,10 +23,16 @@ func get_total_stat(stat_name: String) -> float:
 		
 	# Add modifiers from equipment.
 	# It's safe to check for the component, as enemies won't have one.
+	# Add modifiers from equipment by looping through the new array.
 	if equipment_component and equipment_component.equipment_data:
 		for item in equipment_component.equipment_data.equipped_items.values():
-			if item and item.stat_modifiers.has(stat_name):
-				total_value += item.stat_modifiers[stat_name]
+			if item:
+				# Loop through each StatModifier resource in the item's array.
+				for modifier in item.stat_modifiers:
+					# Check if the modifier's enum matches the one we're looking for.
+					# Convert the modifier's enum (int) to its string name before comparing.
+					if Stats.STAT_NAMES[modifier.stat] == stat_name:
+						total_value += modifier.value
 	
 	# In the future, we could add buffs here:
 	# if buff_component:

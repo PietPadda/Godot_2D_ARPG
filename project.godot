@@ -27,7 +27,6 @@ Music="*res://scenes/core/music_manager.tscn"
 NetworkManager="*res://scripts/core/network_manager.gd"
 Scene="*res://scripts/core/scene_manager.gd"
 States="*res://scripts/core/state_manager.gd"
-Stats="*res://scripts/core/stats.gd"
 Tooltip="*res://scenes/core/tooltip_manager.tscn"
 
 [input]

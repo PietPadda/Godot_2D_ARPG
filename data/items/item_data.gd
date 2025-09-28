@@ -17,5 +17,7 @@ enum ItemType { REGULAR, CURRENCY }
 # item type and a value for currency.
 @export var item_type: ItemType = ItemType.REGULAR
 @export var value: int = 1 # Used for gold amount, etc.
-# This dictionary will hold stat bonuses, e.g., {"damage": 10, "strength": 5}
-@export var stat_modifiers: Dictionary = {}
+
+# Replace the Dictionary with an Array of our new custom Resource.
+# This will hold stat bonuses, e.g., {"damage": 10, "strength": 5}
+@export var stat_modifiers: Array[StatModifier]

@@ -1,16 +1,24 @@
-[gd_resource type="Resource" script_class="ItemData" load_steps=3 format=3 uid="uid://bgqro0j5mqo6v"]
+[gd_resource type="Resource" script_class="ItemData" load_steps=6 format=3 uid="uid://bgqro0j5mqo6v"]
 
 [ext_resource type="Script" uid="uid://dsidci2l4yr4r" path="res://data/items/item_data.gd" id="1_p3c8t"]
 [ext_resource type="Texture2D" uid="uid://de3rsxpxn3q2e" path="res://assets/items/helms/d1_leather_cap.png" id="2_0s3l0"]
+[ext_resource type="Script" uid="uid://cw6u7dqyn8n7w" path="res://data/items/stat_modifier.gd" id="2_8v2vr"]
+
+[sub_resource type="Resource" id="Resource_fsek8"]
+script = ExtResource("2_8v2vr")
+stat = 3
+value = 75.0
+metadata/_custom_type_script = "uid://cw6u7dqyn8n7w"
+
+[sub_resource type="Resource" id="Resource_v6o08"]
+script = ExtResource("2_8v2vr")
+value = 25.0
+metadata/_custom_type_script = "uid://cw6u7dqyn8n7w"
 
 [resource]
 script = ExtResource("1_p3c8t")
 item_name = "Leather Cap"
 texture = ExtResource("2_0s3l0")
 equipment_slot = 3
-item_type = 0
-value = 1
-stat_modifiers = {
-"damage": 5.0
-}
+stat_modifiers = Array[ExtResource("2_8v2vr")]([SubResource("Resource_fsek8"), SubResource("Resource_v6o08")])
 metadata/_custom_type_script = "uid://dsidci2l4yr4r"

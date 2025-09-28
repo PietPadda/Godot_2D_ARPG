@@ -1,16 +1,25 @@
-[gd_resource type="Resource" script_class="ItemData" load_steps=3 format=3 uid="uid://pq4mhady4dpq"]
+[gd_resource type="Resource" script_class="ItemData" load_steps=6 format=3 uid="uid://pq4mhady4dpq"]
 
 [ext_resource type="Script" uid="uid://dsidci2l4yr4r" path="res://data/items/item_data.gd" id="1_fcd15"]
 [ext_resource type="Texture2D" uid="uid://7ecb4vmqfnya" path="res://assets/items/armor/d1_cloak.png" id="2_irfxa"]
+[ext_resource type="Script" uid="uid://cw6u7dqyn8n7w" path="res://data/items/stat_modifier.gd" id="2_y74xf"]
+
+[sub_resource type="Resource" id="Resource_44ecn"]
+script = ExtResource("2_y74xf")
+stat = 3
+value = 25.0
+metadata/_custom_type_script = "uid://cw6u7dqyn8n7w"
+
+[sub_resource type="Resource" id="Resource_qn6wu"]
+script = ExtResource("2_y74xf")
+stat = 4
+value = 25.0
+metadata/_custom_type_script = "uid://cw6u7dqyn8n7w"
 
 [resource]
 script = ExtResource("1_fcd15")
 item_name = "Cloak"
 texture = ExtResource("2_irfxa")
 equipment_slot = 2
-item_type = 0
-value = 1
-stat_modifiers = {
-"damage": 5.0
-}
+stat_modifiers = Array[ExtResource("2_y74xf")]([SubResource("Resource_44ecn"), SubResource("Resource_qn6wu")])
 metadata/_custom_type_script = "uid://dsidci2l4yr4r"

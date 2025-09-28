@@ -1,5 +1,6 @@
 # scripts/core/stats.gd
 # A globally accessible container for all stat name constants.
+class_name Stats
 
 enum STAT {
 	DAMAGE,
