@@ -10,10 +10,7 @@ var item_data: ItemData
 
 # Add a _physics_process function to this script
 func _physics_process(_delta: float) -> void:
-	# --- ADD THIS DEBUG CODE ---
-	if not multiplayer.is_server():
-		# This print statement will only run on the client's machine.
-		print("CLIENT LOOT: visible property is %s, is_visible_in_tree() is %s" % [visible, is_visible_in_tree()])
+	pass
 
 # --- Signal Handlers ---
 ## Player enters the body of loot on the floor
@@ -30,6 +27,12 @@ func _on_body_entered(body: Node2D) -> void:
 ## Generate networked loot for all players
 @rpc("any_peer", "call_local", "reliable")
 func initialize(item_path: String, pos: Vector2, texture_path: String):
+	var peer_id = multiplayer.get_unique_id()
+	
+	# --- DEBUG TRACE 1 ---
+	# Did the RPC arrive with the correct item_path string?
+	print("[%s] Initialize RPC received. Attempting to load item_path: '%s'" % [peer_id, item_path])
+	
 	# This function will now run on the server and all clients.
 	if item_path.is_empty():
 		# If something went wrong, just delete this node to prevent ghost items.
@@ -39,8 +42,17 @@ func initialize(item_path: String, pos: Vector2, texture_path: String):
 	# Set the position FIRST, while the object is still invisible.
 	global_position = pos
 	
+	# --- DEBUG TRACE 2 ---
+	# Did `load()` work? What did it return?
+	var loaded_data = load(item_path)
+	print("[%s] Result of load(item_path): %s" % [peer_id, loaded_data])
+	
 	# Load the resource from the given path.
 	self.item_data = load(item_path)	
+	
+	# --- DEBUG TRACE 3 ---
+	# Did the assignment happen? What is the variable's value now?
+	print("[%s] self.item_data is now: %s" % [peer_id, self.item_data])
 	
 	# --- THIS IS THE FIX ---
 	# Get a direct reference to the sprite node inside the RPC.
@@ -51,6 +63,10 @@ func initialize(item_path: String, pos: Vector2, texture_path: String):
 	# This will run on the host AND the client, setting the correct texture.
 	if item_data and not texture_path.is_empty():
 		sprite.texture = load(texture_path)
+	else:
+		# --- DEBUG TRACE 4 ---
+		# If we can't set the texture, let's find out why.
+		print("[%s] Could not set texture. is_instance_valid(item_data): %s" % [peer_id, is_instance_valid(self.item_data)])
 		
 	# Now that everything is perfectly set up, make it visible.
 	visible = true

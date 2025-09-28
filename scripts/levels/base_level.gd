@@ -152,6 +152,10 @@ func _on_loot_drop_requested(loot_table: LootTableData, position: Vector2) -> vo
 	var item_to_drop = loot_table.get_drop()
 
 	if item_to_drop:
+		# --- DEBUG TRACE ---
+		# Log the exact resource path the server is about to send in the RPC.
+		print("[SERVER] Spawning loot. Item Path to send: '", item_to_drop.resource_path, "'")
+		
 		var loot_instance = LootDropScene.instantiate()
 		
 		var loot_container = get_node_or_null("LootContainer")
