@@ -151,25 +151,28 @@ func _on_loot_drop_requested(loot_table: LootTableData, position: Vector2) -> vo
 		
 	var item_to_drop = loot_table.get_drop()
 
-	if item_to_drop:
+	if item_to_drop and not item_to_drop.resource_path.is_empty():
 		# --- DEBUG TRACE ---
 		# Log the exact resource path the server is about to send in the RPC.
 		print("[SERVER] Spawning loot. Item Path to send: '", item_to_drop.resource_path, "'")
 		
 		var loot_instance = LootDropScene.instantiate()
 		
-		var loot_container = get_node_or_null("LootContainer")
-		if not loot_container: return # Safety check
+		# Configure the node's synced properties BEFORE adding it to the scene.
+		loot_instance.item_data_path = item_to_drop.resource_path
+		loot_instance.global_position = position
+		# Keep collision disabled initially.
+		loot_instance.get_node("CollisionShape2D").disabled = true
 		
+		var loot_container = get_node_or_null("LootContainer")
+		if not loot_container: 
+			return # Safety check
+		
+		# Add the node. The spawner now replicates it with the correct data path.
 		loot_container.add_child(loot_instance, true)
 		
-		# Now that the instance is safely in the scene tree, call its initialize RPC.
-		# This pattern is now identical to the working projectile pattern.
-		loot_instance.initialize.rpc(
-			item_to_drop.resource_path,
-			position,
-			item_to_drop.texture.resource_path
-		)
+		# The RPC is no longer needed and should be removed.
+		# loot_instance.initialize.rpc(...)
 
 # -- RPCs --
 @rpc("any_peer", "call_local", "reliable")

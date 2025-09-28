@@ -8,6 +8,18 @@ extends Area2D
 # This will be set via RPC after the node is spawned.
 var item_data: ItemData
 
+# This path will be set by the server and synced to clients automatically.
+@export var item_data_path: String = "":
+	set(value):
+		item_data_path = value
+		# If the node is ready, run setup immediately when this value changes.
+		if is_node_ready():
+			_setup_loot()
+			
+func _ready() -> void:
+	# The node is guaranteed to exist here, so we can safely run setup.
+	_setup_loot()
+
 # Add a _physics_process function to this script
 func _physics_process(_delta: float) -> void:
 	pass
@@ -21,6 +33,33 @@ func _on_body_entered(body: Node2D) -> void:
 
 	# We send the RPC request to the server (peer_id = 1) and include our own ID.
 	server_request_pickup.rpc_id(1, body.get_multiplayer_authority())
+
+# --- Private Functions ---
+# This new function contains all our setup logic.
+func _setup_loot() -> void:
+	# Guard clause: Don't run if the path is empty or we already set it up.
+	if item_data_path.is_empty() or is_instance_valid(item_data):
+		return
+
+	print("[%s] Setting up loot from synced path: '%s'" % [multiplayer.get_unique_id(), item_data_path])
+	item_data = load(item_data_path)
+	
+	var sprite: Sprite2D = $Sprite2D
+	if is_instance_valid(item_data) and is_instance_valid(sprite) and is_instance_valid(item_data.texture):
+		sprite.texture = item_data.texture
+	
+	# Enable collision only after setup is complete.
+	$CollisionShape2D.disabled = false
+	
+	# Enable sprite visibility now (prevent 0,0 spawn then sycn relocate 1 frame later)
+	visible = true
+	
+	# If we are the server, we are responsible for telling all clients
+	# that this node's synchronizer is now ready to be seen.
+	if multiplayer.is_server():
+		var level = LevelManager.get_current_level()
+		if is_instance_valid(level):
+			level.make_node_visible_to_all(get_path())
 
 # --- RPCs ---
 # This function will be called by the server on all clients to set up the loot.
@@ -81,7 +120,6 @@ func initialize(item_path: String, pos: Vector2, texture_path: String):
 @rpc("any_peer", "call_local", "reliable")
 func server_request_pickup(picker_id: int):
 	# This code ONLY runs on the server.
-	
 	# This safety check is important because item_data might be null for a split second
 	# before the RPC arrives.
 	if not item_data:

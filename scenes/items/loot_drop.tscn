@@ -9,10 +9,13 @@ radius = 17.1172
 [sub_resource type="SceneReplicationConfig" id="SceneReplicationConfig_8qepv"]
 properties/0/path = NodePath(".:position")
 properties/0/spawn = true
-properties/0/replication_mode = 1
+properties/0/replication_mode = 2
 properties/1/path = NodePath(".:visible")
 properties/1/spawn = true
-properties/1/replication_mode = 1
+properties/1/replication_mode = 2
+properties/2/path = NodePath(".:item_data_path")
+properties/2/spawn = true
+properties/2/replication_mode = 2
 
 [node name="LootDrop" type="Area2D"]
 visible = false
