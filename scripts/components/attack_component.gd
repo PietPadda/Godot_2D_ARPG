@@ -47,7 +47,7 @@ func execute(target: Node2D) -> void:
 	# Only attempt to deal damage if the target is still valid.
 	if is_instance_valid(target):
 		# Get the character's total damage from the StatCalculator.
-		var total_damage = owner.get_total_stat("damage")
+		var total_damage = owner.get_total_stat(Stats.STAT_NAMES[Stats.STAT.DAMAGE])
 		# Add the attacker's ID to the RPC call
 		var my_id = multiplayer.get_unique_id()
 		
