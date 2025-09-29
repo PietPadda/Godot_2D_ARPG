@@ -141,9 +141,10 @@ shape = SubResource("CircleShape2D_xro8k")
 offset_top = -85.0
 offset_bottom = -55.0
 
-[node name="StatsComponent" type="Node" parent="."]
+[node name="StatsComponent" type="Node" parent="." node_paths=PackedStringArray("stat_calculator")]
 script = ExtResource("2_xxwgs")
 stats_data = ExtResource("3_lj2r1")
+stat_calculator = NodePath("../StatCalculator")
 
 [node name="GridMovementComponent" type="Node" parent="."]
 script = ExtResource("11_vnbgq")
