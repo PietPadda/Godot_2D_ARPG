@@ -164,3 +164,9 @@ func award_xp_rpc(amount: int):
 @rpc("any_peer", "call_local", "reliable")
 func set_initial_position(pos: Vector2):
 	global_position = pos
+
+# This RPC is called BY the server ON a specific client to deliver their data.
+@rpc("authority", "call_local", "reliable")
+func client_apply_transition_data(data: SaveData):
+	# We received our data package from the server, now apply it.
+	apply_persistent_data(data, true)
