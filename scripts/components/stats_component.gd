@@ -84,7 +84,8 @@ func add_xp(amount: int) -> void:
 		_level_up() # level up ONLY if more than req		
 		# If we are the client with authority, tell the server we have leveled up.
 		if owner.is_multiplayer_authority():
-			server_level_up.rpc_id(1, stats_data.level)
+			# We no longer pass any arguments here.
+			server_level_up.rpc_id(1)
 	
 	# After all logic is done, update the UI once with the final state.
 	if leveled_up:
@@ -119,8 +120,8 @@ func recalculate_max_stats() -> void:
 	# We no longer modify stats_data. We only update our internal variables.
 	
 	# Ensure current health and mana do not exceed the new maximums.
-	current_health = min(current_health, stats_data.max_health)
-	current_mana = min(current_mana, stats_data.max_mana)
+	current_health = min(current_health, total_max_health)
+	current_mana = min(current_mana, total_max_health)
 
 	# Emit the signals to update the UI with the new values.
 	emit_signal("health_changed", current_health, total_max_health)
