@@ -145,6 +145,14 @@ func register_player(player_node: Node) -> void:
 	# to overwrite any stale reference from a previous scene.
 	active_players[player_id] = player_node
 	print("[SERVER] Player %s registered." % player_id)
+	
+	# THE FIX: When a player is registered, check iif we have transition data for them.
+	if all_players_transition_data.has(player_id):
+		var player_data = all_players_transition_data[player_id]
+		# We found their data! Send it to them using our new RPC.
+		player_node.client_apply_transition_data.rpc_id(player_id, player_data)
+		# Remove the data after sending to prevent re-applying it and to clean up.
+		all_players_transition_data.erase(player_id)
 
 func unregister_player(player_node: Node) -> void:
 	var player_id = int(player_node.name)
