@@ -41,7 +41,6 @@ func _setup_loot() -> void:
 	if item_data_path.is_empty() or is_instance_valid(item_data):
 		return
 
-	print("[%s] Setting up loot from synced path: '%s'" % [multiplayer.get_unique_id(), item_data_path])
 	item_data = load(item_data_path)
 	
 	var sprite: Sprite2D = $Sprite2D

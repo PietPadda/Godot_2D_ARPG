@@ -41,11 +41,14 @@ func request_scene_transition(scene_path: String, player_id: int) -> void:
 	if not multiplayer.is_server():
 		return
 		
-	# THE FIX: Remove this call. Cleanup is now automatic.
-	# _clear_persistent_containers()
-
 	# Server Log
 	print("[SERVER] Received request from player %s to transition to scene: %s" % [player_id, scene_path])
+	
+	# THE FIX: Before doing anything else, tell the current level to
+	# gracefully shut down all player synchronizers.
+	if is_instance_valid(current_level):
+		current_level.hide_all_players_for_transition()
+		
 	print("[SERVER] Initiating transition...")
 	
 	# Persist player data (this is still necessary).
