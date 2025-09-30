@@ -172,9 +172,48 @@ func set_initial_position(pos: Vector2):
 
 # This RPC is called BY the server ON a specific client to deliver their data.
 @rpc("any_peer", "call_local", "reliable")
-func client_apply_transition_data(data: SaveData):
-	# We received our data package from the server, now apply it.
-	apply_persistent_data(data, true)
+func client_apply_transition_data(data: Dictionary):
+	# We received our data dictionary from the server, now apply it.
+	
+	# dynamic stats application
+	var stats_dictionary = data["stats_data"]
+	for stat_name in stats_dictionary:
+		# Use set() to apply the value using the stat's name (the dictionary key)
+		stats_component.stats_data.set(stat_name, stats_dictionary[stat_name])
+
+	# Apply Inventory
+	inventory_component.inventory_data.items.clear()
+	for item_path in data["inventory_items"]:
+		var item_resource = load(item_path)
+		if is_instance_valid(item_resource): # Safety check
+			inventory_component.inventory_data.items.append(item_resource)
+	# Manually emit signal after batch update
+	inventory_component.inventory_changed.emit()
+		
+	# Apply Equipment
+	# Clear existing equipment first for a clean slate
+	for slot in equipment_component.equipment_data.equipped_items:
+		equipment_component.equipment_data.equipped_items[slot] = null
+		
+	for slot in data["equipped_items"]:
+		var item_path = data["equipped_items"][slot]
+		if item_path != null:
+			var item_resource = load(item_path)
+			if is_instance_valid(item_resource): # Safety check
+				equipment_component.equipment_data.equipped_items[slot] = item_resource
+	# Manually emit signal after batch update
+	equipment_component.equipment_changed.emit()
+
+	# Apply live health/mana AFTER stats and equipment are set
+	stats_component.recalculate_max_stats() # Recalculate totals based on new items
+	stats_component.current_health = data["current_health"]
+	stats_component.current_mana = data["current_mana"]
+	
+	# Finally, tell the UI to update with all the new data.
+	stats_component.refresh_stats()
+	var hud = get_tree().get_first_node_in_group("hud")
+	if hud and is_instance_valid(hud.character_sheet):
+		hud.character_sheet.redraw()
 
 # Sent from a client to the server to request transition data.
 @rpc("any_peer", "call_local", "reliable")
