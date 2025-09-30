@@ -116,7 +116,13 @@ func carry_player_data_for_all() -> void:
 	# Instead of searching the whole tree, we look inside the current level.
 	var level = Scene.current_level
 	if  not is_instance_valid(level): 
+		print("[SERVER ERROR] carry_player_data_for_all: Could not find a valid level!")
 		return
+	
+	# --- DEBUG PRINT ---
+	var players_in_scene = level.get_tree().get_nodes_in_group("player")
+	print("[SERVER] carry_player_data_for_all: Found the following player nodes: ", players_in_scene)
+	# --- END DEBUG ---
 	
 	# Find all nodes in the "player" group within the current level.
 	for player in level.get_tree().get_nodes_in_group("player"):
@@ -136,6 +142,10 @@ func carry_player_data_for_all() -> void:
 			
 		# Store the populated data in our dictionary.
 		all_players_transition_data[player_id] = data
+	
+	# --- DEBUG PRINT ---
+	print("[SERVER] carry_player_data_for_all: Stored data for player IDs: ", all_players_transition_data.keys())
+	# --- END DEBUG ---
 		
 func register_player(player_node: Node) -> void:
 	var player_id = int(player_node.name)
@@ -160,8 +170,16 @@ func get_player(player_id: int) -> Node:
 	
 # This is called by the player's RPC.
 func send_transition_data_to_player(player_id: int):
+	# --- DEBUG PRINT ---
+	print("[SERVER] Received a request to send transition data to player ID: ", player_id)
+	# --- END DEBUG ---
+	
 	# Make sure we actually have a player and data for this ID.
 	if all_players_transition_data.has(player_id) and active_players.has(player_id):
+		# --- DEBUG PRINT ---
+		print("[SERVER] SUCCESS: Found data and active player node for ID: ", player_id, ". Sending now.")
+		# --- END DEBUG ---
+		
 		var player_data: SaveData = all_players_transition_data[player_id]
 		var player_node = active_players[player_id]
 		
@@ -203,6 +221,14 @@ func send_transition_data_to_player(player_id: int):
 		
 		# Remove the data after sending to prevent re-applying it and to clean up.
 		all_players_transition_data.erase(player_id)
+	else:
+		# --- DEBUG PRINT ---
+		print("[SERVER] FAILURE: Could not send data to player ID: ", player_id)
+		if not all_players_transition_data.has(player_id):
+			print("    - Reason: No transition data was stored for this ID.")
+		if not active_players.has(player_id):
+			print("    - Reason: This player is not registered as active in the new scene.")
+		# --- END DEBUG ---
 
 # -- Signal Handlers --
 # This function is called by the EventBus when the player is ready.
