@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=5 format=3 uid="uid://brtm4jr74ch7j"]
+
+[ext_resource type="Script" uid="uid://dsidci2l4yr4r" path="res://data/items/item_data.gd" id="1_l3lbd"]
+[ext_resource type="Script" uid="uid://cw6u7dqyn8n7w" path="res://data/items/stat_modifier.gd" id="2_nbomn"]
+[ext_resource type="Texture2D" uid="uid://cpdfwv6iqw4xu" path="res://assets/items/weapons/d1_falchion.png" id="3_l3lbd"]
+
+[sub_resource type="Resource" id="Resource_oicgm"]
+script = ExtResource("2_nbomn")
+value = 30.0
+metadata/_custom_type_script = "uid://cw6u7dqyn8n7w"
+
+[resource]
+script = ExtResource("1_l3lbd")
+item_name = "Falchion"
+texture = ExtResource("3_l3lbd")
+equipment_slot = 1
+stat_modifiers = Array[ExtResource("2_nbomn")]([SubResource("Resource_oicgm")])
+metadata/_custom_type_script = "uid://dsidci2l4yr4r"

@@ -1,0 +1,25 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=6 format=3 uid="uid://x0jg5yxskpcb"]
+
+[ext_resource type="Script" uid="uid://dsidci2l4yr4r" path="res://data/items/item_data.gd" id="1_4ffpi"]
+[ext_resource type="Script" uid="uid://cw6u7dqyn8n7w" path="res://data/items/stat_modifier.gd" id="2_qe101"]
+[ext_resource type="Texture2D" uid="uid://dmcqc2yqchp71" path="res://assets/items/armor/d1_rags.png" id="3_4ffpi"]
+
+[sub_resource type="Resource" id="Resource_44ecn"]
+script = ExtResource("2_qe101")
+stat = 3
+value = 10.0
+metadata/_custom_type_script = "uid://cw6u7dqyn8n7w"
+
+[sub_resource type="Resource" id="Resource_qn6wu"]
+script = ExtResource("2_qe101")
+stat = 4
+value = 10.0
+metadata/_custom_type_script = "uid://cw6u7dqyn8n7w"
+
+[resource]
+script = ExtResource("1_4ffpi")
+item_name = "Rags"
+texture = ExtResource("3_4ffpi")
+equipment_slot = 2
+stat_modifiers = Array[ExtResource("2_qe101")]([SubResource("Resource_44ecn"), SubResource("Resource_qn6wu")])
+metadata/_custom_type_script = "uid://dsidci2l4yr4r"
