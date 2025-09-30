@@ -44,10 +44,10 @@ func request_scene_transition(scene_path: String, player_id: int) -> void:
 	# Server Log
 	print("[SERVER] Received request from player %s to transition to scene: %s" % [player_id, scene_path])
 	
-	# THE FIX: Before doing anything else, tell the current level to
-	# gracefully shut down all player synchronizers.
+	# Before doing anything else, tell the current level to
+	# gracefully shut down all synchronizers.
 	if is_instance_valid(current_level):
-		current_level.hide_all_players_for_transition()
+		current_level.shutdown_network_sync_for_transition()
 		
 	print("[SERVER] Initiating transition...")
 	
