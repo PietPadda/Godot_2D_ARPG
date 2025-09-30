@@ -174,6 +174,9 @@ func send_transition_data_to_player(player_id: int):
 			# We only want to save properties that are meant for storage (our @export vars).
 			if prop.usage & PROPERTY_USAGE_STORAGE:
 				var prop_name = prop.name
+				# THE FIX: Skip the "script" property to prevent the RPC error.
+				if prop_name == "script":
+					continue
 				stats_dictionary[prop_name] = stats_resource.get(prop_name)
 
 		var data_dictionary = {

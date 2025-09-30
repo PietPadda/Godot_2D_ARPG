@@ -213,9 +213,9 @@ func _rpc_force_visibility_update(node_path: NodePath, for_peer_id: int, is_visi
 		sync.set_visibility_for(for_peer_id, is_visible)
 
 # This function is called by the SceneManager right before a transition.
-# It tells all clients to make all player synchronizers invisible to prevent
+# It tells all clients to make all synchronizers invisible to prevent
 # errors during the scene change.
-func hide_all_players_for_transition():
+func shutdown_network_sync_for_transition():
 	# This must only be run on the server.
 	if not multiplayer.is_server():
 		return
@@ -226,11 +226,31 @@ func hide_all_players_for_transition():
 	all_peers.append(1) # Include the server itself
 
 	var player_container = get_node_or_null("PlayerContainer")
-	if not is_instance_valid(player_container):
-		return
+	if is_instance_valid(player_container):
+		# Hide all players from everyone
+		for player in player_container.get_children():
+			# ...tell every peer (including the server) to stop seeing them.
+			for peer_id in all_peers:
+				_rpc_force_visibility_update.rpc(player.get_path(), peer_id, false)
 
-	# For every player currently in the scene...
-	for player in player_container.get_children():
-		# ...tell every peer (including the server) to stop seeing them.
-		for peer_id in all_peers:
-			_rpc_force_visibility_update.rpc(player.get_path(), peer_id, false)
+	# THE FIX: Also hide all enemies from everyone.
+	# This prevents the "ERR_UNAUTHORIZED" spam on despawn.
+	var enemy_container = get_node_or_null("EnemyContainer")
+	if is_instance_valid(enemy_container):
+		for enemy in enemy_container.get_children():
+			for peer_id in all_peers:
+				_rpc_force_visibility_update.rpc(enemy.get_path(), peer_id, false)
+				
+	# Hide all projectiles
+	var projectile_container = get_node_or_null("ProjectileContainer")
+	if is_instance_valid(projectile_container):
+		for projectile in projectile_container.get_children():
+			for peer_id in all_peers:
+				_rpc_force_visibility_update.rpc(projectile.get_path(), peer_id, false)
+				
+	# Hide all loot
+	var loot_container = get_node_or_null("LootContainer")
+	if is_instance_valid(loot_container):
+		for loot in loot_container.get_children():
+			for peer_id in all_peers:
+				_rpc_force_visibility_update.rpc(loot.get_path(), peer_id, false)
