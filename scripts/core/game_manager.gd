@@ -146,13 +146,8 @@ func register_player(player_node: Node) -> void:
 	active_players[player_id] = player_node
 	print("[SERVER] Player %s registered." % player_id)
 	
-	# THE FIX: When a player is registered, check iif we have transition data for them.
-	if all_players_transition_data.has(player_id):
-		var player_data = all_players_transition_data[player_id]
-		# We found their data! Send it to them using our new RPC.
-		player_node.client_apply_transition_data.rpc_id(player_id, player_data)
-		# Remove the data after sending to prevent re-applying it and to clean up.
-		all_players_transition_data.erase(player_id)
+	# REMOVED: We no longer send the data immediately upon registration.
+	# We will now wait for the player to request it.
 
 func unregister_player(player_node: Node) -> void:
 	var player_id = int(player_node.name)
@@ -162,6 +157,20 @@ func unregister_player(player_node: Node) -> void:
 
 func get_player(player_id: int) -> Node:
 	return active_players.get(player_id, null)
+	
+# This is called by the player's RPC.
+func send_transition_data_to_player(player_id: int):
+	# Make sure we actually have a player and data for this ID.
+	if all_players_transition_data.has(player_id) and active_players.has(player_id):
+		var player_data = all_players_transition_data[player_id]
+		var player_node = active_players[player_id]
+		
+		# We found their data! Send it to them using our existing RPC.
+		player_node.client_apply_transition_data.rpc_id(player_id, player_data)
+		print(player_data)
+		
+		# Remove the data after sending to prevent re-applying it and to clean up.
+		all_players_transition_data.erase(player_id)
 
 # -- Signal Handlers --
 # This function is called by the EventBus when the player is ready.

@@ -1,0 +1,25 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=6 format=3 uid="uid://bylnnmiqn5qe6"]
+
+[ext_resource type="Script" uid="uid://dsidci2l4yr4r" path="res://data/items/item_data.gd" id="1_6ublr"]
+[ext_resource type="Script" uid="uid://cw6u7dqyn8n7w" path="res://data/items/stat_modifier.gd" id="2_6jr3g"]
+[ext_resource type="Texture2D" uid="uid://dy0yngtlstxhl" path="res://assets/items/helms/d1_helm.png" id="3_6ublr"]
+
+[sub_resource type="Resource" id="Resource_fsek8"]
+script = ExtResource("2_6jr3g")
+stat = 3
+value = 40.0
+metadata/_custom_type_script = "uid://cw6u7dqyn8n7w"
+
+[sub_resource type="Resource" id="Resource_v6o08"]
+script = ExtResource("2_6jr3g")
+stat = 4
+value = 40.0
+metadata/_custom_type_script = "uid://cw6u7dqyn8n7w"
+
+[resource]
+script = ExtResource("1_6ublr")
+item_name = "Helm"
+texture = ExtResource("3_6ublr")
+equipment_slot = 3
+stat_modifiers = Array[ExtResource("2_6jr3g")]([SubResource("Resource_fsek8"), SubResource("Resource_v6o08")])
+metadata/_custom_type_script = "uid://dsidci2l4yr4r"

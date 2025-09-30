@@ -137,12 +137,13 @@ properties/1/spawn = true
 properties/1/replication_mode = 1
 
 [sub_resource type="Gradient" id="Gradient_ioxgp"]
-colors = PackedColorArray(1, 1, 1, 1, 0, 0, 0, 1)
+offsets = PackedFloat32Array(0.16666667, 0.8194444, 1)
+colors = PackedColorArray(1, 1, 1, 1, 0.06944442, 0.06944442, 0.06944442, 1, 0, 0, 0, 1)
 
 [sub_resource type="GradientTexture2D" id="GradientTexture2D_cnsyf"]
 gradient = SubResource("Gradient_ioxgp")
-width = 150
-height = 150
+width = 250
+height = 125
 fill = 1
 fill_from = Vector2(0.48433048, 0.50427353)
 fill_to = Vector2(0.051282052, 0.84045583)

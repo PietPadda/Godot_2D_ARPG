@@ -1,0 +1,25 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=6 format=3 uid="uid://b35a78foi5r2d"]
+
+[ext_resource type="Script" uid="uid://dsidci2l4yr4r" path="res://data/items/item_data.gd" id="1_a73ri"]
+[ext_resource type="Script" uid="uid://cw6u7dqyn8n7w" path="res://data/items/stat_modifier.gd" id="2_jjvj1"]
+[ext_resource type="Texture2D" uid="uid://bomppa0ry7ruo" path="res://assets/items/helms/d1_skull_cap.png" id="3_a73ri"]
+
+[sub_resource type="Resource" id="Resource_fsek8"]
+script = ExtResource("2_jjvj1")
+stat = 3
+value = 25.0
+metadata/_custom_type_script = "uid://cw6u7dqyn8n7w"
+
+[sub_resource type="Resource" id="Resource_v6o08"]
+script = ExtResource("2_jjvj1")
+stat = 4
+value = 25.0
+metadata/_custom_type_script = "uid://cw6u7dqyn8n7w"
+
+[resource]
+script = ExtResource("1_a73ri")
+item_name = "Skull Cap"
+texture = ExtResource("3_a73ri")
+equipment_slot = 3
+stat_modifiers = Array[ExtResource("2_jjvj1")]([SubResource("Resource_fsek8"), SubResource("Resource_v6o08")])
+metadata/_custom_type_script = "uid://dsidci2l4yr4r"

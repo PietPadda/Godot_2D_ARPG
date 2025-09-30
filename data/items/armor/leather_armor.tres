@@ -1,0 +1,25 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=6 format=3 uid="uid://0ff25mmdfv2h"]
+
+[ext_resource type="Script" uid="uid://dsidci2l4yr4r" path="res://data/items/item_data.gd" id="1_meyq0"]
+[ext_resource type="Script" uid="uid://cw6u7dqyn8n7w" path="res://data/items/stat_modifier.gd" id="2_m2tec"]
+[ext_resource type="Texture2D" uid="uid://ddm21sc54wlk6" path="res://assets/items/armor/d1_leather_armor.png" id="3_meyq0"]
+
+[sub_resource type="Resource" id="Resource_44ecn"]
+script = ExtResource("2_m2tec")
+stat = 3
+value = 40.0
+metadata/_custom_type_script = "uid://cw6u7dqyn8n7w"
+
+[sub_resource type="Resource" id="Resource_qn6wu"]
+script = ExtResource("2_m2tec")
+stat = 4
+value = 40.0
+metadata/_custom_type_script = "uid://cw6u7dqyn8n7w"
+
+[resource]
+script = ExtResource("1_meyq0")
+item_name = "Leather Armor"
+texture = ExtResource("3_meyq0")
+equipment_slot = 2
+stat_modifiers = Array[ExtResource("2_m2tec")]([SubResource("Resource_44ecn"), SubResource("Resource_qn6wu")])
+metadata/_custom_type_script = "uid://dsidci2l4yr4r"

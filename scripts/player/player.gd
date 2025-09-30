@@ -75,6 +75,11 @@ func _ready() -> void:
 	
 	# This ensures our stats are correct for any starting equipment.
 	stats_component.recalculate_max_stats()
+	
+	# THE FIX: If we are the player with authority, once we are fully ready,
+	# we send an RPC to the server asking for our persistent data.
+	if is_multiplayer_authority():
+		server_request_my_data.rpc_id(1)
 
 # We need to add _physics_process to see the position on the first frame of gameplay.
 func _physics_process(_delta: float) -> void:
@@ -166,7 +171,18 @@ func set_initial_position(pos: Vector2):
 	global_position = pos
 
 # This RPC is called BY the server ON a specific client to deliver their data.
-@rpc("authority", "call_local", "reliable")
+@rpc("any_peer", "call_local", "reliable")
 func client_apply_transition_data(data: SaveData):
 	# We received our data package from the server, now apply it.
 	apply_persistent_data(data, true)
+
+# Sent from a client to the server to request transition data.
+@rpc("any_peer", "call_local", "reliable")
+func server_request_my_data():
+	# This function only needs to run on the server.
+	if not multiplayer.is_server():
+		return
+	
+	# Tell the GameManager to send this client their data.
+	var client_id = multiplayer.get_remote_sender_id()
+	GameManager.send_transition_data_to_player(client_id)
