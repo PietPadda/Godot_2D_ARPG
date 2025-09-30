@@ -181,30 +181,32 @@ func client_apply_transition_data(data: Dictionary):
 		# Use set() to apply the value using the stat's name (the dictionary key)
 		stats_component.stats_data.set(stat_name, stats_dictionary[stat_name])
 
-	# Apply Inventory
+	# Clear ALL old item data first for a clean slate.
 	inventory_component.inventory_data.items.clear()
-	for item_path in data["inventory_items"]:
-		var item_resource = load(item_path)
-		if is_instance_valid(item_resource): # Safety check
-			inventory_component.inventory_data.items.append(item_resource)
-	# Manually emit signal after batch update
-	inventory_component.inventory_changed.emit()
-		
-	# Apply Equipment
-	# Clear existing equipment first for a clean slate
 	for slot in equipment_component.equipment_data.equipped_items:
 		equipment_component.equipment_data.equipped_items[slot] = null
 		
-	for slot in data["equipped_items"]:
-		var item_path = data["equipped_items"][slot]
+	# Re-add items to the main inventory.
+	for item_path in data["inventory_items"]:
+		var item_resource = load(item_path)
+		if is_instance_valid(item_resource):
+			inventory_component.inventory_data.items.append(item_resource)
+		
+	# Re-equip items to their correct slots.
+	for slot_str in data["equipped_items"]:
+		var item_path = data["equipped_items"][slot_str]
+		# The dictionary keys are strings from JSON, so we convert them back to int for the slot.
+		var slot_index = int(slot_str) 
 		if item_path != null:
 			var item_resource = load(item_path)
-			if is_instance_valid(item_resource): # Safety check
-				equipment_component.equipment_data.equipped_items[slot] = item_resource
-	# Manually emit signal after batch update
-	equipment_component.equipment_changed.emit()
+			if is_instance_valid(item_resource):
+				equipment_component.equipment_data.equipped_items[slot_index] = item_resource
 
-	# Apply live health/mana AFTER stats and equipment are set
+	# Manually emit signals AFTER all data has been rebuilt.
+	inventory_component.inventory_changed.emit()
+	equipment_component.equipment_changed.emit()
+	
+	# Apply live stats/mana AFTER stats and equipment are set
 	stats_component.recalculate_max_stats() # Recalculate totals based on new items
 	stats_component.current_health = data["current_health"]
 	stats_component.current_mana = data["current_mana"]
