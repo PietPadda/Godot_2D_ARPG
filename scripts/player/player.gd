@@ -227,3 +227,15 @@ func server_request_my_data():
 	# Tell the GameManager to send this client their data.
 	var client_id = multiplayer.get_remote_sender_id()
 	GameManager.send_transition_data_to_player(client_id)
+	
+# This RPC is called BY the server ON a client to tell it to freeze
+# its state in preparation for a scene transition.
+@rpc("any_peer", "call_local", "reliable")
+func client_prepare_for_transition():
+	# Stop the state machine from processing input or physics. This effectively
+	# freezes the player and stops it from sending any more network updates.
+	state_machine.set_physics_process(false)
+	state_machine.set_process_unhandled_input(false)
+	# Also explicitly stop any movement.
+	if movement_component:
+		movement_component.stop()

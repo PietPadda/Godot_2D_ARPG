@@ -44,18 +44,25 @@ func request_scene_transition(scene_path: String, player_id: int) -> void:
 	# Server Log
 	print("[SERVER] Received request from player %s to transition to scene: %s" % [player_id, scene_path])
 	
-	# Before doing anything else, tell the current level to
-	# gracefully shut down all synchronizers.
+	# "Pencils Down": Tell all clients to freeze their players.
+	var all_player_ids = GameManager.active_players.keys()
+	for p_id in all_player_ids:
+		var player_node = GameManager.get_player(p_id)
+		if is_instance_valid(player_node):
+			player_node.client_prepare_for_transition.rpc_id(p_id)
+	
+	# "Go Dark": Now that clients are frozen, tell the current level
+	# to gracefully shut down all network synchronizers.
 	if is_instance_valid(current_level):
 		current_level.shutdown_network_sync_for_transition()
 		
 	print("[SERVER] Initiating transition...")
 	
-	# Persist player data (this is still necessary).
-	GameManager.carry_player_data_for_all() # This should be updated slightly
+	# Save Data: Gather all player data.
+	GameManager.carry_player_data_for_all()
 	
-	# Use call_deferred to give the queue_free calls a frame to process
-	# before we broadcast the command to load the new scene.
+	# Change Scene: Use call_deferred to give the shutdown a frame to complete
+	# before broadcasting the command to load the new scene.
 	transition_to_scene.rpc.call_deferred(scene_path)
 	
 # This RPC is called BY the server ON all clients to execute the change.
