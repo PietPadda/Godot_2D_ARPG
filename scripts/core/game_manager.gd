@@ -162,11 +162,41 @@ func get_player(player_id: int) -> Node:
 func send_transition_data_to_player(player_id: int):
 	# Make sure we actually have a player and data for this ID.
 	if all_players_transition_data.has(player_id) and active_players.has(player_id):
-		var player_data = all_players_transition_data[player_id]
+		var player_data: SaveData = all_players_transition_data[player_id]
 		var player_node = active_players[player_id]
 		
-		# We found their data! Send it to them using our existing RPC.
-		player_node.client_apply_transition_data.rpc_id(player_id, player_data)
+		# dynamic dictionary creation
+		var stats_dictionary = {}
+		var stats_resource = player_data.player_stats_data
+		
+		# Ask the stats resource for all of its properties.
+		for prop in stats_resource.get_property_list():
+			# We only want to save properties that are meant for storage (our @export vars).
+			if prop.usage & PROPERTY_USAGE_STORAGE:
+				var prop_name = prop.name
+				stats_dictionary[prop_name] = stats_resource.get(prop_name)
+
+		var data_dictionary = {
+			"stats_data": stats_dictionary, # Use our dynamically created dictionary
+			"inventory_items": [],
+			"equipped_items": {},
+			"current_health": player_data.current_health,
+			"current_mana": player_data.current_mana
+		}
+
+		# For items, we only send their resource path (a string), not the whole object.
+		for item in player_data.player_inventory_data.items:
+			data_dictionary["inventory_items"].append(item.resource_path)
+			
+		for slot in player_data.player_equipment_data.equipped_items:
+			var item = player_data.player_equipment_data.equipped_items[slot]
+			if is_instance_valid(item):
+				data_dictionary["equipped_items"][slot] = item.resource_path
+			else:
+				data_dictionary["equipped_items"][slot] = null
+
+		# We found their data! Send the DICTIONARY to them using our RPC.
+		player_node.client_apply_transition_data.rpc_id(player_id, data_dictionary)
 		
 		# Remove the data after sending to prevent re-applying it and to clean up.
 		all_players_transition_data.erase(player_id)
