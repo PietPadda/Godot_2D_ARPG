@@ -232,6 +232,12 @@ func shutdown_network_sync_for_transition():
 			# ...tell every peer (including the server) to stop seeing them.
 			for peer_id in all_peers:
 				_rpc_force_visibility_update.rpc(player.get_path(), peer_id, false)
+				
+			var sync = player.get_node_or_null("MultiplayerSynchronizer")
+			if is_instance_valid(sync):
+				# For the server itself (peer_id 1), update visibility LOCALLY and IMMEDIATELY.
+				# This avoids the host sending an RPC to itself, fixing the race condition.
+				sync.set_visibility_for(1, false)
 
 	# THE FIX: Also hide all enemies from everyone.
 	# This prevents the "ERR_UNAUTHORIZED" spam on despawn.
@@ -241,6 +247,12 @@ func shutdown_network_sync_for_transition():
 			for peer_id in all_peers:
 				_rpc_force_visibility_update.rpc(enemy.get_path(), peer_id, false)
 				
+			var sync = enemy.get_node_or_null("MultiplayerSynchronizer")
+			if is_instance_valid(sync):
+				# For the server itself (peer_id 1), update visibility LOCALLY and IMMEDIATELY.
+				# This avoids the host sending an RPC to itself, fixing the race condition.
+				sync.set_visibility_for(1, false)
+				
 	# Hide all projectiles
 	var projectile_container = get_node_or_null("ProjectileContainer")
 	if is_instance_valid(projectile_container):
@@ -248,9 +260,21 @@ func shutdown_network_sync_for_transition():
 			for peer_id in all_peers:
 				_rpc_force_visibility_update.rpc(projectile.get_path(), peer_id, false)
 				
+			var sync = projectile.get_node_or_null("MultiplayerSynchronizer")
+			if is_instance_valid(sync):
+				# For the server itself (peer_id 1), update visibility LOCALLY and IMMEDIATELY.
+				# This avoids the host sending an RPC to itself, fixing the race condition.
+				sync.set_visibility_for(1, false)
+				
 	# Hide all loot
 	var loot_container = get_node_or_null("LootContainer")
 	if is_instance_valid(loot_container):
 		for loot in loot_container.get_children():
 			for peer_id in all_peers:
 				_rpc_force_visibility_update.rpc(loot.get_path(), peer_id, false)
+				
+			var sync = loot.get_node_or_null("MultiplayerSynchronizer")
+			if is_instance_valid(sync):
+				# For the server itself (peer_id 1), update visibility LOCALLY and IMMEDIATELY.
+				# This avoids the host sending an RPC to itself, fixing the race condition.
+				sync.set_visibility_for(1, false)
