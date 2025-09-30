@@ -142,10 +142,6 @@ func _on_loot_drop_requested(loot_table: LootTableData, position: Vector2) -> vo
 	var item_to_drop = loot_table.get_drop()
 
 	if item_to_drop and not item_to_drop.resource_path.is_empty():
-		# --- DEBUG TRACE ---
-		# Log the exact resource path the server is about to send in the RPC.
-		print("[SERVER] Spawning loot. Item Path to send: '", item_to_drop.resource_path, "'")
-		
 		var loot_instance = LootDropScene.instantiate()
 		
 		# Configure the node's synced properties BEFORE adding it to the scene.
@@ -215,3 +211,26 @@ func _rpc_force_visibility_update(node_path: NodePath, for_peer_id: int, is_visi
 	var sync = node.get_node_or_null("MultiplayerSynchronizer")
 	if is_instance_valid(sync):
 		sync.set_visibility_for(for_peer_id, is_visible)
+
+# This function is called by the SceneManager right before a transition.
+# It tells all clients to make all player synchronizers invisible to prevent
+# errors during the scene change.
+func hide_all_players_for_transition():
+	# This must only be run on the server.
+	if not multiplayer.is_server():
+		return
+		
+	print("[SERVER] Hiding all player synchronizers for scene transition...")
+
+	var all_peers = multiplayer.get_peers()
+	all_peers.append(1) # Include the server itself
+
+	var player_container = get_node_or_null("PlayerContainer")
+	if not is_instance_valid(player_container):
+		return
+
+	# For every player currently in the scene...
+	for player in player_container.get_children():
+		# ...tell every peer (including the server) to stop seeing them.
+		for peer_id in all_peers:
+			_rpc_force_visibility_update.rpc(player.get_path(), peer_id, false)

@@ -167,7 +167,6 @@ func send_transition_data_to_player(player_id: int):
 		
 		# We found their data! Send it to them using our existing RPC.
 		player_node.client_apply_transition_data.rpc_id(player_id, player_data)
-		print(player_data)
 		
 		# Remove the data after sending to prevent re-applying it and to clean up.
 		all_players_transition_data.erase(player_id)
