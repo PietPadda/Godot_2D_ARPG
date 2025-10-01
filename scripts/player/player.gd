@@ -188,7 +188,8 @@ func client_apply_transition_data(data: Dictionary):
 		
 	# Re-add items to the main inventory.
 	for item_path in data["inventory_items"]:
-		var item_resource = load(item_path)
+		# THE FIX: Use the database instead of load()
+		var item_resource = ItemDatabase.get_item(item_path)
 		if is_instance_valid(item_resource):
 			inventory_component.inventory_data.items.append(item_resource)
 		
@@ -198,7 +199,8 @@ func client_apply_transition_data(data: Dictionary):
 		# The dictionary keys are strings from JSON, so we convert them back to int for the slot.
 		var slot_index = int(slot_str) 
 		if item_path != null:
-			var item_resource = load(item_path)
+			# THE FIX: Use the database instead of load()
+			var item_resource = ItemDatabase.get_item(item_path)
 			if is_instance_valid(item_resource):
 				equipment_component.equipment_data.equipped_items[slot_index] = item_resource
 
