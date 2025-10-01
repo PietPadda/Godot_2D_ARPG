@@ -19,6 +19,8 @@ const LootDropScene = preload("res://scenes/items/loot_drop.tscn")
 var player_spawn_points: Array = []
 var current_player_spawn_index: int = 0
 
+var _peers_ready_in_level := []
+
 func _ready() -> void:
 	# Announce to our new service that this is the active level.
 	LevelManager.register_active_level(self)
@@ -89,9 +91,38 @@ func _spawn_player(id: int):
 	# We call the RPC on the client to ensure its local position is set correctly.
 	player.set_initial_position.rpc_id(id, spawn_position)
 	
-	# We no longer need to await. We will use call_deferred to ensure the
-	# player node exists everywhere before we start the handshake.
-	call_deferred("_perform_handshake_for_player", id)
+	# REMOVED: We no longer call the handshake from here. This prevents the race condition.
+	# call_deferred("_perform_handshake_for_player", id)
+	
+# This is our new, robust handshake function.
+func _perform_global_handshake():
+	var container = get_node_or_null("PlayerContainer")
+	if not is_instance_valid(container): return
+	
+	var players_in_this_scene = container.get_children()
+	
+	# For every combination of players in THIS scene, make them visible to each other.
+	for player1 in players_in_this_scene:
+		for player2 in players_in_this_scene:
+			var p1_id = int(player1.name)
+			var p2_id = int(player2.name)
+			
+			# Tell player2's client that it can now see player1
+			_rpc_force_visibility_update.rpc(player1.get_path(), p2_id, true)
+			# Tell player1's client that it can now see player2.
+			_rpc_force_visibility_update.rpc(player2.get_path(), p1_id, true)
+			
+	# Enemy-to-Player Handshake
+	var enemy_container = get_node_or_null("EnemyContainer")
+	if is_instance_valid(enemy_container):
+		var enemies_in_this_scene = enemy_container.get_children()
+		
+		# For every player who is now in the scene...
+		for player in players_in_this_scene:
+			var player_id = int(player.name)
+			# ...make every enemy visible to them.
+			for enemy in enemies_in_this_scene:
+				_rpc_force_visibility_update.rpc(enemy.get_path(), player_id, true)
 	
 func _perform_handshake_for_player(new_player_id: int) -> void:
 	var container = get_node_or_null("PlayerContainer")
@@ -183,22 +214,27 @@ func server_process_projectile_hit(projectile_path: NodePath, target_path: NodeP
 	# The server authoritatively destroys the projectile after the hit is processed.
 	projectile.queue_free()
 	
-# This RPC is the single entry point for making the world visible. Runs ONLY on the server.
+# This RPC is the single entry point for making the world visible.
+# This RPC is now our gatekeeper for the handshake.
 @rpc("any_peer", "call_local", "reliable")
 func server_peer_ready(id: int):
 	if not multiplayer.is_server(): 
 		return
-		
-	# DEBUG: Trace when a peer reports that it has loaded the level.
-	print("[HOST] server_peer_ready: Received 'ready' signal from peer: %s. Spawning their character." % id)
-
-	print("[SERVER] Peer %s confirmed level is loaded. Revealing world..." % id)
 	
-	# THIS IS THE CHANGE: We remove the loop from this function.
-	# The _spawn_player function will now handle ALL visibility setup.
-			
-	# Finally, spawn the player character FOR the peer that just reported ready.
+	# Spawn the player as soon as they report ready.
 	_spawn_player(id)
+		
+	# Add the player to our headcount for this level.
+	if not id in _peers_ready_in_level:
+		_peers_ready_in_level.append(id)
+	
+	print("[SERVER] Peers ready in this level: ", _peers_ready_in_level)
+	
+	# Check if everyone has arrived.
+	if _peers_ready_in_level.size() == multiplayer.get_peers().size() + 1: # +1 for the server
+		print("[SERVER] All peers have loaded the level. Performing global handshake.")
+		# Use call_deferred to ensure the last player has a frame to fully spawn.
+		call_deferred("_perform_global_handshake")
 	
 # This RPC is a COMMAND from the server to a client telling it
 # to update the visibility of a specific node's synchronizer.
