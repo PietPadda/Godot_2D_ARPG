@@ -211,8 +211,10 @@ func send_transition_data_to_player(player_id: int):
 			
 		for slot in player_data.player_equipment_data.equipped_items:
 			var item = player_data.player_equipment_data.equipped_items[slot]
+			print("item %s to equip for slot %s:" % [item, slot])
 			if is_instance_valid(item):
 				data_dictionary["equipped_items"][slot] = item.resource_path
+				print("path %s to slot %s:" % [item.resource_path, data_dictionary["equipped_items"][slot]])
 			else:
 				data_dictionary["equipped_items"][slot] = null
 
