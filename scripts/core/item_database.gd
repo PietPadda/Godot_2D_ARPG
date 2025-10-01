@@ -31,3 +31,10 @@ func _scan_for_items(path: String) -> void:
 # The global function to get an item from the database.
 func get_item(path: String) -> ItemData:
 	return items_by_path.get(path, null)
+
+# Finds the original resource path of an item by its unique name.
+func find_item_path_by_name(name: String) -> String:
+	for path in items_by_path:
+		if items_by_path[path].item_name == name:
+			return path
+	return "" # Return empty string if not found

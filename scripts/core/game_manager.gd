@@ -3,6 +3,9 @@ extends Node
 
 const SAVE_PATH = "user://savegame.tres"
 
+# We need a reference to our new database.
+@onready var item_database: Node = get_node("/root/ItemDatabase")
+
 # Preloading the Player script ensures Godot knows about the "Player" type
 # when it parses the rest of this file.
 const Player = preload("res://scripts/player/player.gd")
@@ -207,16 +210,25 @@ func send_transition_data_to_player(player_id: int):
 
 		# For items, we only send their resource path (a string), not the whole object.
 		for item in player_data.player_inventory_data.items:
-			data_dictionary["inventory_items"].append(item.resource_path)
+			# Find the original resource path by looking up the item's name in our database.
+			var original_path = item_database.find_item_path_by_name(item.item_name)
+			if not original_path.is_empty():
+				data_dictionary["inventory_items"].append(original_path)
 			
 		for slot in player_data.player_equipment_data.equipped_items:
 			var item = player_data.player_equipment_data.equipped_items[slot]
 			print("item %s to equip for slot %s:" % [item, slot])
 			if is_instance_valid(item):
-				data_dictionary["equipped_items"][slot] = item.resource_path
+				# Do the same lookup for equipped items.
+				var original_path = item_database.find_item_path_by_name(item.item_name)
+				if not original_path.is_empty():
+					data_dictionary["equipped_items"][slot] = original_path
+				else:
+					data_dictionary["equipped_items"][slot] = null
 				print("path %s to slot %s:" % [item.resource_path, data_dictionary["equipped_items"][slot]])
 			else:
 				data_dictionary["equipped_items"][slot] = null
+				print("Slot %s Item is null!" % [slot])
 
 		# We found their data! Send the DICTIONARY to them using our RPC.
 		player_node.client_apply_transition_data.rpc_id(player_id, data_dictionary)
