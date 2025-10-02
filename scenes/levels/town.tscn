@@ -37,6 +37,8 @@ position = Vector2(1270, 152)
 [node name="PlayerSpawner" type="MultiplayerSpawner" parent="."]
 _spawnable_scenes = PackedStringArray("uid://c04jx6vcgex1j")
 spawn_path = NodePath("../PlayerContainer")
+
+[node name="Node" type="Node" parent="PlayerSpawner"]
 script = ExtResource("7_n8lao")
 
 [node name="PlayerContainer" type="Node2D" parent="."]

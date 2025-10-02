@@ -36,7 +36,7 @@ func change_scene(scene_path: String, target_spawn_position: Vector2 = Vector2.I
 # --- RPCs ---
 # This function can be called by any client, but will only run on the server (peer 1).
 @rpc("any_peer", "call_local")
-func request_scene_transition(scene_path: String, player_id: int) -> void:
+func request_scene_transition(scene_path: String, player_id: int, player_data: Dictionary) -> void:
 	# This is a guard clause. If a non-server peer somehow tries to run this, stop.
 	if not multiplayer.is_server():
 		return
@@ -44,22 +44,24 @@ func request_scene_transition(scene_path: String, player_id: int) -> void:
 	# Server Log
 	print("[SERVER] Received request from player %s to transition to scene: %s" % [player_id, scene_path])
 	
-	# "Pencils Down": Tell all clients to freeze their players.
-	var all_player_ids = GameManager.active_players.keys()
-	for p_id in all_player_ids:
-		var player_node = GameManager.get_player(p_id)
-		if is_instance_valid(player_node):
-			player_node.client_prepare_for_transition.rpc_id(p_id)
+	# Clear any old data from a previous transition.
+	GameManager.all_players_transition_data.clear()
 	
-	# "Go Dark": Now that clients are frozen, tell the current level
-	# to gracefully shut down all network synchronizers.
-	if is_instance_valid(current_level):
-		current_level.shutdown_network_sync_for_transition()
+	# Store the CORRECT data that the client just sent us.
+	GameManager.all_players_transition_data[player_id] = player_data
+	
+	# If the host is not the one transitioning, it still needs to save its own data.
+	# We find the host's node and use our new, unified function.
+	if player_id != 1:
+		var host_player_node = GameManager.get_player(1)
+		var host_data_dictionary = GameManager.get_player_data_as_dictionary(host_player_node)
+		GameManager.all_players_transition_data[1] = host_data_dictionary
+		print("[SERVER] Stored host data for transition.")
+	
+	# (We are temporarily removing the "Pencils Down" and "Go Dark" logic to simplify debugging.
+	# We can add it back once the data transfer is confirmed to work.)
 		
-	print("[SERVER] Initiating transition...")
-	
-	# Save Data: Gather all player data.
-	GameManager.carry_player_data_for_all()
+	print("[SERVER] Initiating transition for all players...")
 	
 	# Change Scene: Use call_deferred to give the shutdown a frame to complete
 	# before broadcasting the command to load the new scene.

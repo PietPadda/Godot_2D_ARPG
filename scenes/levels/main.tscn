@@ -72,8 +72,6 @@ position = Vector2(175, -94)
 _spawnable_scenes = PackedStringArray("uid://dg2sqch3jtd3h")
 spawn_path = NodePath("../EnemyContainer")
 
-[node name="Node" type="Node" parent="EnemySpawner"]
-
 [node name="EnemyContainer" type="Node2D" parent="."]
 
 [node name="EnemySpawnPoints" type="Node2D" parent="."]
@@ -625,15 +623,11 @@ position = Vector2(-2887, 899)
 _spawnable_scenes = PackedStringArray("uid://boxuys3wl2v3p")
 spawn_path = NodePath("../LootContainer")
 
-[node name="Node" type="Node" parent="LootSpawner"]
-
 [node name="LootContainer" type="Node2D" parent="."]
 
 [node name="ProjectileSpawner" type="MultiplayerSpawner" parent="."]
 _spawnable_scenes = PackedStringArray("uid://dfce8t7pklgpr")
 spawn_path = NodePath("../ProjectileContainer")
-
-[node name="Node" type="Node" parent="ProjectileSpawner"]
 
 [node name="ProjectileContainer" type="Node2D" parent="."]
 
