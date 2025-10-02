@@ -19,13 +19,18 @@ func _on_body_entered(body: Node2D) -> void:
 	# actually controls their character can trigger the portal action.
 	if body.is_multiplayer_authority():
 		# Instead of calling the RPC directly, we defer a helper function.
-		call_deferred("_request_transition")
+		# Pass the specific player node that entered the portal.
+		call_deferred("_request_transition", body)
 		
 # This new function contains our original RPC call.
-func _request_transition() -> void:
+func _request_transition(player: Node) -> void:
 	print("Player entered portal. Requesting transition to: ", target_scene_path)
 	
-	# Get our unique ID and send an RPC to the server (peer 1)
-		# asking it to handle the scene change.
+	# This client will now gather its own data and send it with the request.
 	var my_id = multiplayer.get_unique_id()
-	Scene.request_scene_transition.rpc_id(1, target_scene_path, my_id)
+	
+	# Ask GameManager to package up the data for us.
+	var data_dictionary = GameManager.get_player_data_as_dictionary(player)
+	
+	# Send the scene path, our ID, and our data package to the server.
+	Scene.request_scene_transition.rpc_id(1, target_scene_path, my_id, data_dictionary)

@@ -111,58 +111,45 @@ func load_game() -> void:
 	get_tree().change_scene_to_file("res://scenes/levels/main.tscn")
 	print("Game loaded!")
 	
-# This function is called by the server to gather data from all players.
-func carry_player_data_for_all() -> void:
-	# Clear any old data first.
-	all_players_transition_data.clear()
-	print("[SERVER] carry_player_data_for_all: Checking active player registry: ", active_players.keys())
-	
-	# Instead of searching the whole tree, we look inside the current level.
-	var level = Scene.current_level
-	if  not is_instance_valid(level): 
-		print("[SERVER ERROR] carry_player_data_for_all: Could not find a valid level!")
-		return
-	
-	# --- DEBUG PRINT ---
-	var players_in_scene = level.get_tree().get_nodes_in_group("player")
-	print("[SERVER] carry_player_data_for_all: Found the following player nodes: ", players_in_scene)
-	# --- END DEBUG ---
-	
-	# Find all nodes in the "player" group within the current level.
-	for player in level.get_tree().get_nodes_in_group("player"):
-		var player_id = int(player.name)
-		var data = SaveData.new() # Create a new data container.
+# NEW: This is now our single function for packaging up any player's data.
+func get_player_data_as_dictionary(player_node: Node) -> Dictionary:
+	if not is_instance_valid(player_node):
+		return {}
 		
-		# Populate the data from the player's components.
-		data.player_stats_data = player.stats_component.stats_data
-		data.current_health = player.stats_component.current_health
-		data.current_mana = player.stats_component.current_mana
-		data.player_inventory_data = player.inventory_component.inventory_data
-		data.player_equipment_data = player.equipment_component.equipment_data
-		
-		# --- DETAILED LOGGING FOR DATA GATHERING ---
-		print("    [GATHER] For Player %s:" % player_id)
-		print("        - Current XP: %s" % data.player_stats_data.current_xp)
-		var equipped_items_log = {}
-		for slot in data.player_equipment_data.equipped_items:
-			var item = data.player_equipment_data.equipped_items[slot]
-			if is_instance_valid(item):
-				equipped_items_log[slot] = item.item_name
-			else:
-				equipped_items_log[slot] = "None"
-		print("        - Equipped Items: ", equipped_items_log)
-		# --- END LOGGING --
-		
-		# If this player is the one who used the portal, save their target spawn position.
-		if player_id == requesting_player_id:
-			data.target_spawn_position = target_spawn_position
-			
-		# Store the populated data in our dictionary.
-		all_players_transition_data[player_id] = data
+	# Use the same dictionary logic from GameManager to build the data package.
+	var stats_res = player_node.stats_component.stats_data
+	var inventory_res = player_node.inventory_component.inventory_data
+	var equipment_res = player_node.equipment_component.equipment_data
+
+	var stats_dict = {}
+	for prop in stats_res.get_property_list():
+		if prop.usage & PROPERTY_USAGE_STORAGE and prop.name != "script":
+			stats_dict[prop.name] = stats_res.get(prop.name)
+
+	var inv_items_paths = []
+	for item in inventory_res.items:
+		if is_instance_valid(item): inv_items_paths.append(item.resource_path)
+
+	var equipped_items_paths = {}
+	for slot in equipment_res.equipped_items:
+		var item = equipment_res.equipped_items[slot]
+		if is_instance_valid(item): equipped_items_paths[slot] = item.resource_path
 	
-	# --- DEBUG PRINT ---
-	print("[SERVER] carry_player_data_for_all: Stored data for player IDs: ", all_players_transition_data.keys())
-	# --- END DEBUG ---
+	var data_dictionary = {
+		"stats_data": stats_dict,
+		"inventory_items": inv_items_paths,
+		"equipped_items": equipped_items_paths,
+		"current_health": player_node.stats_component.current_health,
+		"current_mana": player_node.stats_component.current_mana,
+	}
+	
+	# Add the target spawn position logic here.
+	if int(player_node.name) == requesting_player_id:
+		data_dictionary["target_spawn_position"] = target_spawn_position
+	else:
+		data_dictionary["target_spawn_position"] = Vector2.INF
+		
+	return data_dictionary
 		
 func register_player(player_node: Node) -> void:
 	var player_id = int(player_node.name)
@@ -185,83 +172,34 @@ func unregister_player(player_node: Node) -> void:
 func get_player(player_id: int) -> Node:
 	return active_players.get(player_id, null)
 	
-# This is called by the player's RPC.
+# This is called by the player's RPC after they have loaded into the new scene.
 func send_transition_data_to_player(player_id: int):
-	# --- DEBUG PRINT ---
 	print("[SERVER] Received a request to send transition data to player ID: ", player_id)
-	# --- END DEBUG ---
 	
 	# Make sure we actually have a player and data for this ID.
 	if all_players_transition_data.has(player_id) and active_players.has(player_id):
-		# --- DEBUG PRINT ---
 		print("[SERVER] SUCCESS: Found data and active player node for ID: ", player_id, ". Sending now.")
-		# --- END DEBUG ---
 		
-		var player_data: SaveData = all_players_transition_data[player_id]
 		var player_node = active_players[player_id]
 		
-		# dynamic dictionary creation
-		var stats_dictionary = {}
-		var stats_resource = player_data.player_stats_data
+		# THE FIX: Directly get the DICTIONARY that was already prepared and stored.
+		# The line that tried to treat this as a SaveData object is the source of the crash and is removed.
+		var data_dictionary = all_players_transition_data[player_id]
 		
-		# Ask the stats resource for all of its properties.
-		for prop in stats_resource.get_property_list():
-			# We only want to save properties that are meant for storage (our @export vars).
-			if prop.usage & PROPERTY_USAGE_STORAGE:
-				var prop_name = prop.name
-				# THE FIX: Skip the "script" property to prevent the RPC error.
-				if prop_name == "script":
-					continue
-				stats_dictionary[prop_name] = stats_resource.get(prop_name)
+		# This debug print is still useful to verify the data being sent.
+		print("[SERVER] Data dictionary being sent to player %s: " % player_id, JSON.stringify(data_dictionary, "\t", false))
 
-		var data_dictionary = {
-			"stats_data": stats_dictionary, # Use our dynamically created dictionary
-			"inventory_items": [],
-			"equipped_items": {},
-			"current_health": player_data.current_health,
-			"current_mana": player_data.current_mana
-		}
-		
-		# --- DETAILED LOGGING FOR DATA SENDING ---
-		print("[SERVER] Data dictionary being sent to player %s: " % player_id)
-		print(JSON.stringify(data_dictionary, "\t", false))
-		# --- END LOGGING ---
-
-		# For items, we only send their resource path (a string), not the whole object.
-		for item in player_data.player_inventory_data.items:
-			# Find the original resource path by looking up the item's name in our database.
-			var original_path = item_database.find_item_path_by_name(item.item_name)
-			if not original_path.is_empty():
-				data_dictionary["inventory_items"].append(original_path)
-			
-		for slot in player_data.player_equipment_data.equipped_items:
-			var item = player_data.player_equipment_data.equipped_items[slot]
-			print("item %s to equip for slot %s:" % [item, slot])
-			if is_instance_valid(item):
-				# Do the same lookup for equipped items.
-				var original_path = item_database.find_item_path_by_name(item.item_name)
-				if not original_path.is_empty():
-					data_dictionary["equipped_items"][slot] = original_path
-				else:
-					data_dictionary["equipped_items"][slot] = null
-				print("path %s to slot %s:" % [item.resource_path, data_dictionary["equipped_items"][slot]])
-			else:
-				data_dictionary["equipped_items"][slot] = null
-				print("Slot %s Item is null!" % [slot])
-
-		# We found their data! Send the DICTIONARY to them using our RPC.
+		# Send the dictionary via RPC.
 		player_node.client_apply_transition_data.rpc_id(player_id, data_dictionary)
 		
-		# Remove the data after sending to prevent re-applying it and to clean up.
+		# Clean up the data after it's been sent.
 		all_players_transition_data.erase(player_id)
 	else:
-		# --- DEBUG PRINT ---
 		print("[SERVER] FAILURE: Could not send data to player ID: ", player_id)
 		if not all_players_transition_data.has(player_id):
-			print("    - Reason: No transition data was stored for this ID.")
+			print("     - Reason: No transition data was stored for this ID.")
 		if not active_players.has(player_id):
-			print("    - Reason: This player is not registered as active in the new scene.")
-		# --- END DEBUG ---
+			print("     - Reason: This player is not registered as active in the new scene.")
 
 # -- Signal Handlers --
 # This function is called by the EventBus when the player is ready.
