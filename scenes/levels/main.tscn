@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=4 uid="uid://cys1ord7jy672"]
+[gd_scene load_steps=9 format=4 uid="uid://cys1ord7jy672"]
 
 [ext_resource type="Script" uid="uid://dyk4hmsc77wwb" path="res://scripts/levels/main.gd" id="1_y0acb"]
 [ext_resource type="Resource" uid="uid://ceqwwvcv6s88b" path="res://data/audio/dungeon_theme.tres" id="2_b6bv0"]
@@ -7,6 +7,7 @@
 [ext_resource type="TileSet" uid="uid://c02d7kxsulago" path="res://assets/tilesets/dungeon_tileset.tres" id="5_u81e1"]
 [ext_resource type="Script" uid="uid://cnaw13i3kkeka" path="res://scripts/tools/WallSyncTool.gd" id="5_ubwgw"]
 [ext_resource type="PackedScene" uid="uid://dmnp50wydxhid" path="res://scenes/world/portal.tscn" id="7_ubwgw"]
+[ext_resource type="Script" uid="uid://drmt7kwaxrnox" path="res://scripts/tools/spawner_monitor.gd" id="8_vkq25"]
 
 [node name="Main" type="Node2D" node_paths=PackedStringArray("floor_tilemap", "wall_tilemap")]
 y_sort_enabled = true
@@ -48,6 +49,9 @@ target_scene_path = "uid://d3xic0inlmby0"
 _spawnable_scenes = PackedStringArray("uid://c04jx6vcgex1j")
 spawn_path = NodePath("../PlayerContainer")
 
+[node name="Node" type="Node" parent="PlayerSpawner"]
+script = ExtResource("8_vkq25")
+
 [node name="PlayerContainer" type="Node2D" parent="."]
 
 [node name="PlayerSpawnPoints" type="Node2D" parent="."]
@@ -67,6 +71,8 @@ position = Vector2(175, -94)
 [node name="EnemySpawner" type="MultiplayerSpawner" parent="."]
 _spawnable_scenes = PackedStringArray("uid://dg2sqch3jtd3h")
 spawn_path = NodePath("../EnemyContainer")
+
+[node name="Node" type="Node" parent="EnemySpawner"]
 
 [node name="EnemyContainer" type="Node2D" parent="."]
 
@@ -619,11 +625,15 @@ position = Vector2(-2887, 899)
 _spawnable_scenes = PackedStringArray("uid://boxuys3wl2v3p")
 spawn_path = NodePath("../LootContainer")
 
+[node name="Node" type="Node" parent="LootSpawner"]
+
 [node name="LootContainer" type="Node2D" parent="."]
 
 [node name="ProjectileSpawner" type="MultiplayerSpawner" parent="."]
 _spawnable_scenes = PackedStringArray("uid://dfce8t7pklgpr")
 spawn_path = NodePath("../ProjectileContainer")
+
+[node name="Node" type="Node" parent="ProjectileSpawner"]
 
 [node name="ProjectileContainer" type="Node2D" parent="."]
 

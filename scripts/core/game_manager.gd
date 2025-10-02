@@ -115,6 +115,7 @@ func load_game() -> void:
 func carry_player_data_for_all() -> void:
 	# Clear any old data first.
 	all_players_transition_data.clear()
+	print("[SERVER] carry_player_data_for_all: Checking active player registry: ", active_players.keys())
 	
 	# Instead of searching the whole tree, we look inside the current level.
 	var level = Scene.current_level
@@ -138,6 +139,19 @@ func carry_player_data_for_all() -> void:
 		data.current_mana = player.stats_component.current_mana
 		data.player_inventory_data = player.inventory_component.inventory_data
 		data.player_equipment_data = player.equipment_component.equipment_data
+		
+		# --- DETAILED LOGGING FOR DATA GATHERING ---
+		print("    [GATHER] For Player %s:" % player_id)
+		print("        - Current XP: %s" % data.player_stats_data.current_xp)
+		var equipped_items_log = {}
+		for slot in data.player_equipment_data.equipped_items:
+			var item = data.player_equipment_data.equipped_items[slot]
+			if is_instance_valid(item):
+				equipped_items_log[slot] = item.item_name
+			else:
+				equipped_items_log[slot] = "None"
+		print("        - Equipped Items: ", equipped_items_log)
+		# --- END LOGGING --
 		
 		# If this player is the one who used the portal, save their target spawn position.
 		if player_id == requesting_player_id:
@@ -207,6 +221,11 @@ func send_transition_data_to_player(player_id: int):
 			"current_health": player_data.current_health,
 			"current_mana": player_data.current_mana
 		}
+		
+		# --- DETAILED LOGGING FOR DATA SENDING ---
+		print("[SERVER] Data dictionary being sent to player %s: " % player_id)
+		print(JSON.stringify(data_dictionary, "\t", false))
+		# --- END LOGGING ---
 
 		# For items, we only send their resource path (a string), not the whole object.
 		for item in player_data.player_inventory_data.items:
