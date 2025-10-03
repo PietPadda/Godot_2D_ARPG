@@ -241,3 +241,21 @@ func client_prepare_for_transition():
 	# Also explicitly stop any movement.
 	if movement_component:
 		movement_component.stop()
+		
+# RPC called BY the server ON a client, asking for their data.
+@rpc("authority", "call_local", "reliable")
+func client_gather_and_send_data():
+	# This client has been asked for its data. Gather it now.
+	var data_dictionary = GameManager.get_player_data_as_dictionary(self)
+	# Send the data back to the server.
+	server_receive_data.rpc_id(1, multiplayer.get_unique_id(), data_dictionary)
+
+# RPC called BY a client ON the server, delivering the requested data.
+@rpc("any_peer", "call_local", "reliable")
+func server_receive_data(player_id: int, player_data: Dictionary):
+	if not multiplayer.is_server():
+		return
+	
+	# The server has received the data from a client and stores it.
+	GameManager.all_players_transition_data[player_id] = player_data
+	print("[SERVER] Received and stored data from client %s." % player_id)

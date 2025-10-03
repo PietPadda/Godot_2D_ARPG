@@ -29,9 +29,7 @@ func change_scene(scene_path: String, target_spawn_position: Vector2 = Vector2.I
 	get_tree().call_deferred("change_scene_to_file", scene_path)
 	
 # --- Private Functions ---
-# THE FIX: Delete this entire function. It is no longer needed.
-# func _clear_persistent_containers():
-# 	# ... (all of this code can be remove
+
 
 # --- RPCs ---
 # This function can be called by any client, but will only run on the server (peer 1).
@@ -50,18 +48,22 @@ func request_scene_transition(scene_path: String, player_id: int, player_data: D
 	# Store the CORRECT data that the client just sent us.
 	GameManager.all_players_transition_data[player_id] = player_data
 	
-	# If the host is not the one transitioning, it still needs to save its own data.
-	# We find the host's node and use our new, unified function.
-	if player_id != 1:
-		var host_player_node = GameManager.get_player(1)
-		var host_data_dictionary = GameManager.get_player_data_as_dictionary(host_player_node)
-		GameManager.all_players_transition_data[1] = host_data_dictionary
-		print("[SERVER] Stored host data for transition.")
-	
-	# (We are temporarily removing the "Pencils Down" and "Go Dark" logic to simplify debugging.
-	# We can add it back once the data transfer is confirmed to work.)
+	# For all OTHER players, REQUEST their data.
+	for p_id in GameManager.active_players:
+		# Skip the player who already sent their data.
+		if p_id == player_id:
+			continue
 		
-	print("[SERVER] Initiating transition for all players...")
+		var other_player_node = GameManager.get_player(p_id)
+		if is_instance_valid(other_player_node):
+			# Send an RPC asking this player to send their data back.
+			other_player_node.client_gather_and_send_data.rpc_id(p_id)
+	
+	# Wait a moment for the data RPCs to arrive before continuing.
+	# This is a simple and reliable way to handle the network delay.
+	await get_tree().create_timer(0.2).timeout
+	
+	print("[SERVER] All data gathered. Initiating transition for all players...")
 	
 	# Change Scene: Use call_deferred to give the shutdown a frame to complete
 	# before broadcasting the command to load the new scene.
