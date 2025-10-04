@@ -189,6 +189,8 @@ func send_transition_data_to_player(player_id: int):
 		# This debug print is still useful to verify the data being sent.
 		print("[SERVER] Data dictionary being sent to player %s: " % player_id, JSON.stringify(data_dictionary, "\t", false))
 
+		# THE FIX: Update the server's local puppet with the data first.
+		player_node._apply_data_dictionary(data_dictionary)
 		# Send the dictionary via RPC.
 		player_node.client_apply_transition_data.rpc_id(player_id, data_dictionary)
 		
