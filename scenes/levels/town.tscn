@@ -1,8 +1,7 @@
-[gd_scene load_steps=8 format=4 uid="uid://d3xic0inlmby0"]
+[gd_scene load_steps=7 format=4 uid="uid://d3xic0inlmby0"]
 
 [ext_resource type="Script" uid="uid://brrmrbxhxogiy" path="res://scripts/levels/town.gd" id="1_6a6b3"]
 [ext_resource type="Resource" uid="uid://dq55lbqvcquuy" path="res://data/audio/town_theme.tres" id="2_3ay17"]
-[ext_resource type="PackedScene" uid="uid://mhkp0k8x04dx" path="res://scenes/ui/HUD.tscn" id="3_ip0dd"]
 [ext_resource type="TileSet" uid="uid://c02d7kxsulago" path="res://assets/tilesets/dungeon_tileset.tres" id="6_5ycnk"]
 [ext_resource type="PackedScene" uid="uid://c3ohkke4ps7j6" path="res://scenes/npcs/shop_npc.tscn" id="7_0x67q"]
 [ext_resource type="Script" uid="uid://drmt7kwaxrnox" path="res://scripts/tools/spawner_monitor.gd" id="7_n8lao"]
@@ -14,8 +13,6 @@ script = ExtResource("1_6a6b3")
 floor_tilemap = NodePath("FloorTileMap")
 wall_tilemap = NodePath("WallTileMap")
 level_music = ExtResource("2_3ay17")
-
-[node name="HUD" parent="." instance=ExtResource("3_ip0dd")]
 
 [node name="FloorTileMap" type="TileMapLayer" parent="."]
 position = Vector2(-10, -10)
