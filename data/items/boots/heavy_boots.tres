@@ -1,0 +1,25 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=6 format=3 uid="uid://bnhpijl1lms8m"]
+
+[ext_resource type="Script" uid="uid://dsidci2l4yr4r" path="res://data/items/item_data.gd" id="1_lvoum"]
+[ext_resource type="Script" uid="uid://cw6u7dqyn8n7w" path="res://data/items/stat_modifier.gd" id="2_dmad4"]
+[ext_resource type="Texture2D" uid="uid://cx6v7w8xnmngx" path="res://assets/items/boots/d2_heavy_boots.png" id="3_lvoum"]
+
+[sub_resource type="Resource" id="Resource_6o8e6"]
+script = ExtResource("2_dmad4")
+stat = 2
+value = 100.0
+metadata/_custom_type_script = "uid://cw6u7dqyn8n7w"
+
+[sub_resource type="Resource" id="Resource_rrjcu"]
+script = ExtResource("2_dmad4")
+stat = 3
+value = 25.0
+metadata/_custom_type_script = "uid://cw6u7dqyn8n7w"
+
+[resource]
+script = ExtResource("1_lvoum")
+item_name = "Heavy Boots"
+texture = ExtResource("3_lvoum")
+equipment_slot = 4
+stat_modifiers = Array[ExtResource("2_dmad4")]([SubResource("Resource_6o8e6"), SubResource("Resource_rrjcu")])
+metadata/_custom_type_script = "uid://dsidci2l4yr4r"

@@ -127,52 +127,9 @@ func apply_persistent_data(data: Resource, is_transition: bool) -> void:
 	var hud = get_tree().get_first_node_in_group("hud")
 	if hud and hud.character_sheet:
 		hud.character_sheet.redraw()
-
-# -- Signal Handlers --
-# This function is called when the StatsComponent emits the "died" signal.
-## Player death function for Player
-func _on_death(_attacker_id: int) -> void:
-	# We tell our state machine to switch to the DeadState.
-	state_machine.change_state(States.PLAYER_STATE_NAMES[States.PLAYER.DEAD])
-	
-	# Create an instance of our Game Over screen.
-	var game_over_instance = GameOverScreen.instantiate()
-	# Add it to the parent (level) scene tree.
-	get_tree().current_scene.add_child(game_over_instance)
-
-# This function is called by the EventBus when the game state changes.
-func _on_game_state_changed(new_state: EventBus.GameState) -> void:
-	# Determine if gameplay should be active based on the new state.
-	var is_gameplay_active: bool = (new_state == EventBus.GameState.GAMEPLAY)
-	
-	# This is the correct way to enable/disable the FSM.
-	state_machine.set_physics_process(is_gameplay_active)
-	state_machine.set_process_unhandled_input(is_gameplay_active)
-
-	# If gameplay is NOT active, we must also ensure the player stops moving.
-	if not is_gameplay_active:
-		if movement_component:
-			movement_component.stop()
-			
-func check_fsm_status():
-	print("--- FSM STATUS CHECK ---")
-	print("Is StateMachine processing physics? ", state_machine.is_physics_processing())
-			
-# -- RPCs ---
-@rpc("any_peer", "call_local")
-func award_xp_rpc(amount: int):
-	# When this RPC is called by the server, award the XP.
-	stats_component.add_xp(amount)
-	
-# This RPC is called by the server on the specific client that owns this player.
-# It sets the character's starting position in the level.
-@rpc("any_peer", "call_local", "reliable")
-func set_initial_position(pos: Vector2):
-	global_position = pos
-
-# This RPC is called BY the server ON a specific client to deliver their data.
-@rpc("any_peer", "call_local", "reliable")
-func client_apply_transition_data(data: Dictionary):
+		
+# This is our new, reusable function that does the actual work.
+func _apply_data_dictionary(data: Dictionary):
 	# We received our data dictionary from the server, now apply it.
 	
 	# dynamic stats application
@@ -218,6 +175,54 @@ func client_apply_transition_data(data: Dictionary):
 	var hud = get_tree().get_first_node_in_group("hud")
 	if hud and is_instance_valid(hud.character_sheet):
 		hud.character_sheet.redraw()
+
+# -- Signal Handlers --
+# This function is called when the StatsComponent emits the "died" signal.
+## Player death function for Player
+func _on_death(_attacker_id: int) -> void:
+	# We tell our state machine to switch to the DeadState.
+	state_machine.change_state(States.PLAYER_STATE_NAMES[States.PLAYER.DEAD])
+	
+	# Create an instance of our Game Over screen.
+	var game_over_instance = GameOverScreen.instantiate()
+	# Add it to the parent (level) scene tree.
+	get_tree().current_scene.add_child(game_over_instance)
+
+# This function is called by the EventBus when the game state changes.
+func _on_game_state_changed(new_state: EventBus.GameState) -> void:
+	# Determine if gameplay should be active based on the new state.
+	var is_gameplay_active: bool = (new_state == EventBus.GameState.GAMEPLAY)
+	
+	# This is the correct way to enable/disable the FSM.
+	state_machine.set_physics_process(is_gameplay_active)
+	state_machine.set_process_unhandled_input(is_gameplay_active)
+
+	# If gameplay is NOT active, we must also ensure the player stops moving.
+	if not is_gameplay_active:
+		if movement_component:
+			movement_component.stop()
+			
+func check_fsm_status():
+	print("--- FSM STATUS CHECK ---")
+	print("Is StateMachine processing physics? ", state_machine.is_physics_processing())
+			
+# -- RPCs ---
+@rpc("any_peer", "call_local")
+func award_xp_rpc(amount: int):
+	# When this RPC is called by the server, award the XP.
+	stats_component.add_xp(amount)
+	
+# This RPC is called by the server on the specific client that owns this player.
+# It sets the character's starting position in the level.
+@rpc("any_peer", "call_local", "reliable")
+func set_initial_position(pos: Vector2):
+	global_position = pos
+
+# This RPC is called BY the server ON a specific client to deliver their data.
+# The RPC function is now just a simple wrapper that calls our new function.
+@rpc("any_peer", "call_local", "reliable")
+func client_apply_transition_data(data: Dictionary):
+	_apply_data_dictionary(data)
 
 # Sent from a client to the server to request transition data.
 @rpc("any_peer", "call_local", "reliable")
