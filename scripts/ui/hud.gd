@@ -69,7 +69,7 @@ func _on_shop_panel_requested() -> void:
 	# Update the game state based on the new visibility.
 	if shop_panel.visible:
 		# If we're opening the panel, tell it to redraw its contents.
-		shop_paneiil.redraw()
+		shop_panel.redraw()
 		EventBus.change_game_state(EventBus.GameState.UI_MODE)
 	else:
 		EventBus.change_game_state(EventBus.GameState.GAMEPLAY)
