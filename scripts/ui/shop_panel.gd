@@ -3,10 +3,6 @@
 class_name ShopPanel
 extends PanelContainer
 
-# --- Signals ---
-# Emitted when the panel is closed, allowing other systems to react.
-signal closed
-
 # --- Scene Nodes ---
 @onready var inventory_panel: PanelContainer = %InventoryPanel
 @onready var gold_label: Label = %GoldLabel
@@ -21,8 +17,6 @@ func _ready() -> void:
 	# Explicitly center the panel to ensure it's always visible.
 	var viewport_size = get_viewport_rect().size
 	self.position = (viewport_size - self.size) / 2.0
-	
-	EventBus.change_game_state(EventBus.GameState.UI_MODE)
 
 # --- Public API ---
 func initialize(inv_comp: InventoryComponent, stats_comp: StatsComponent):
@@ -42,9 +36,9 @@ func initialize(inv_comp: InventoryComponent, stats_comp: StatsComponent):
 	redraw()
 
 # --- Signal Handlers ---
-# This function is automatically called when the CloseButton is pressed.
+# When the "Close" button is pressed, it now emits the same signal as the 'E' key.
 func _on_close_button_pressed() -> void:
-	close_panel()
+	EventBus.shop_panel_requested.emit()
 	
 func _on_inventory_slot_right_clicked(item_data: ItemData):
 	# Sell the item
@@ -55,15 +49,11 @@ func _on_gold_changed(total_gold: int):
 	gold_label.text = "Gold: " + str(total_gold)
 
 # --- Private Methods ---
-# Centralized function for closing the panel. Can be called from other events too (like pressing Escape).
-func close_panel() -> void:
-	# Before closing, it returns control back to the player.
-	EventBus.change_game_state(EventBus.GameState.GAMEPLAY)
-	closed.emit() # emit the shop panel is closed
-	queue_free() # This safely removes the UI panel from the game.
+# REMOVED: The close_panel function is no longer needed.
 
 func redraw():
+	# don't redraw if both inventory and stats not there
 	if not is_instance_valid(inventory_component) or not is_instance_valid(stats_component):
 		return
-	inventory_panel.redraw(inventory_component.inventory_data)
-	_on_gold_changed(stats_component.stats_data.gold)
+	inventory_panel.redraw(inventory_component.inventory_data) # redraw panel
+	_on_gold_changed(stats_component.stats_data.gold) # get new gold

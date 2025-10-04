@@ -1,8 +1,8 @@
 # hud.gd
 extends CanvasLayer
 
-# Preload the panel scene we will be creating instances of.
-const ShopPanelScene = preload("res://scenes/ui/shop_panel.tscn")
+# REMOVED: We no longer need to preload the scene.
+# const ShopPanelScene = preload("res://scenes/ui/shop_panel.tscn")
 
 # scene nodes
 @onready var health_bar: ProgressBar = $PlayerHealthBar
@@ -11,14 +11,16 @@ const ShopPanelScene = preload("res://scenes/ui/shop_panel.tscn")
 @onready var mana_label: Label = $PlayerManaBar/ManaLabel # child of manabar
 @onready var xp_bar: ProgressBar = $PlayerXpBar
 @onready var xp_label: Label = $PlayerXpBar/XpLabel # child of xpbar
-@onready var character_sheet = $CharacterSheet
+@onready var character_sheet: PanelContainer = $CharacterSheet
+@onready var shop_panel: PanelContainer = $ShopPanel
+
+var _is_player_in_shop_range := false
 
 func _ready() -> void:
-	# Instead of trying to find the player, we now just listen for the announcement.
 	EventBus.local_player_spawned.connect(_on_local_player_spawned)
-		
-	# The HUD now listens for requests to open the shop.
 	EventBus.shop_panel_requested.connect(_on_shop_panel_requested)
+	EventBus.player_entered_shop_range.connect(func(): _is_player_in_shop_range = true)
+	EventBus.player_exited_shop_range.connect(func(): _is_player_in_shop_range = false)
 
 func _unhandled_input(_event: InputEvent) -> void:
 	# Toggle the character sheet panel's visibility
@@ -28,6 +30,10 @@ func _unhandled_input(_event: InputEvent) -> void:
 		if character_sheet.visible:
 			character_sheet.redraw() # redraw it
 	
+	# E to interact with shop npc
+	if _is_player_in_shop_range and Input.is_action_just_pressed("interact"):
+		_on_shop_panel_requested()
+		
 	# F5 to quick save
 	if Input.is_action_just_pressed("save_game"):
 		GameManager.save_game()
@@ -57,33 +63,26 @@ func on_player_xp_changed(level: int, current_xp: int, xp_to_next_level: int) ->
 	
 # This function runs when the EventBus emits the signal.
 func _on_shop_panel_requested() -> void:
-	# Check if a shop panel already exists as a child of the HUD.
-	var existing_panel = find_child("ShopPanel", true, false)
-	if existing_panel:
-		# If it exists, simply remove it.
-		existing_panel.queue_free()
-		# Also, ensure we return to gameplay state.
-		EventBus.change_game_state(EventBus.GameState.GAMEPLAY)
+	# Toggle the panel's visibility.
+	shop_panel.visible = not shop_panel.visible
+	
+	# Update the game state based on the new visibility.
+	if shop_panel.visible:
+		EventBus.change_game_state(EventBus.GameState.UI_MODE)
 	else:
-		# If it does not exist, create a new one.
-		var shop_panel_instance = ShopPanelScene.instantiate()
-		# Add the panel as a child of the HUD. This is the crucial change.
-		add_child(shop_panel_instance)
-		
-		# Get player components and initialize the shop
-		var player = get_tree().get_first_node_in_group("player")
-		if player:
-			var inv_comp = player.get_node("InventoryComponent")
-			var stats_comp = player.get_node("StatsComponent")
-			shop_panel_instance.initialize(inv_comp, stats_comp)
+		EventBus.change_game_state(EventBus.GameState.GAMEPLAY)
 			
-# This function runs ONLY when the local_player_spawned signal is received.
+# This new function runs ONLY when the local_player_spawned signal is received.
 func _on_local_player_spawned(player: Node) -> void:
-	# THE FIX: Always hide the character sheet when a new level starts.
+	 # Ensure UI panels are hidden on spawn
 	character_sheet.hide()
+	shop_panel.hide()
 	
 	# Now that we have a guaranteed reference to the player, we connect to their stats.
 	var player_stats = player.get_node("StatsComponent")
+	var player_inventory = player.get_node("InventoryComponent")
+	var player_equipment: EquipmentComponent = player.get_node("EquipmentComponent")
+	
 	# Connect our UI update function to the player's signal.
 	player_stats.health_changed.connect(on_player_health_changed)
 	player_stats.mana_changed.connect(on_player_mana_changed)
@@ -94,9 +93,6 @@ func _on_local_player_spawned(player: Node) -> void:
 	on_player_mana_changed(player_stats.current_mana, player_stats.total_max_mana)
 	on_player_xp_changed(player_stats.stats_data.level, player_stats.stats_data.current_xp, player_stats.stats_data.xp_to_next_level)
 	
-	# We only need to pass the components to the character sheet now.
-	var player_inventory = player.get_node("InventoryComponent")
-	var player_equipment: EquipmentComponent = player.get_node("EquipmentComponent")
-	
-	# Call the new, explicit initialize function
+	# Initialize both panels with the player's components.
 	character_sheet.initialize(player_inventory, player_equipment, player_stats)
+	shop_panel.initialize(player_inventory, player_stats)
