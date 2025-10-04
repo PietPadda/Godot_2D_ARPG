@@ -25,6 +25,14 @@ func _ready() -> void:
 	# Announce to our new service that this is the active level.
 	LevelManager.register_active_level(self)
 	
+	# --- Guard Clauses for Editor Properties ---
+	# Ensure TileMaps are assigned before trying to register them.
+	if !is_instance_valid(floor_tilemap) or !is_instance_valid(wall_tilemap):
+		push_error("A floor or wall TileMap has not been assigned to this level in the Inspector!")
+		# We might want to gracefully handle this, but for now, stopping is safest.
+		get_tree().quit() 
+		return
+	
 	# When the level loads, tell the GridManager about our tilemaps.
 	Grid.register_level_tilemaps(floor_tilemap, wall_tilemap)
 	
@@ -34,7 +42,11 @@ func _ready() -> void:
 	# Play the music track that has been assigned in the Inspector.
 	if level_music:
 		Music.play_music(level_music)
-	
+	else:
+		# This isn't a fatal error, but it's good to know if we forgot it.
+		push_warning("No level_music has been assigned to this level in the Inspector.")
+
+	# --- Network Readiness ---
 	# Both host and client will report to the server when they are ready.
 	if multiplayer.is_server():
 		server_peer_ready(1) # The host is always ready for itself.
