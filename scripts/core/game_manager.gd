@@ -34,18 +34,21 @@ func _ready() -> void:
 	NetworkManager.player_disconnected.connect(_on_player_disconnected)
 
 # --- Public API ---
-#  This function grabs the current player's data and stores it for the transition.
+# Grabs the current player's data and stores it in memory for a scene transition.
 ## Save chardata between scene transitions
 func carry_player_data() -> void:
 	var player = get_tree().get_first_node_in_group("player") # get player
-	if not player:
-		push_error("GameManager: Could not find player to carry data.")
-		return
+	if !is_instance_valid(player):
+		push_error("GameManager: Could not find player to carry data for scene transition.")
+		return # CRITICAL: We must stop execution if the player isn't found.
 	
-	# get player's components
+		# Guard Clauses: Validate components before accessing their data.
 	var stats_component: StatsComponent = player.get_node("StatsComponent")
 	var inventory_component: InventoryComponent = player.get_node("InventoryComponent")
 	var equipment_component: EquipmentComponent = player.get_node("EquipmentComponent")
+	if !is_instance_valid(stats_component) or !is_instance_valid(inventory_component) or !is_instance_valid(equipment_component):
+		push_error("carry_player_data failed: Player is missing one or more data components.")
+		return
 	
 	# We create a new SaveData resource to hold the current data.
 	# We use .duplicate() to ensure it's a unique copy.
@@ -65,49 +68,59 @@ func carry_player_data() -> void:
 func save_game() -> void:
 	# get Player for components
 	var player = get_tree().get_first_node_in_group("player")
-	if not player:
-		print("Save failed: Player not found.")
+	if !is_instance_valid(player):
+		push_error("Save failed: Player node not found in the scene.")
 		return
 
-	# get player's components
+	# Guard Clauses: Ensure all required components exist before trying to access their data.
 	var stats_component: StatsComponent = player.get_node("StatsComponent")
 	var inventory_component: InventoryComponent = player.get_node("InventoryComponent")
 	var equipment_component: EquipmentComponent = player.get_node("EquipmentComponent")
 	
+	if !is_instance_valid(stats_component) or !is_instance_valid(inventory_component) or !is_instance_valid(equipment_component):
+		push_error("Save failed: Player is missing one or more data components (Stats, Inventory, or Equipment).")
+		return
+	
 	var save_data = SaveData.new() # define save data
 	
-	# By duplicating the resources, we create a unique snapshot of the player's
-	# data, forcing Godot to save the actual values, not just a link.
+	# Duplicating the resources creates a unique snapshot of the data for saving.
 	save_data.player_stats_data = stats_component.stats_data.duplicate() # update with player stats
 	save_data.player_inventory_data = inventory_component.inventory_data.duplicate() # update with player items
 	save_data.player_equipment_data = equipment_component.equipment_data.duplicate() # update with player eq
 	
+	# ResourceSaver.save() returns an error code, which we can check for success.
 	var error = ResourceSaver.save(save_data, SAVE_PATH) # error check
 	if error == OK: # will not print if save failed or error occured
 		print("Game saved successfully!")
+	else:
+		push_error("An error occurred while saving the game. Error code: %s" % error)
 
 ## Load player's game and restart level
 func load_game() -> void:
-	# check if file actually exists
-	if not FileAccess.file_exists(SAVE_PATH):
-		print("No save file found.")
+	# Guard Clause: Check if the save file actually exists before trying to load it.
+	if !FileAccess.file_exists(SAVE_PATH):
+		push_warning("No save file found at path: %s" % SAVE_PATH)
 		return
 		
 	# Stop the current music before reloading.
 	Music.stop_music()
 
-	# Load the data from the file.
-	var loaded_data: SaveData = ResourceLoader.load(SAVE_PATH)
+	var loaded_resource = ResourceLoader.load(SAVE_PATH)
 	
-	# Create a deep, unique copy of the loaded data.
-	# This breaks the "live link" to the save file resource.
-	if is_instance_valid(loaded_data):
-		loaded_player_data = loaded_data.duplicate(true)
+	# Guard Clause: Verify that the loaded file is a valid SaveData resource.
+	# This prevents crashes from corrupted or incorrect file types.
+	if !loaded_resource is SaveData:
+		push_error("Failed to load game: The file at %s is not a valid SaveData resource." % SAVE_PATH)
+		# Clear any potentially bad data before returning.
+		loaded_player_data = null
+		return
+	
+	# Create a deep, unique copy of the loaded data to break its link to the file.
+	loaded_player_data = loaded_resource.duplicate(true)
 		
-	# After loading, ALWAYS reset the game state to ensure the player has control.
 	EventBus.change_game_state(EventBus.GameState.GAMEPLAY)
 		
-	# Now, reload the entire level. Diablo 2 style!!
+	# Reload the scene to apply the loaded data.
 	get_tree().change_scene_to_file("res://scenes/levels/main.tscn")
 	print("Game loaded!")
 	
@@ -224,15 +237,3 @@ func _on_player_disconnected(player_id: int) -> void:
 	if is_instance_valid(player_node):
 		# Now, unregister them from the central list.
 		unregister_player(player_node)
-		
-# --- RPCs ---
-# RPC called BY a client ON the server, delivering the requested data.
-@rpc("any_peer", "call_local", "reliable")
-func server_receive_client_data(player_id: int, player_data: Dictionary):
-	# This function will only run on the server.
-	if not multiplayer.is_server():
-		return
-	
-	# The server has received the data from a client and stores it.
-	all_players_transition_data[player_id] = player_data
-	print("[SERVER] Received and stored data from client %s." % player_id)
