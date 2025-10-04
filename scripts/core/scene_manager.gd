@@ -42,6 +42,10 @@ func request_scene_transition(scene_path: String, player_id: int, player_data: D
 	# Server Log
 	print("[SERVER] Received request from player %s to transition to scene: %s" % [player_id, scene_path])
 	
+	# THE FIX: Shut down all network visibility in the current level BEFORE transitioning.
+	if is_instance_valid(current_level) and current_level.has_method("shutdown_network_sync_for_transition"):
+		current_level.shutdown_network_sync_for_transition()
+	
 	# Clear any old data from a previous transition.
 	GameManager.all_players_transition_data.clear()
 	

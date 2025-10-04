@@ -28,7 +28,9 @@ func initialize(inv_comp: InventoryComponent, stats_comp: StatsComponent):
 	# Initialize the UI
 	inventory_panel.initialize_inventory(inventory_component.inventory_data)
 	for slot in inventory_panel.grid_container.get_children():
-		slot.slot_right_clicked.connect(_on_inventory_slot_right_clicked)
+		# THE FIX: Only connect the signal if it's not already connected.
+		if not slot.slot_right_clicked.is_connected(_on_inventory_slot_right_clicked):
+			slot.slot_right_clicked.connect(_on_inventory_slot_right_clicked)
 
 	# Manually draw once to show initial state
 	redraw()
