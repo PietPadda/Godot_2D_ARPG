@@ -1,24 +1,39 @@
-[gd_resource type="Resource" script_class="LootTableData" load_steps=29 format=3 uid="uid://d053rkg5v7tfo"]
+[gd_resource type="Resource" script_class="LootTableData" load_steps=47 format=3 uid="uid://d053rkg5v7tfo"]
 
 [ext_resource type="Script" uid="uid://c0qclo6ny1cit" path="res://data/loot/loot_table_entry.gd" id="1_4iswm"]
 [ext_resource type="Script" uid="uid://dgdblf7kbblhl" path="res://data/loot/loot_table_data.gd" id="1_igltk"]
 [ext_resource type="Resource" uid="uid://bllc505jsueh7" path="res://data/items/weapon/short_sword.tres" id="3_0axwc"]
+[ext_resource type="Resource" uid="uid://d3xy6ww1t30sv" path="res://data/items/weapon/dagger.tres" id="3_k2heu"]
 [ext_resource type="Resource" uid="uid://b5mcomwyg7q84" path="res://data/items/currency/gold_coin.tres" id="3_wx3no"]
 [ext_resource type="Resource" uid="uid://pq4mhady4dpq" path="res://data/items/armor/cloak.tres" id="4_0axwc"]
 [ext_resource type="Resource" uid="uid://0bafpmpmp1bt" path="res://data/items/weapon/sabre.tres" id="4_yav3v"]
 [ext_resource type="Resource" uid="uid://gvgdx6yv2ili" path="res://data/items/boots/leather_boots.tres" id="5_afp8o"]
 [ext_resource type="Resource" uid="uid://brtm4jr74ch7j" path="res://data/items/weapon/falchion.tres" id="5_jfhn3"]
 [ext_resource type="Resource" uid="uid://bgqro0j5mqo6v" path="res://data/items/helm/leather_cap.tres" id="6_f2clq"]
+[ext_resource type="Resource" uid="uid://cn3bqbnrw4020" path="res://data/items/weapon/scimitar.tres" id="6_xo6ku"]
 [ext_resource type="Resource" uid="uid://x0jg5yxskpcb" path="res://data/items/armor/rags.tres" id="7_n8pv8"]
+[ext_resource type="Resource" uid="uid://dscdrp7glyvl0" path="res://data/items/armor/cape.tres" id="7_pmcgn"]
+[ext_resource type="Resource" uid="uid://c6n5qsxjy8fxa" path="res://data/items/weapon/blade.tres" id="7_txstd"]
 [ext_resource type="Resource" uid="uid://0ff25mmdfv2h" path="res://data/items/armor/leather_armor.tres" id="8_eaon8"]
+[ext_resource type="Resource" uid="uid://ppbatjcyotcx" path="res://data/items/armor/robe.tres" id="9_00qi0"]
+[ext_resource type="Resource" uid="uid://dma713n42cocs" path="res://data/items/armor/quilted_armor.tres" id="10_bgbg3"]
 [ext_resource type="Resource" uid="uid://b35a78foi5r2d" path="res://data/items/helm/skull_cap.tres" id="11_bi278"]
 [ext_resource type="Resource" uid="uid://bylnnmiqn5qe6" path="res://data/items/helm/helm.tres" id="12_pmcgn"]
 [ext_resource type="Resource" uid="uid://bnhpijl1lms8m" path="res://data/items/boots/heavy_boots.tres" id="13_n8pv8"]
 [ext_resource type="Resource" uid="uid://dfj7utvjr3t2v" path="res://data/items/boots/chain_boots.tres" id="14_eaon8"]
+[ext_resource type="Resource" uid="uid://b6chkvcudo8im" path="res://data/items/helm/full_helm.tres" id="18_r1vms"]
+[ext_resource type="Resource" uid="uid://ba2ghrmgrg1u4" path="res://data/items/boots/light_plated_boots.tres" id="21_txstd"]
+[ext_resource type="Resource" uid="uid://bi4j7t2xr6n1b" path="res://data/items/boots/greaves.tres" id="22_r1vms"]
 
 [sub_resource type="Resource" id="Resource_f2clq"]
 script = ExtResource("1_4iswm")
 item = ExtResource("3_wx3no")
+weight = 48.0
+metadata/_custom_type_script = "uid://c0qclo6ny1cit"
+
+[sub_resource type="Resource" id="Resource_fp8ml"]
+script = ExtResource("1_4iswm")
+item = ExtResource("3_k2heu")
 weight = 12.0
 metadata/_custom_type_script = "uid://c0qclo6ny1cit"
 
@@ -31,6 +46,18 @@ metadata/_custom_type_script = "uid://c0qclo6ny1cit"
 [sub_resource type="Resource" id="Resource_00qi0"]
 script = ExtResource("1_4iswm")
 item = ExtResource("4_yav3v")
+weight = 4.0
+metadata/_custom_type_script = "uid://c0qclo6ny1cit"
+
+[sub_resource type="Resource" id="Resource_7htsf"]
+script = ExtResource("1_4iswm")
+item = ExtResource("6_xo6ku")
+weight = 3.0
+metadata/_custom_type_script = "uid://c0qclo6ny1cit"
+
+[sub_resource type="Resource" id="Resource_jxrp6"]
+script = ExtResource("1_4iswm")
+item = ExtResource("7_txstd")
 weight = 2.0
 metadata/_custom_type_script = "uid://c0qclo6ny1cit"
 
@@ -42,12 +69,30 @@ metadata/_custom_type_script = "uid://c0qclo6ny1cit"
 [sub_resource type="Resource" id="Resource_k2heu"]
 script = ExtResource("1_4iswm")
 item = ExtResource("7_n8pv8")
+weight = 12.0
+metadata/_custom_type_script = "uid://c0qclo6ny1cit"
+
+[sub_resource type="Resource" id="Resource_swrgc"]
+script = ExtResource("1_4iswm")
+item = ExtResource("7_pmcgn")
 weight = 6.0
 metadata/_custom_type_script = "uid://c0qclo6ny1cit"
 
 [sub_resource type="Resource" id="Resource_0axwc"]
 script = ExtResource("1_4iswm")
 item = ExtResource("4_0axwc")
+weight = 4.0
+metadata/_custom_type_script = "uid://c0qclo6ny1cit"
+
+[sub_resource type="Resource" id="Resource_dabiv"]
+script = ExtResource("1_4iswm")
+item = ExtResource("9_00qi0")
+weight = 3.0
+metadata/_custom_type_script = "uid://c0qclo6ny1cit"
+
+[sub_resource type="Resource" id="Resource_j2d6r"]
+script = ExtResource("1_4iswm")
+item = ExtResource("10_bgbg3")
 weight = 2.0
 metadata/_custom_type_script = "uid://c0qclo6ny1cit"
 
@@ -59,38 +104,56 @@ metadata/_custom_type_script = "uid://c0qclo6ny1cit"
 [sub_resource type="Resource" id="Resource_vc5wq"]
 script = ExtResource("1_4iswm")
 item = ExtResource("6_f2clq")
-weight = 6.0
+weight = 12.0
 metadata/_custom_type_script = "uid://c0qclo6ny1cit"
 
 [sub_resource type="Resource" id="Resource_txstd"]
 script = ExtResource("1_4iswm")
 item = ExtResource("11_bi278")
-weight = 2.0
+weight = 4.0
 metadata/_custom_type_script = "uid://c0qclo6ny1cit"
 
 [sub_resource type="Resource" id="Resource_r1vms"]
 script = ExtResource("1_4iswm")
 item = ExtResource("12_pmcgn")
+weight = 2.0
+metadata/_custom_type_script = "uid://c0qclo6ny1cit"
+
+[sub_resource type="Resource" id="Resource_uyuvx"]
+script = ExtResource("1_4iswm")
+item = ExtResource("18_r1vms")
 metadata/_custom_type_script = "uid://c0qclo6ny1cit"
 
 [sub_resource type="Resource" id="Resource_wom0h"]
 script = ExtResource("1_4iswm")
 item = ExtResource("5_afp8o")
-weight = 6.0
+weight = 12.0
 metadata/_custom_type_script = "uid://c0qclo6ny1cit"
 
 [sub_resource type="Resource" id="Resource_bi278"]
 script = ExtResource("1_4iswm")
 item = ExtResource("13_n8pv8")
-weight = 2.0
+weight = 4.0
 metadata/_custom_type_script = "uid://c0qclo6ny1cit"
 
 [sub_resource type="Resource" id="Resource_pmcgn"]
 script = ExtResource("1_4iswm")
 item = ExtResource("14_eaon8")
+weight = 3.0
+metadata/_custom_type_script = "uid://c0qclo6ny1cit"
+
+[sub_resource type="Resource" id="Resource_u8g1e"]
+script = ExtResource("1_4iswm")
+item = ExtResource("21_txstd")
+weight = 2.0
+metadata/_custom_type_script = "uid://c0qclo6ny1cit"
+
+[sub_resource type="Resource" id="Resource_75tqb"]
+script = ExtResource("1_4iswm")
+item = ExtResource("22_r1vms")
 metadata/_custom_type_script = "uid://c0qclo6ny1cit"
 
 [resource]
 script = ExtResource("1_igltk")
-drops = Array[ExtResource("1_4iswm")]([SubResource("Resource_f2clq"), SubResource("Resource_afp8o"), SubResource("Resource_00qi0"), SubResource("Resource_bgbg3"), SubResource("Resource_k2heu"), SubResource("Resource_0axwc"), SubResource("Resource_xo6ku"), SubResource("Resource_vc5wq"), SubResource("Resource_txstd"), SubResource("Resource_r1vms"), SubResource("Resource_wom0h"), SubResource("Resource_bi278"), SubResource("Resource_pmcgn")])
+drops = Array[ExtResource("1_4iswm")]([SubResource("Resource_f2clq"), SubResource("Resource_fp8ml"), SubResource("Resource_afp8o"), SubResource("Resource_00qi0"), SubResource("Resource_7htsf"), SubResource("Resource_jxrp6"), SubResource("Resource_bgbg3"), SubResource("Resource_k2heu"), SubResource("Resource_swrgc"), SubResource("Resource_0axwc"), SubResource("Resource_dabiv"), SubResource("Resource_j2d6r"), SubResource("Resource_xo6ku"), SubResource("Resource_vc5wq"), SubResource("Resource_txstd"), SubResource("Resource_r1vms"), SubResource("Resource_uyuvx"), SubResource("Resource_wom0h"), SubResource("Resource_bi278"), SubResource("Resource_pmcgn"), SubResource("Resource_u8g1e"), SubResource("Resource_75tqb")])
 metadata/_custom_type_script = "uid://dgdblf7kbblhl"

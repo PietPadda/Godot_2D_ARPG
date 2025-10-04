@@ -14,9 +14,7 @@ var stats_component: StatsComponent
 # --- Godot Lifecycle ---
 # When the panel is created and ready, it immediately takes control.
 func _ready() -> void:
-	# Explicitly center the panel to ensure it's always visible.
-	var viewport_size = get_viewport_rect().size
-	self.position = (viewport_size - self.size) / 2.0
+	pass
 
 # --- Public API ---
 func initialize(inv_comp: InventoryComponent, stats_comp: StatsComponent):

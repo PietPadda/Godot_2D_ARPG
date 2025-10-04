@@ -1,0 +1,25 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=6 format=3 uid="uid://dma713n42cocs"]
+
+[ext_resource type="Script" uid="uid://dsidci2l4yr4r" path="res://data/items/item_data.gd" id="1_gkh2m"]
+[ext_resource type="Script" uid="uid://cw6u7dqyn8n7w" path="res://data/items/stat_modifier.gd" id="2_uxfpl"]
+[ext_resource type="Texture2D" uid="uid://ds0uhmj1k2yo0" path="res://assets/items/armor/d1_quilted_armor.png" id="3_gkh2m"]
+
+[sub_resource type="Resource" id="Resource_44ecn"]
+script = ExtResource("2_uxfpl")
+stat = 3
+value = 25.0
+metadata/_custom_type_script = "uid://cw6u7dqyn8n7w"
+
+[sub_resource type="Resource" id="Resource_qn6wu"]
+script = ExtResource("2_uxfpl")
+stat = 4
+value = 25.0
+metadata/_custom_type_script = "uid://cw6u7dqyn8n7w"
+
+[resource]
+script = ExtResource("1_gkh2m")
+item_name = "Quilted Armor"
+texture = ExtResource("3_gkh2m")
+equipment_slot = 2
+stat_modifiers = Array[ExtResource("2_uxfpl")]([SubResource("Resource_44ecn"), SubResource("Resource_qn6wu")])
+metadata/_custom_type_script = "uid://dsidci2l4yr4r"
