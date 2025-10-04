@@ -57,58 +57,61 @@ func _ready() -> void:
 	if multiplayer.is_server():
 		EventBus.loot_drop_requested.connect(_on_loot_drop_requested)
 	
-# This function contains the core spawning logic and is ONLY ever run on the server.
-# It now uses the Auto Spawn List feature by manually instancing and adding as a child.
-# This function now also makes the new player visible to everyone.
+# Contains the server-authoritative logic for spawning a player character.
 func _spawn_player(id: int):
-	# DEBUG: Trace the start of the spawning process on the HOST.
-	print("[HOST] _spawn_player: Spawning character for ID: %s" % id)
-	
-	# Find the spawner and container nodes.
+	# --- Pre-Spawn Validation ---
+	# Guard Clause: Ensure the required spwaner nodesexist in the scene.
 	var player_spawner = get_node_or_null("PlayerSpawner")
+	if !is_instance_valid(player_spawner):
+		push_error("BaseLevel: PlayerSpawner not found! Cannot spawn player.")
+		return
+	
+	# Guard Clause: Ensure the required container nodes exist in the scene.
 	var container = get_node_or_null("PlayerContainer")
-	if not is_instance_valid(player_spawner) or not is_instance_valid(container):
-		push_error("BaseLevel: PlayerSpawner or PlayerContainer not found!")
+	if !is_instance_valid(container):
+		push_error("BaseLevel: PlayerContainer not found! Cannot spawn player.")
 		return
 
-	# Prevent spawning the same player twice (a safeguard).
-	if container.has_node(str(id)): 
+	# Guard Clause: Prevent spawning the same player twice if they already exist.
+	if container.has_node(str(id)):
+		push_warning("BaseLevel: Attempted to spawn player ID %s, but they already exist." % id)
 		return
 	
-	# Determine the spawn position and store it.
-	var spawn_position = Vector2.ZERO
-	if not player_spawn_points.is_empty():
-		spawn_position = player_spawn_points[current_player_spawn_index].global_position
-		current_player_spawn_index = (current_player_spawn_index + 1) % player_spawn_points.size()
+	# Guard Clause: Ensure the PLAYER_SCENE constant is a valid PackedScene.
+	if !NetworkManager.PLAYER_SCENE is PackedScene:
+		push_error("NetworkManager.PLAYER_SCENE is not a valid PackedScene! Cannot spawn player.")
+		return
 	
-	# FIX: Switch back to manual instantiation + add_child() for Auto Spawn List feature.
+	# --- Determine Spawn Position ---
+	var spawn_position = Vector2.ZERO
+	if !player_spawn_points.is_empty():
+		spawn_position = player_spawn_points[current_player_spawn_index].global_position
+		# Cycle through the available spawn points for each new player.
+		current_player_spawn_index = (current_player_spawn_index + 1) % player_spawn_points.size()
+	else:
+		push_warning("No player spawn points found in this level! Player will spawn at (0,0).")
+	
+	# --- Instantiate and Configure ---
 	var player = NetworkManager.PLAYER_SCENE.instantiate()
 	
-	# CRITICAL: We set the authority BEFORE adding it to the scene tree.
-	# This prevents conflicts with the MultiplayerSynchronizer.
+	# CRITICAL ORDER: The node's name and multiplayer authority MUST be set *before*
+	# adding it to the scene tree to ensure the MultiplayerSpawner replicates it correctly.
 	player.set_multiplayer_authority(id)
-	
-	# CRITICAL: We rename the local server's copy. The GameManager relies on the name 
-	# being the player's ID for its registration logic.
 	player.name = str(id)
 	
 	# Set the position on the server's instance.
 	player.global_position = spawn_position
 	
-	# Add the player to the Spawn Path (PlayerContainer).
-	# The MultiplayerSpawner detects this and replicates the spawn event to all clients.
+	# Add the player to the container. The MultiplayerSpawner will now detect this
+	# and automatically replicate the spawn event to all clients.
 	container.add_child(player)
 	
-	# THE FIX: Immediately after spawning the player on the server,
-	# tell the GameManager to send them their transition data.
+	# --- Post-Spawn Synchronization ---
+	# Now that the player exists on all clients, we can send them their data.
 	GameManager.send_transition_data_to_player(id)
 	
-	# The spawned node's position is synchronized via the MultiplayerSynchronizer/RPC.
-	# We call the RPC on the client to ensure its local position is set correctly.
+	# We also call an RPC on the specific client to ensure their local position is set correctly on the first frame.
 	player.set_initial_position.rpc_id(id, spawn_position)
-	
-	# REMOVED: We no longer call the handshake from here. This prevents the race condition.
-	# call_deferred("_perform_handshake_for_player", id)
 	
 # This is our new, robust handshake function.
 func _perform_global_handshake():
@@ -179,11 +182,15 @@ func make_node_visible_to_all(node_path: NodePath) -> void:
 		_rpc_force_visibility_update.rpc(node_path, peer_id, true)
 		
 # -- Signal Handlers --
-		
-# This function runs on the server when an enemy requests a loot drop.
-# We've moved the logic from LootComponent here, to a safe location.
+# Runs on the server when an enemy's death requests a loot drop via the EventBus.
 func _on_loot_drop_requested(loot_table: LootTableData, position: Vector2) -> void:
-	if not loot_table:
+	# Guard Clause: Do nothing if the loot table is invalid.
+	if !is_instance_valid(loot_table):
+		return
+		
+	# Guard Clause: Make sure our preloaded scene is valid before trying to use it.
+	if !LootDropScene is PackedScene:
+		push_error("LootDropScene is not a valid PackedScene! Cannot drop loot.")
 		return
 		
 	var item_to_drop = loot_table.get_drop()
@@ -191,21 +198,20 @@ func _on_loot_drop_requested(loot_table: LootTableData, position: Vector2) -> vo
 	if item_to_drop and not item_to_drop.resource_path.is_empty():
 		var loot_instance = LootDropScene.instantiate()
 		
-		# Configure the node's synced properties BEFORE adding it to the scene.
+		# Configure the node's properties BEFORE adding it to the scene. This ensures
+		# the MultiplayerSynchronizer has the correct initial data to replicate.
 		loot_instance.item_data_path = item_to_drop.resource_path
 		loot_instance.global_position = position
-		# Keep collision disabled initially.
 		loot_instance.get_node("CollisionShape2D").disabled = true
 		
 		var loot_container = get_node_or_null("LootContainer")
-		if not loot_container: 
-			return # Safety check
+		if !is_instance_valid(loot_container):
+			push_error("Could not find 'LootContainer' node in the current level!")
+			loot_instance.queue_free() # Clean up the instance we created.
+			return
 		
-		# Add the node. The spawner now replicates it with the correct data path.
+		# Add the loot to the scene. The MultiplayerSpawner will replicate it.
 		loot_container.add_child(loot_instance, true)
-		
-		# The RPC is no longer needed and should be removed.
-		# loot_instance.initialize.rpc(...)
 
 # -- RPCs --
 @rpc("any_peer", "call_local", "reliable")
