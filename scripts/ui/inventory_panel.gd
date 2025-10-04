@@ -11,6 +11,10 @@ const InventorySlot = preload("res://scenes/ui/inventory_slot.tscn")
 # This will be called from the HUD when the game starts.
 ## create all inv slots at startup
 func initialize_inventory(inventory_data: InventoryData) -> void:
+	# THE FIX: Clear any slots that might exist from a previous scene load.
+	for child in grid_container.get_children():
+		child.queue_free()
+		
 	# This function now creates all the slots ONE TIME.
 	for i in inventory_data.capacity:
 		var slot = InventorySlot.instantiate()
