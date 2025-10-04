@@ -32,11 +32,9 @@ func _enter_tree() -> void:
 		GameManager.register_player(self)
 	
 func _ready() -> void:
-	# DEBUG: Trace when a player node is ready.
-	print("[%s] PLAYER _ready: Node '%s' is ready. Is it mine to control? %s" % [multiplayer.get_unique_id(), name, is_multiplayer_authority()])
-	
-	# Duplicate the data resources to make them unique to this player instance.
-	# This prevents players from sharing inventories, stats, or equipment.
+	# --- Resource Duplication ---
+	# We duplicate our data resources to ensure this player instance has its own unique
+	# stats, inventory, and equipment. Without this, all players would share the same data objects.
 	if stats_component.stats_data:
 		stats_component.stats_data = stats_component.stats_data.duplicate(true)
 	if inventory_component.inventory_data:
@@ -44,42 +42,34 @@ func _ready() -> void:
 	if equipment_component.equipment_data:
 		equipment_component.equipment_data = equipment_component.equipment_data.duplicate(true)
 	
-	# This is the crucial check. Do it first!
+	# --- Authority Check ---
+	# This is the most important check for a networked character.
+	# If this node's multiplayer authority is NOT this local machine, it's a "puppet."
 	if not is_multiplayer_authority():
-		# This is a remote player's puppet.
-		camera.enabled = false # disable the camera
-		# Deactivate its StateMachine so it doesn't try to run logic.
+		# Disable all logic and components that are only relevant to the controlling player.
+		camera.enabled = false
 		state_machine.set_physics_process(false)
 		state_machine.set_process_unhandled_input(false)
-		
-		# Do nothing else
-		return # This is the most important part!
+		return# Stop execution here for puppets.
 	
-	# Force this camera to be the active one for the viewport.
+	# --- Local Player Setup ---
+	# The following code only runs for the player character that we control.
 	camera.make_current()
 	
-	# Connect signals only for the local player.
+	# Connect signals for game events.
 	stats_component.died.connect(_on_death) # player died
 	EventBus.game_state_changed.connect(_on_game_state_changed) # game state change
 	
-	# This block only runs for the player we control. This is the perfect place
-	# to announce that the local player is ready.
+	# Announce to the rest of the game (like the HUD) that the local player is ready.
 	EventBus.emit_signal("local_player_spawned", self)
 	
-	# When equipment changes, tell the StatsComponent to recalculate.
+	# Connect equipment changes to stat recalculation.
 	if equipment_component:
 		equipment_component.equipment_changed.connect(stats_component.recalculate_max_stats)
 	
-	# Manually call the handler on startup to set the initial correct state.
+	# Set the initial game state and calculate stats based on starting equipment.
 	_on_game_state_changed(EventBus.current_game_state)
-	
-	# This ensures our stats are correct for any starting equipment.
 	stats_component.recalculate_max_stats()
-	
-	# THE FIX: If we are the player with authority, once we are fully ready,
-	# we send an RPC to the server asking for our persistent data.
-	# if is_multiplayer_authority():
-	#	server_request_my_data.rpc_id(1)
 
 # We need to add _physics_process to see the position on the first frame of gameplay.
 func _physics_process(_delta: float) -> void:
@@ -97,12 +87,17 @@ func get_total_stat(stat_name: String) -> float:
 	push_warning("StatCalculator not found on %s" % name)
 	return 0.0
 	
-# This is the entity's public interface for taking damage.
+# The public-facing function for this entity to receive damage.
+# It acts as a clean entry point that delegates the actual damage logic to the StatsComponent.
+# Other objects should call this function to deal damage, rather than accessing components directly.
 func handle_damage(damage_amount: int, attacker_id: int) -> void:
-	if stats_component:
-		# The entity is responsible for communicating with its own components.
-		var my_multiplayer_authority = get_multiplayer_authority()
-		stats_component.server_take_damage.rpc_id(my_multiplayer_authority, damage_amount, attacker_id)
+	# Guard Clause: Ensure the stats_component is valid before using it.
+	if not is_instance_valid(stats_component):
+		push_warning("handle_damage called on %s, but no StatsComponent was found." % name)
+		return
+		
+	var my_multiplayer_authority = get_multiplayer_authority()
+	stats_component.server_take_damage.rpc_id(my_multiplayer_authority, damage_amount, attacker_id)
 
 # This new public function is the player's API for receiving data.
 func apply_persistent_data(data: Resource, is_transition: bool) -> void:
@@ -177,16 +172,25 @@ func _apply_data_dictionary(data: Dictionary):
 		hud.character_sheet.redraw()
 
 # -- Signal Handlers --
-# This function is called when the StatsComponent emits the "died" signal.
+# Called by this player's own StatsComponent when its health reaches zero.
 ## Player death function for Player
 func _on_death(_attacker_id: int) -> void:
-	# We tell our state machine to switch to the DeadState.
 	state_machine.change_state(States.PLAYER_STATE_NAMES[States.PLAYER.DEAD])
 	
 	# Create an instance of our Game Over screen.
 	var game_over_instance = GameOverScreen.instantiate()
+	
+	# Guard Clause: Before adding a child, ensure the current_scene is valid.
+	# This prevents a crash if the player dies during a volatile moment, like a scene transition.
+	var current_scene = get_tree().current_scene
+	if !is_instance_valid(current_scene):
+		push_error("Player died but could not find a valid current_scene to add GameOverScreen to.")
+		# We still want to free the instance we created to prevent a memory leak.
+		game_over_instance.queue_free()
+		return
+		
 	# Add it to the parent (level) scene tree.
-	get_tree().current_scene.add_child(game_over_instance)
+	current_scene.add_child(game_over_instance)
 
 # This function is called by the EventBus when the game state changes.
 func _on_game_state_changed(new_state: EventBus.GameState) -> void:
