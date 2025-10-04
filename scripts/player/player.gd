@@ -76,18 +76,16 @@ func _ready() -> void:
 	# This ensures our stats are correct for any starting equipment.
 	stats_component.recalculate_max_stats()
 	
-	# REMOVE the 'if is_multiplayer_authority()' block from the end of this function.
-	# We are moving this logic to _physics_process.
+	# THE FIX: If we are the player with authority, once we are fully ready,
+	# we send an RPC to the server asking for our persistent data.
 	# if is_multiplayer_authority():
-	# 	server_request_my_data.rpc_id(1)
+	#	server_request_my_data.rpc_id(1)
 
 # We need to add _physics_process to see the position on the first frame of gameplay.
 func _physics_process(_delta: float) -> void:
 	# This code will only run once for our controlled character.
 	if is_multiplayer_authority() and not _first_physics_frame_checked:
 		_first_physics_frame_checked = true
-		# By running this here, we guarantee the server has had time to register us.
-		server_request_my_data.rpc_id(1)
 
 # --- Public API ---
 # This function is now just a clean pass-through to the dedicated calculator.
@@ -249,8 +247,8 @@ func client_prepare_for_transition():
 func client_gather_and_send_data():
 	# This client has been asked for its data. Gather it now.
 	var data_dictionary = GameManager.get_player_data_as_dictionary(self)
-	# Send the data back to the server via the GameManager singleton.
-	GameManager.server_receive_client_data.rpc_id(1, multiplayer.get_unique_id(), data_dictionary)
+	# Send the data back to the server.
+	server_receive_data.rpc_id(1, multiplayer.get_unique_id(), data_dictionary)
 
 # RPC called BY a client ON the server, delivering the requested data.
 @rpc("any_peer", "call_local", "reliable")
