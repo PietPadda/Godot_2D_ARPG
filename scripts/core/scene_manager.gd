@@ -59,9 +59,11 @@ func request_scene_transition(scene_path: String, player_id: int, player_data: D
 			# Send an RPC asking this player to send their data back.
 			other_player_node.client_gather_and_send_data.rpc_id(p_id)
 	
-	# Wait a moment for the data RPCs to arrive before continuing.
-	# This is a simple and reliable way to handle the network delay.
-	await get_tree().create_timer(0.2).timeout
+	# THE FIX: Halt the transition until all player data is received.
+	var wait_time = 3.0 # Wait a maximum of 3 seconds as a failsafe.
+	while GameManager.all_players_transition_data.size() < GameManager.active_players.size() and wait_time > 0:
+		await get_tree().create_timer(0.1).timeout
+		wait_time -= 0.1
 	
 	print("[SERVER] All data gathered. Initiating transition for all players...")
 	

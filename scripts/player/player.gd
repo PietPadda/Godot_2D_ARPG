@@ -243,7 +243,7 @@ func client_prepare_for_transition():
 		movement_component.stop()
 		
 # RPC called BY the server ON a client, asking for their data.
-@rpc("authority", "call_local", "reliable")
+@rpc("any_peer", "call_local", "reliable")
 func client_gather_and_send_data():
 	# This client has been asked for its data. Gather it now.
 	var data_dictionary = GameManager.get_player_data_as_dictionary(self)
