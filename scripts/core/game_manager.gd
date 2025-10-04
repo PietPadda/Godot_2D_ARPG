@@ -222,3 +222,15 @@ func _on_player_disconnected(player_id: int) -> void:
 	if is_instance_valid(player_node):
 		# Now, unregister them from the central list.
 		unregister_player(player_node)
+		
+# --- RPCs ---
+# RPC called BY a client ON the server, delivering the requested data.
+@rpc("any_peer", "call_local", "reliable")
+func server_receive_client_data(player_id: int, player_data: Dictionary):
+	# This function will only run on the server.
+	if not multiplayer.is_server():
+		return
+	
+	# The server has received the data from a client and stores it.
+	all_players_transition_data[player_id] = player_data
+	print("[SERVER] Received and stored data from client %s." % player_id)
