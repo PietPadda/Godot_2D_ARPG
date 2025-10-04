@@ -249,8 +249,8 @@ func client_prepare_for_transition():
 func client_gather_and_send_data():
 	# This client has been asked for its data. Gather it now.
 	var data_dictionary = GameManager.get_player_data_as_dictionary(self)
-	# Send the data back to the server.
-	server_receive_data.rpc_id(1, multiplayer.get_unique_id(), data_dictionary)
+	# Send the data back to the server via the GameManager singleton.
+	GameManager.server_receive_client_data.rpc_id(1, multiplayer.get_unique_id(), data_dictionary)
 
 # RPC called BY a client ON the server, delivering the requested data.
 @rpc("any_peer", "call_local", "reliable")
