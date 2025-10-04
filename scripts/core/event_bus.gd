@@ -12,6 +12,9 @@ signal debug_respawn_enemies_requested
 signal server_requesting_transition(scene_path)
 # Emitted by an enemy on death, requesting that the level spawn its loot.
 signal loot_drop_requested(loot_table: LootTableData, global_position: Vector2)
+# NPC range signals
+signal player_entered_shop_range
+signal player_exited_shop_range
 
 # An Enum provides clear, readable names for our states and prevents errors from typos.
 enum GameState {
