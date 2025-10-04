@@ -77,8 +77,11 @@ func _on_shop_panel_requested() -> void:
 			var stats_comp = player.get_node("StatsComponent")
 			shop_panel_instance.initialize(inv_comp, stats_comp)
 			
-# This new function runs ONLY when the local_player_spawned signal is received.
+# This function runs ONLY when the local_player_spawned signal is received.
 func _on_local_player_spawned(player: Node) -> void:
+	# THE FIX: Always hide the character sheet when a new level starts.
+	character_sheet.hide()
+	
 	# Now that we have a guaranteed reference to the player, we connect to their stats.
 	var player_stats = player.get_node("StatsComponent")
 	# Connect our UI update function to the player's signal.
