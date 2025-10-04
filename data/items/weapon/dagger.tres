@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=5 format=3 uid="uid://d3xy6ww1t30sv"]
+
+[ext_resource type="Script" uid="uid://dsidci2l4yr4r" path="res://data/items/item_data.gd" id="1_cqll7"]
+[ext_resource type="Script" uid="uid://cw6u7dqyn8n7w" path="res://data/items/stat_modifier.gd" id="2_hvqgf"]
+[ext_resource type="Texture2D" uid="uid://cvg3853bpjadi" path="res://assets/items/weapons/d1_dagger.png" id="3_cqll7"]
+
+[sub_resource type="Resource" id="Resource_oicgm"]
+script = ExtResource("2_hvqgf")
+value = 5.0
+metadata/_custom_type_script = "uid://cw6u7dqyn8n7w"
+
+[resource]
+script = ExtResource("1_cqll7")
+item_name = "Dagger"
+texture = ExtResource("3_cqll7")
+equipment_slot = 1
+stat_modifiers = Array[ExtResource("2_hvqgf")]([SubResource("Resource_oicgm")])
+metadata/_custom_type_script = "uid://dsidci2l4yr4r"

@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=5 format=3 uid="uid://cn3bqbnrw4020"]
+
+[ext_resource type="Script" uid="uid://dsidci2l4yr4r" path="res://data/items/item_data.gd" id="1_6gn1m"]
+[ext_resource type="Script" uid="uid://cw6u7dqyn8n7w" path="res://data/items/stat_modifier.gd" id="2_giosi"]
+[ext_resource type="Texture2D" uid="uid://bo6b1pdq4f17x" path="res://assets/items/weapons/d1_scimitar.png" id="3_6gn1m"]
+
+[sub_resource type="Resource" id="Resource_oicgm"]
+script = ExtResource("2_giosi")
+value = 20.0
+metadata/_custom_type_script = "uid://cw6u7dqyn8n7w"
+
+[resource]
+script = ExtResource("1_6gn1m")
+item_name = "Scimitar"
+texture = ExtResource("3_6gn1m")
+equipment_slot = 1
+stat_modifiers = Array[ExtResource("2_giosi")]([SubResource("Resource_oicgm")])
+metadata/_custom_type_script = "uid://dsidci2l4yr4r"

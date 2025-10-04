@@ -1,0 +1,25 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=6 format=3 uid="uid://dscdrp7glyvl0"]
+
+[ext_resource type="Script" uid="uid://dsidci2l4yr4r" path="res://data/items/item_data.gd" id="1_e5tyg"]
+[ext_resource type="Script" uid="uid://cw6u7dqyn8n7w" path="res://data/items/stat_modifier.gd" id="2_y8cgl"]
+[ext_resource type="Texture2D" uid="uid://d2yxq2tmke8fh" path="res://assets/items/armor/d1_cape.png" id="3_e5tyg"]
+
+[sub_resource type="Resource" id="Resource_44ecn"]
+script = ExtResource("2_y8cgl")
+stat = 3
+value = 10.0
+metadata/_custom_type_script = "uid://cw6u7dqyn8n7w"
+
+[sub_resource type="Resource" id="Resource_qn6wu"]
+script = ExtResource("2_y8cgl")
+stat = 4
+value = 10.0
+metadata/_custom_type_script = "uid://cw6u7dqyn8n7w"
+
+[resource]
+script = ExtResource("1_e5tyg")
+item_name = "Cape"
+texture = ExtResource("3_e5tyg")
+equipment_slot = 2
+stat_modifiers = Array[ExtResource("2_y8cgl")]([SubResource("Resource_44ecn"), SubResource("Resource_qn6wu")])
+metadata/_custom_type_script = "uid://dsidci2l4yr4r"

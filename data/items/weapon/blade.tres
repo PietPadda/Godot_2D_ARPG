@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=5 format=3 uid="uid://c6n5qsxjy8fxa"]
+
+[ext_resource type="Script" uid="uid://dsidci2l4yr4r" path="res://data/items/item_data.gd" id="1_747kh"]
+[ext_resource type="Script" uid="uid://cw6u7dqyn8n7w" path="res://data/items/stat_modifier.gd" id="2_obewj"]
+[ext_resource type="Texture2D" uid="uid://bdexhar6ltbs3" path="res://assets/items/weapons/d1_blade.png" id="3_747kh"]
+
+[sub_resource type="Resource" id="Resource_oicgm"]
+script = ExtResource("2_obewj")
+value = 25.0
+metadata/_custom_type_script = "uid://cw6u7dqyn8n7w"
+
+[resource]
+script = ExtResource("1_747kh")
+item_name = "Blade"
+texture = ExtResource("3_747kh")
+equipment_slot = 1
+stat_modifiers = Array[ExtResource("2_obewj")]([SubResource("Resource_oicgm")])
+metadata/_custom_type_script = "uid://dsidci2l4yr4r"
