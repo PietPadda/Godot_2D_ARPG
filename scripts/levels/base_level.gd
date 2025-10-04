@@ -87,6 +87,10 @@ func _spawn_player(id: int):
 	# The MultiplayerSpawner detects this and replicates the spawn event to all clients.
 	container.add_child(player)
 	
+	# THE FIX: Immediately after spawning the player on the server,
+	# tell the GameManager to send them their transition data.
+	GameManager.send_transition_data_to_player(id)
+	
 	# The spawned node's position is synchronized via the MultiplayerSynchronizer/RPC.
 	# We call the RPC on the client to ensure its local position is set correctly.
 	player.set_initial_position.rpc_id(id, spawn_position)
