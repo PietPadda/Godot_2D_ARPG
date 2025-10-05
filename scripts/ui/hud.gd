@@ -12,6 +12,7 @@ extends CanvasLayer
 @onready var xp_bar: ProgressBar = $PlayerXpBar
 @onready var xp_label: Label = $PlayerXpBar/XpLabel # child of xpbar
 @onready var player_inventory: PanelContainer = $PlayerInventory
+@onready var character_sheet: PanelContainer = $CharacterSheet
 @onready var shop_panel: PanelContainer = $ShopPanel
 
 var _is_player_in_shop_range := false
@@ -29,6 +30,12 @@ func _unhandled_input(_event: InputEvent) -> void:
 		# Redraw the inventory every time it's opened to ensure it's up to date.
 		if player_inventory.visible:
 			player_inventory.redraw() # redraw it
+	
+	# Toggle character sheet panel's visibility
+	if Input.is_action_just_pressed("toggle_character_sheet"): # "C"
+		character_sheet.visible = not character_sheet.visible
+		if character_sheet.visible:
+			character_sheet.redraw() # This will populate stats later
 	
 	# E to interact with shop npc
 	if _is_player_in_shop_range and Input.is_action_just_pressed("interact"):
