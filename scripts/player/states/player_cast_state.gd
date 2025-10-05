@@ -7,11 +7,19 @@ var skill_to_cast: SkillData
 var cast_target_position: Vector2
 
 func enter() -> void:
-	# For now, we'll reuse the Attack animation for casting.
+	# Immediately stop any residual movement.
+	grid_movement_component.stop()
+	
+	# Try to cast the skill and check if it was successful.
+	var cast_succeeded = skill_caster_component.cast(skill_to_cast, cast_target_position)
+	
+	# THE FIX: If the cast fails (e.g., not enough mana), exit this state immediately.
+	if !cast_succeeded:
+		state_machine.change_state(States.PLAYER_STATE_NAMES[States.PLAYER.IDLE])
+		return # Stop execution to prevent connecting a signal that will never fire.
+	
+	# If the cast was successful, play the animation and wait for the cast to finish.
 	animation_component.play_animation(Anims.PLAYER_NAMES[Anims.PLAYER.ATTACK])
-	# Tell the skill caster to perform the action.
-	skill_caster_component.cast(skill_to_cast, cast_target_position)
-	# Connect to the signal from our component.
 	skill_caster_component.cast_finished.connect(on_cast_finished)
 
 # Add an exit function for clean signal disconnection.
