@@ -2,6 +2,9 @@
 class_name LootDrop
 extends Area2D
 
+# NEW: This flag will be set by the server and synced to clients.
+@export var apply_pickup_delay: bool = false
+
 # --- Loot Properties ---
 @onready var collision_shape: CollisionShape2D = $CollisionShape2D
 @onready var timer: Timer = $PickupTimer
@@ -9,7 +12,7 @@ extends Area2D
 # This will be set via RPC after the node is spawned.
 var item_data: ItemData
 
-# This path will be set by the server and synced to clients automatically.
+# This path will be set by the server and syniiiced to clients automatically.
 @export var item_data_path: String = "":
 	set(value):
 		item_data_path = value
@@ -59,11 +62,12 @@ func _setup_loot() -> void:
 	if is_instance_valid(item_data) and is_instance_valid(sprite) and is_instance_valid(item_data.texture):
 		sprite.texture = item_data.texture
 	
-	# Start the pickup cooldown timer.
-	timer.start()
-	
-	# Enable collision only after setup is complete.
-	$CollisionShape2D.disabled = false
+	# THE FIX: Only start the timer if the flag is true.
+	if apply_pickup_delay:
+		timer.start()
+	else:
+		# If no delay, make it pickup-able immediately.
+		_on_pickup_timer_timeout()
 	
 	# Enable sprite visibility now (prevent 0,0 spawn then sycn relocate 1 frame later)
 	visible = true

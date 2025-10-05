@@ -54,7 +54,6 @@ func _ready() -> void:
 	# The server listens for loot drop requests from dying enemies and now from players.
 	if multiplayer.is_server():
 		EventBus.loot_drop_requested.connect(_on_loot_drop_requested)
-		EventBus.item_drop_requested_by_player.connect(_on_item_drop_requested_by_player)
 		
 # Contains the server-authoritative logic for spawning a player character.
 func _spawn_player(id: int):
@@ -111,7 +110,7 @@ func _spawn_player(id: int):
 	
 	# We also call an RPC on the specific client to ensure their local position is set correctly on the first frame.
 	player.set_initial_position.rpc_id(id, spawn_position)
-	
+
 # This is our new, robust handshake function.
 func _perform_global_handshake():
 	var container = get_node_or_null("PlayerContainer")
@@ -179,121 +178,6 @@ func make_node_visible_to_all(node_path: NodePath) -> void:
 
 	for peer_id in all_peers:
 		_rpc_force_visibility_update.rpc(node_path, peer_id, true)
-		
-# -- Signal Handlers --
-# Runs on the server when an enemy's death requests a loot drop via the EventBus.
-func _on_loot_drop_requested(loot_table: LootTableData, position: Vector2) -> void:
-	# Guard Clause: Do nothing if the loot table is invalid.
-	if !is_instance_valid(loot_table):
-		return
-		
-	# Guard Clause: Make sure our preloaded scene is valid before trying to use it.
-	if !LootDropScene is PackedScene:
-		push_error("LootDropScene is not a valid PackedScene! Cannot drop loot.")
-		return
-		
-	var item_to_drop = loot_table.get_drop()
-
-	if item_to_drop and not item_to_drop.resource_path.is_empty():
-		var loot_instance = LootDropScene.instantiate()
-		
-		# Configure the node's properties BEFORE adding it to the scene. This ensures
-		# the MultiplayerSynchronizer has the correct initial data to replicate.
-		loot_instance.item_data_path = item_to_drop.resource_path
-		loot_instance.global_position = position
-		loot_instance.get_node("CollisionShape2D").disabled = true
-		
-		var loot_container = get_node_or_null("LootContainer")
-		if !is_instance_valid(loot_container):
-			push_error("Could not find 'LootContainer' node in the current level!")
-			loot_instance.queue_free() # Clean up the instance we created.
-			return
-		
-		# Add the loot to the scene. The MultiplayerSpawner will replicate it.
-		loot_container.add_child(loot_instance, true)
-
-# NEW: This function runs on the server when a player drops an item.
-func _on_item_drop_requested_by_player(item_data: ItemData, position: Vector2) -> void:
-	# Guard Clause: Ensure the item data is valid before spawning.
-	if not is_instance_valid(item_data) or item_data.resource_path.is_empty():
-		push_warning("Player tried to drop an invalid item.")
-		return
-
-	var loot_instance = LootDropScene.instantiate()
-	
-	# Configure the node's synced properties BEFORE adding it to the scene.
-	loot_instance.item_data_path = item_data.resource_path
-	loot_instance.global_position = position
-	loot_instance.get_node("CollisionShape2D").disabled = true
-	
-	var loot_container = get_node_or_null("LootContainer")
-	if not is_instance_valid(loot_container):
-		push_error("Could not find 'LootContainer' node in the current level! Cannot drop item.")
-		loot_instance.queue_free() # Clean up the orphaned instance.
-		return
-	
-	# Add the loot to the scene. The MultiplayerSpawner will replicate it to all clients.
-	loot_container.add_child(loot_instance, true)
-	
-	# THE FIX: Tell all clients to make this new node's synchronizer visible.
-	make_node_visible_to_all(loot_instance.get_path())
-
-# -- RPCs --
-@rpc("any_peer", "call_local", "reliable")
-func server_process_projectile_hit(projectile_path: NodePath, target_path: NodePath):
-	# This function runs only on the server.
-	var projectile = get_node_or_null(projectile_path)
-	var target = get_node_or_null(target_path)
-	
-	# This is the critical safety check. If either the projectile or the target
-	# has already been destroyed by another event, we simply do nothing.
-	if not is_instance_valid(projectile) or not is_instance_valid(target):
-		return # do nothing to prevent RPC race condition
-
-	# If both are valid, proceed with dealing damage.
-	var stats: StatsComponent = target.get_node_or_null("StatsComponent")
-	if stats:
-		# Get the attacker's ID from the projectile
-		var attacker_id = projectile.owner_id
-		# We deal damage directly because this is all happening on the server. No RPC needed.
-		stats.take_damage(projectile.damage, attacker_id)
-	
-	# The server authoritatively destroys the projectile after the hit is processed.
-	projectile.queue_free()
-	
-# This RPC is the single entry point for making the world visible.
-# This RPC is now our gatekeeper for the handshake.
-@rpc("any_peer", "call_local", "reliable")
-func server_peer_ready(id: int):
-	if not multiplayer.is_server(): 
-		return
-	
-	# Spawn the player as soon as they report ready.
-	_spawn_player(id)
-		
-	# Add the player to our headcount for this level.
-	if not id in _peers_ready_in_level:
-		_peers_ready_in_level.append(id)
-	
-	print("[SERVER] Peers ready in this level: ", _peers_ready_in_level)
-	
-	# Check if everyone has arrived.
-	if _peers_ready_in_level.size() == multiplayer.get_peers().size() + 1: # +1 for the server
-		print("[SERVER] All peers have loaded the level. Performing global handshake.")
-		# Use call_deferred to ensure the last player has a frame to fully spawn.
-		call_deferred("_perform_global_handshake")
-	
-# This RPC is a COMMAND from the server to a client telling it
-# to update the visibility of a specific node's synchronizer.
-@rpc("any_peer", "call_local", "reliable")
-func _rpc_force_visibility_update(node_path: NodePath, for_peer_id: int, is_visible: bool) -> void:
-	var node = get_node_or_null(node_path)
-	if not is_instance_valid(node):
-		return
-	
-	var sync = node.get_node_or_null("MultiplayerSynchronizer")
-	if is_instance_valid(sync):
-		sync.set_visibility_for(for_peer_id, is_visible)
 
 # This function is called by the SceneManager right before a transition.
 # It tells all clients to make all synchronizers invisible to prevent
@@ -361,3 +245,115 @@ func shutdown_network_sync_for_transition():
 				# For the server itself (peer_id 1), update visibility LOCALLY and IMMEDIATELY.
 				# This avoids the host sending an RPC to itself, fixing the race condition.
 				sync.set_visibility_for(1, false)
+
+# This is our new, reusable helper function for spawning a specific item.
+func _spawn_single_item(item_to_drop: ItemData, position: Vector2, apply_cooldown: bool):
+	if not is_instance_valid(item_to_drop) or item_to_drop.resource_path.is_empty():
+		return
+
+	var loot_instance = LootDropScene.instantiate()
+	
+	# Configure the loot drop.
+	loot_instance.item_data_path = item_to_drop.resource_path
+	loot_instance.global_position = position
+	# NEW: We pass the cooldown flag to the loot instance.
+	loot_instance.apply_pickup_delay = apply_cooldown 
+	
+	var loot_container = get_node_or_null("LootContainer")
+	if not is_instance_valid(loot_container):
+		push_error("Could not find 'LootContainer' node in the current level!")
+		loot_instance.queue_free()
+		return
+	
+	loot_container.add_child(loot_instance, true)
+	make_node_visible_to_all(loot_instance.get_path())
+
+# -- Signal Handlers --
+# Runs on the server when an enemy's death requests a loot drop via the EventBus.
+func _on_loot_drop_requested(loot_table: LootTableData, position: Vector2) -> void:
+	# Guard Clause: Do nothing if the loot table is invalid.
+	if not is_instance_valid(loot_table): return
+		
+	var item_to_drop = loot_table.get_drop()
+	# Enemy drops do NOT apply the pickup cooldown.
+	_spawn_single_item(item_to_drop, position, false)
+
+# We no longer need _on_item_drop_requested_by_player, it's replaced by the RPC.
+# And we can remove the EventBus connection in _ready().
+
+# -- RPCs --
+@rpc("any_peer", "call_local", "reliable")
+func server_process_projectile_hit(projectile_path: NodePath, target_path: NodePath):
+	# This function runs only on the server.
+	var projectile = get_node_or_null(projectile_path)
+	var target = get_node_or_null(target_path)
+	
+	# This is the critical safety check. If either the projectile or the target
+	# has already been destroyed by another event, we simply do nothing.
+	if not is_instance_valid(projectile) or not is_instance_valid(target):
+		return # do nothing to prevent RPC race condition
+
+	# If both are valid, proceed with dealing damage.
+	var stats: StatsComponent = target.get_node_or_null("StatsComponent")
+	if stats:
+		# Get the attacker's ID from the projectile
+		var attacker_id = projectile.owner_id
+		# We deal damage directly because this is all happening on the server. No RPC needed.
+		stats.take_damage(projectile.damage, attacker_id)
+	
+	# The server authoritatively destroys the projectile after the hit is processed.
+	projectile.queue_free()
+	
+# This RPC is the single entry point for making the world visible.
+# This RPC is now our gatekeeper for the handshake.
+@rpc("any_peer", "call_local", "reliable")
+func server_peer_ready(id: int):
+	if not multiplayer.is_server(): 
+		return
+	
+	# Spawn the player as soon as they report ready.
+	_spawn_player(id)
+		
+	# Add the player to our headcount for this level.
+	if not id in _peers_ready_in_level:
+		_peers_ready_in_level.append(id)
+	
+	print("[SERVER] Peers ready in this level: ", _peers_ready_in_level)
+	
+	# Check if everyone has arrived.
+	if _peers_ready_in_level.size() == multiplayer.get_peers().size() + 1: # +1 for the server
+		print("[SERVER] All peers have loaded the level. Performing global handshake.")
+		# Use call_deferred to ensure the last player has a frame to fully spawn.
+		call_deferred("_perform_global_handshake")
+	
+# This RPC is a COMMAND from the server to a client telling it
+# to update the visibility of a specific node's synchronizer.
+@rpc("any_peer", "call_local", "reliable")
+func _rpc_force_visibility_update(node_path: NodePath, for_peer_id: int, is_visible: bool) -> void:
+	var node = get_node_or_null(node_path)
+	if not is_instance_valid(node):
+		return
+	
+	var sync = node.get_node_or_null("MultiplayerSynchronizer")
+	if is_instance_valid(sync):
+		sync.set_visibility_for(for_peer_id, is_visible)
+
+# This RPC is called by a client when they request to drop an item.
+@rpc("any_peer", "call_local", "reliable")
+func server_request_player_drop(item_path: String, position: Vector2):
+	# Get the ID of the client who sent this request.
+	var player_id = multiplayer.get_remote_sender_id()
+	
+	# Get the server's version of that player.
+	var player = GameManager.get_player(player_id)
+	if not is_instance_valid(player): return
+		
+	# Authoritatively remove the item from the server's version of the player's inventory.
+	var inventory_component = player.get_node("InventoryComponent")
+	var item_resource = ItemDatabase.get_item(item_path)
+	if is_instance_valid(inventory_component) and is_instance_valid(item_resource):
+		inventory_component.remove_item(item_resource)
+	
+	# Now, reuse our existing loot spawning logic to create the item in the world.
+	# We'll call the function directly since we're already on the server.
+	_spawn_single_item(item_resource, position, true)

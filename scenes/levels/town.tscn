@@ -54,6 +54,10 @@ position = Vector2(1332, 589)
 [node name="PlayerSpawnPoint4" type="Marker2D" parent="PlayerSpawnPoints"]
 position = Vector2(1069, 594)
 
+[node name="LootSpawner" type="MultiplayerSpawner" parent="."]
+_spawnable_scenes = PackedStringArray("uid://boxuys3wl2v3p")
+spawn_path = NodePath("../LootContainer")
+
 [node name="LootContainer" type="Node2D" parent="."]
 
 [node name="CanvasModulate" type="CanvasModulate" parent="."]
