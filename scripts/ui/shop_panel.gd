@@ -28,9 +28,9 @@ func initialize(inv_comp: InventoryComponent, stats_comp: StatsComponent):
 	# Initialize the UI
 	inventory_panel.initialize_inventory(inventory_component.inventory_data)
 	for slot in inventory_panel.grid_container.get_children():
-		# THE FIX: Only connect the signal if it's not already connected.
-		if not slot.slot_right_clicked.is_connected(_on_inventory_slot_right_clicked):
-			slot.slot_right_clicked.connect(_on_inventory_slot_right_clicked)
+		# This panel interprets a right-click as a "sell item" request.
+		if not slot.slot_right_clicked.is_connected(_on_item_sell_requested):
+			slot.slot_right_clicked.connect(_on_item_sell_requested)
 
 	# Manually draw once to show initial state
 	redraw()
@@ -40,7 +40,8 @@ func initialize(inv_comp: InventoryComponent, stats_comp: StatsComponent):
 func _on_close_button_pressed() -> void:
 	EventBus.shop_panel_requested.emit()
 	
-func _on_inventory_slot_right_clicked(item_data: ItemData):
+# RENAMED from _on_inventory_slot_right_clicked for clarity.
+func _on_item_sell_requested(item_data: ItemData):
 	# Sell the item
 	inventory_component.remove_item(item_data)
 	stats_component.add_gold(item_data.value)
