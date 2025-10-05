@@ -53,10 +53,11 @@ func _ready() -> void:
 	else:
 		server_peer_ready.rpc_id(1, multiplayer.get_unique_id()) # Clients send an RPC.
 		
-	# The level will listen for loot drop requests. This only needs to happen on the server.
+	# The server listens for loot drop requests from dying enemies and now from players.
 	if multiplayer.is_server():
 		EventBus.loot_drop_requested.connect(_on_loot_drop_requested)
-	
+		EventBus.item_drop_requested_by_player.connect(_on_item_drop_requested_by_player)
+		
 # Contains the server-authoritative logic for spawning a player character.
 func _spawn_player(id: int):
 	# --- Pre-Spawn Validation ---
@@ -212,6 +213,29 @@ func _on_loot_drop_requested(loot_table: LootTableData, position: Vector2) -> vo
 		
 		# Add the loot to the scene. The MultiplayerSpawner will replicate it.
 		loot_container.add_child(loot_instance, true)
+
+# NEW: This function runs on the server when a player drops an item.
+func _on_item_drop_requested_by_player(item_data: ItemData, position: Vector2) -> void:
+	# Guard Clause: Ensure the item data is valid before spawning.
+	if not is_instance_valid(item_data) or item_data.resource_path.is_empty():
+		push_warning("Player tried to drop an invalid item.")
+		return
+
+	var loot_instance = LootDropScene.instantiate()
+	
+	# Configure the node's synced properties BEFORE adding it to the scene.
+	loot_instance.item_data_path = item_data.resource_path
+	loot_instance.global_position = position
+	loot_instance.get_node("CollisionShape2D").disabled = true
+	
+	var loot_container = get_node_or_null("LootContainer")
+	if not is_instance_valid(loot_container):
+		push_error("Could not find 'LootContainer' node in the current level! Cannot drop item.")
+		loot_instance.queue_free() # Clean up the orphaned instance.
+		return
+	
+	# Add the loot to the scene. The MultiplayerSpawner will replicate it to all clients.
+	loot_container.add_child(loot_instance, true)
 
 # -- RPCs --
 @rpc("any_peer", "call_local", "reliable")

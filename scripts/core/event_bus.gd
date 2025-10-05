@@ -15,6 +15,8 @@ signal loot_drop_requested(loot_table: LootTableData, global_position: Vector2)
 # NPC range signals
 signal player_entered_shop_range
 signal player_exited_shop_range
+# Emitted by the UI when the player requests to drop an item.
+signal item_drop_requested_by_player(item_data: ItemData, global_position: Vector2)
 
 # An Enum provides clear, readable names for our states and prevents errors from typos.
 enum GameState {

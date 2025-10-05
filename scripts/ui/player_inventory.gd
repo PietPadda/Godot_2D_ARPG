@@ -14,11 +14,18 @@ var inventory_component: InventoryComponent
 var equipment_component: EquipmentComponent
 var stats_component: StatsComponent
 
+# We need a reference to the actual player node to get their position.
+var player_node: Node2D
+
 # This is our new, explicit setup function.
 func initialize(inv_comp: InventoryComponent, equip_comp: EquipmentComponent, stats_comp: StatsComponent):
+	# Store references to the components from function input
 	inventory_component = inv_comp
 	equipment_component = equip_comp
 	stats_component = stats_comp
+	
+	# We can get the player node from any of its components.
+	self.player_node = inv_comp.get_owner()
 
 	# Connect to the data component signals
 	inventory_component.inventory_changed.connect(redraw)
@@ -128,8 +135,14 @@ func _on_equipment_slot_clicked(slot_type: ItemData.EquipmentSlot, item_data: It
 	
 # This function is called when an inventory slot is right-clicked.
 func _on_item_drop_requested(item_data: ItemData) -> void:
-	print("Player requested to drop: ", item_data.item_name)
+	# Guard clause to ensure we have a valid player reference.
+	if not is_instance_valid(player_node):
+		push_error("PlayerInventory cannot drop item: Player reference is not valid.")
+		return
+		
 	# Remove the item from the player's inventory component.
 	inventory_component.remove_item(item_data)
-	# In the next step, we will add an RPC call here to tell the server
-	# to spawn the item on the ground.
+	
+	# Announce that an item should be spawned at the player's current location.
+	# The server will hear this and handle the spawning.
+	EventBus.item_drop_requested_by_player.emit(item_data, player_node.global_position)
