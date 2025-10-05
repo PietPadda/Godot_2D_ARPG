@@ -1,10 +1,10 @@
 [gd_scene load_steps=4 format=3 uid="uid://mgpdom0bxt1y"]
 
-[ext_resource type="Script" uid="uid://dtjds5xuru1x6" path="res://scripts/ui/character_sheet.gd" id="1_84elj"]
+[ext_resource type="Script" uid="uid://dtjds5xuru1x6" path="res://scripts/ui/player_inventory.gd" id="1_84elj"]
 [ext_resource type="PackedScene" uid="uid://c2w13g6qp7nis" path="res://scenes/ui/equipment_slot.tscn" id="1_pylm2"]
 [ext_resource type="PackedScene" uid="uid://i8r3dhcqw1wa" path="res://scenes/ui/inventory_panel.tscn" id="2_ielsr"]
 
-[node name="CharacterSheet" type="PanelContainer"]
+[node name="PlayerInventory" type="PanelContainer"]
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0

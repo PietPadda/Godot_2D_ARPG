@@ -17,7 +17,7 @@ func _on_host_button_pressed():
 	
 	# Instead of destructively changing the scene, we ask our SceneManager to handle it.
 	# This keeps our persistent World node alive.
-	Scene.transition_to_scene("res://scenes/levels/main.tscn")
+	Scene.transition_to_scene("res://scenes/levels/town.tscn")
 	
 	# The main menu's job is done, so we can safely remove it.
 	self.queue_free()
