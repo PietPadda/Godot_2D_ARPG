@@ -140,9 +140,10 @@ func _on_item_drop_requested(item_data: ItemData) -> void:
 		push_error("PlayerInventory cannot drop item: Player reference is not valid.")
 		return
 		
-	# Remove the item from the player's inventory component.
+	# Client-side Prediction: Remove the item from our local inventory immediately.
 	inventory_component.remove_item(item_data)
 	
-	# Announce that an item should be spawned at the player's current location.
-	# The server will hear this and handle the spawning.
-	EventBus.item_drop_requested_by_player.emit(item_data, player_node.global_position)
+	# Send the request to the server to perform the authoritative drop.
+	var level = LevelManager.get_current_level()
+	if is_instance_valid(level):
+		level.server_request_player_drop.rpc_id(1, item_data.resource_path, player_node.global_position)
