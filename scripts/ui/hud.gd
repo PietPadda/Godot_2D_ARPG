@@ -27,7 +27,7 @@ func _unhandled_input(_event: InputEvent) -> void:
 	# Toggle player inventory panel's visibility
 	if Input.is_action_just_pressed("toggle_inventory"): # "I"
 		player_inventory.visible = !player_inventory.visible
-		# Redraw the inventory every time it's opened to ensure it's up to date.
+		# Redraw the inventory every time it's ocpened to ensure it's up to date.
 		if player_inventory.visible:
 			player_inventory.redraw() # redraw it
 	
@@ -83,25 +83,28 @@ func _on_shop_panel_requested() -> void:
 			
 # This new function runs ONLY when the local_player_spawned signal is received.
 func _on_local_player_spawned(player: Node) -> void:
-		# Ensure UI panels are hidden on spawn
+	# Ensure UI panels are hidden on spawn
 	player_inventory.hide()
+	character_sheet.hide()
 	shop_panel.hide()
 	
-		# Now that we have a guaranteed reference to the player, we connect to their stats.
-	var player_stats = player.get_node("StatsComponent")
-	var inventory_component = player.get_node("InventoryComponent")
-	var player_equipment: EquipmentComponent = player.get_node("EquipmentComponent")
+	# Now that we have a guaranteed reference to the player, we connect to their stats.
+	var stats_component: StatsComponent = player.get_node("StatsComponent")
+	var inventory_component: InventoryComponent = player.get_node("InventoryComponent")
+	var equipment_component: EquipmentComponent = player.get_node("EquipmentComponent")
+	var stat_calculator: StatCalculator = player.get_node("StatCalculator") # Get the calculator
 	
 	# Connect our UI update function to the player's signal.
-	player_stats.health_changed.connect(on_player_health_changed)
-	player_stats.mana_changed.connect(on_player_mana_changed)
-	player_stats.xp_changed.connect(on_player_xp_changed)
+	stats_component.health_changed.connect(on_player_health_changed)
+	stats_component.mana_changed.connect(on_player_mana_changed)
+	stats_component.xp_changed.connect(on_player_xp_changed)
 	
 	# Manually update bars once using the component's final, calculated values.
-	on_player_health_changed(player_stats.current_health, player_stats.total_max_health)
-	on_player_mana_changed(player_stats.current_mana, player_stats.total_max_mana)
-	on_player_xp_changed(player_stats.stats_data.level, player_stats.stats_data.current_xp, player_stats.stats_data.xp_to_next_level)
+	on_player_health_changed(stats_component.current_health, stats_component.total_max_health)
+	on_player_mana_changed(stats_component.current_mana, stats_component.total_max_mana)
+	on_player_xp_changed(stats_component.stats_data.level, stats_component.stats_data.current_xp, stats_component.stats_data.xp_to_next_level)
 	
 	# Initialize both panels with the player's components.
-	player_inventory.initialize(inventory_component, player_equipment, player_stats)
-	shop_panel.initialize(inventory_component, player_stats)
+	player_inventory.initialize(inventory_component, equipment_component, stats_component)
+	character_sheet.initialize(stats_component, stat_calculator) # Initialize the new sheet
+	shop_panel.initialize(inventory_component, stats_component)
