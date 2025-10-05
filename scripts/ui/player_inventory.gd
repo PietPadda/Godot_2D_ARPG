@@ -29,15 +29,18 @@ func initialize(inv_comp: InventoryComponent, equip_comp: EquipmentComponent, st
 	inventory_panel.initialize_inventory(inventory_component.inventory_data)
 	# Connect to the UI slots now that they've been created
 	for slot in inventory_panel.grid_container.get_children():
-		# Invetory slot calls
-		# Only connect the signals if they aren't connected already.
-		if not slot.slot_clicked.is_connected(_on_inventory_slot_clicked):
-			slot.slot_clicked.connect(_on_inventory_slot_clicked)
+		# This panel interprets a left-click as an "equip item" request.
+		if !slot.slot_left_clicked.is_connected(_on_inventory_slot_clicked):
+			slot.slot_left_clicked.connect(_on_inventory_slot_clicked)
+			
+		# NEW: This panel interprets a right-click as a "drop item" request.
+		if !slot.slot_right_clicked.is_connected(_on_item_drop_requested):
+			slot.slot_right_clicked.connect(_on_item_drop_requested)
 			
 		# Inventory Tooltip calls
-		if not slot.show_tooltip.is_connected(Tooltip.show_tooltip):
+		if !slot.show_tooltip.is_connected(Tooltip.show_tooltip):
 			slot.show_tooltip.connect(Tooltip.show_tooltip)
-		if not slot.hide_tooltip.is_connected(Tooltip.hide_tooltip):
+		if !slot.hide_tooltip.is_connected(Tooltip.hide_tooltip):
 			slot.hide_tooltip.connect(Tooltip.hide_tooltip.bind(slot)) # Bind the slot node as an argument
 	
 	# Equipment Tooltip calls
@@ -68,6 +71,35 @@ func _ready() -> void:
 	helm_slot.slot_clicked.connect(_on_equipment_slot_clicked)
 	boots_slot.slot_clicked.connect(_on_equipment_slot_clicked)
 
+# unequip is now an internal only private helper
+func _unequip_item(slot_type: ItemData.EquipmentSlot, item_data: ItemData) -> void:
+	# The add_item function returns true if it succeeds.
+	# Check if inventory has space before unequipping.
+	if inventory_component.add_item(item_data):
+		# Call the component's method instead of modifying its data directly.
+		equipment_component.unequip_item_by_slot(slot_type)
+	# Redraw will also happen automatically here.
+	
+
+
+# A central function to update all UI elements.
+func redraw() -> void:
+	# Check if the components are ready before redrawing.
+	if not is_instance_valid(inventory_component) or not is_instance_valid(equipment_component) or not is_instance_valid(stats_component):
+		return
+	
+	inventory_panel.redraw(inventory_component.inventory_data)
+	weapon_slot.update_slot(equipment_component.equipment_data.equipped_items[ItemData.EquipmentSlot.WEAPON])
+	armor_slot.update_slot(equipment_component.equipment_data.equipped_items[ItemData.EquipmentSlot.ARMOR])
+	helm_slot.update_slot(equipment_component.equipment_data.equipped_items[ItemData.EquipmentSlot.HELM])
+	boots_slot.update_slot(equipment_component.equipment_data.equipped_items[ItemData.EquipmentSlot.BOOTS])
+	_on_gold_changed(stats_component.stats_data.gold)
+
+# -- Signal Handlers --
+# This function is called when the StatsComponent emits the "gold_changed" signal.
+func _on_gold_changed(total_gold: int) -> void:
+	gold_label.text = "Gold: " + str(total_gold)
+
 # When an inventory item is clicked, try to equip it.
 func _on_inventory_slot_clicked(item_data: ItemData) -> void:
 	# Ignore clicks on non-equippable items.
@@ -93,29 +125,11 @@ func _on_inventory_slot_clicked(item_data: ItemData) -> void:
 # When an equipped item is clicked, unequip it.
 func _on_equipment_slot_clicked(slot_type: ItemData.EquipmentSlot, item_data: ItemData) -> void:
 	_unequip_item(slot_type, item_data)
-
-# unequip is now an internal only private helper
-func _unequip_item(slot_type: ItemData.EquipmentSlot, item_data: ItemData) -> void:
-	# The add_item function returns true if it succeeds.
-	# Check if inventory has space before unequipping.
-	if inventory_component.add_item(item_data):
-		# Call the component's method instead of modifying its data directly.
-		equipment_component.unequip_item_by_slot(slot_type)
-	# Redraw will also happen automatically here.
 	
-# This function is called when the StatsComponent emits the "gold_changed" signal.
-func _on_gold_changed(total_gold: int) -> void:
-	gold_label.text = "Gold: " + str(total_gold)
-
-# A central function to update all UI elements.
-func redraw() -> void:
-	# Check if the components are ready before redrawing.
-	if not is_instance_valid(inventory_component) or not is_instance_valid(equipment_component) or not is_instance_valid(stats_component):
-		return
-	
-	inventory_panel.redraw(inventory_component.inventory_data)
-	weapon_slot.update_slot(equipment_component.equipment_data.equipped_items[ItemData.EquipmentSlot.WEAPON])
-	armor_slot.update_slot(equipment_component.equipment_data.equipped_items[ItemData.EquipmentSlot.ARMOR])
-	helm_slot.update_slot(equipment_component.equipment_data.equipped_items[ItemData.EquipmentSlot.HELM])
-	boots_slot.update_slot(equipment_component.equipment_data.equipped_items[ItemData.EquipmentSlot.BOOTS])
-	_on_gold_changed(stats_component.stats_data.gold)
+# This function is called when an inventory slot is right-clicked.
+func _on_item_drop_requested(item_data: ItemData) -> void:
+	print("Player requested to drop: ", item_data.item_name)
+	# Remove the item from the player's inventory component.
+	inventory_component.remove_item(item_data)
+	# In the next step, we will add an RPC call here to tell the server
+	# to spawn the item on the ground.

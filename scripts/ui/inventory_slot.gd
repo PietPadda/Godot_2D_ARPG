@@ -1,12 +1,12 @@
 # inventory_slot.gd
 extends PanelContainer
 
-# signals
-signal slot_clicked(item_data)
+# The old signals are replaced with generic input signals.
+signal slot_left_clicked(item_data)
+signal slot_right_clicked(item_data)
 # announce when to show or hide a tooltip for our item
 signal show_tooltip(item_data, slot_node)
 signal hide_tooltip()
-signal slot_right_clicked(item_data) # NEW: Signal for selling
 
 # vars
 var current_item: ItemData # Astore the item
@@ -32,13 +32,13 @@ func update_slot(item_data: ItemData) -> void:
 		item_texture.visible = false
 
 # ---Signal Handlers---
-# clicking a slot
+# This function now cleanly separates left and right click actions.
 func _on_gui_input(event: InputEvent) -> void:
-	if event is InputEventMouseButton  and event.is_pressed():
-		if current_item:
-			if event.button_index == MOUSE_BUTTON_LEFT: # left click
-				emit_signal("slot_clicked", current_item)
-			elif event.button_index == MOUSE_BUTTON_RIGHT: # right click 
+	if event is InputEventMouseButton and event.is_pressed() and current_item:
+		match event.button_index:
+			MOUSE_BUTTON_LEFT: # left click
+				emit_signal("slot_left_clicked", current_item)
+			MOUSE_BUTTON_RIGHT: # right click 
 				emit_signal("slot_right_clicked", current_item)
 
 # mouse hovering over slot

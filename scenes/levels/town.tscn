@@ -26,7 +26,7 @@ tile_set = ExtResource("6_5ycnk")
 
 [node name="Portal" parent="." instance=ExtResource("7_rklyf")]
 position = Vector2(1668, 347)
-target_scene_path = "uid://cys1ord7jy672"
+target_scene_path = "uid://c653y5qrd8oqt"
 
 [node name="ShopNpc" parent="." instance=ExtResource("7_0x67q")]
 position = Vector2(1270, 152)
