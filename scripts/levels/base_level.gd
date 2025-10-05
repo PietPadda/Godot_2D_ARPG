@@ -15,10 +15,8 @@ const LootDropScene = preload("res://scenes/items/loot_drop.tscn")
 
 # --- Player Spawning Properties ---
 @onready var player_spawn_points_container: Node2D = $PlayerSpawnPoints
-
 var player_spawn_points: Array = []
 var current_player_spawn_index: int = 0
-
 var _peers_ready_in_level := []
 
 func _ready() -> void:
@@ -236,6 +234,9 @@ func _on_item_drop_requested_by_player(item_data: ItemData, position: Vector2) -
 	
 	# Add the loot to the scene. The MultiplayerSpawner will replicate it to all clients.
 	loot_container.add_child(loot_instance, true)
+	
+	# THE FIX: Tell all clients to make this new node's synchronizer visible.
+	make_node_visible_to_all(loot_instance.get_path())
 
 # -- RPCs --
 @rpc("any_peer", "call_local", "reliable")

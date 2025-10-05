@@ -2,8 +2,9 @@
 class_name LootDrop
 extends Area2D
 
-# We no longer need the @onready var here, as it can cause race conditions.
-# @onready var sprite: Sprite2D = $Sprite2D
+# --- Loot Properties ---
+@onready var collision_shape: CollisionShape2D = $CollisionShape2D
+@onready var timer: Timer = $PickupTimer
 
 # This will be set via RPC after the node is spawned.
 var item_data: ItemData
@@ -17,7 +18,13 @@ var item_data: ItemData
 			_setup_loot()
 			
 func _ready() -> void:
-	# The node is guaranteed to exist here, so we can safely run setup.
+	# Start with the collision disabled so it can't be picked up immediately.
+	collision_shape.disabled = true
+	
+	# Connect the timer's timeout signal to a function that will enable pickup.
+	timer.timeout.connect(_on_pickup_timer_timeout)
+	
+	# The setup logic will run once the item_data_path is synced.setup.
 	_setup_loot()
 
 # Add a _physics_process function to this script
@@ -34,6 +41,11 @@ func _on_body_entered(body: Node2D) -> void:
 	# We send the RPC request to the server (peer_id = 1) and include our own ID.
 	server_request_pickup.rpc_id(1, body.get_multiplayer_authority())
 
+# This function will run after the 1-second timer finishes.
+func _on_pickup_timer_timeout() -> void:
+	# Now that the cooldown is over, enable the collision shape.
+	collision_shape.disabled = false
+
 # --- Private Functions ---
 # This new function contains all our setup logic.
 func _setup_loot() -> void:
@@ -46,6 +58,9 @@ func _setup_loot() -> void:
 	var sprite: Sprite2D = $Sprite2D
 	if is_instance_valid(item_data) and is_instance_valid(sprite) and is_instance_valid(item_data.texture):
 		sprite.texture = item_data.texture
+	
+	# Start the pickup cooldown timer.
+	timer.start()
 	
 	# Enable collision only after setup is complete.
 	$CollisionShape2D.disabled = false
