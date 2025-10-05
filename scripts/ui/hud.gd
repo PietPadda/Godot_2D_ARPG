@@ -11,7 +11,7 @@ extends CanvasLayer
 @onready var mana_label: Label = $PlayerManaBar/ManaLabel # child of manabar
 @onready var xp_bar: ProgressBar = $PlayerXpBar
 @onready var xp_label: Label = $PlayerXpBar/XpLabel # child of xpbar
-@onready var character_sheet: PanelContainer = $CharacterSheet
+@onready var player_inventory: PanelContainer = $PlayerInventory
 @onready var shop_panel: PanelContainer = $ShopPanel
 
 var _is_player_in_shop_range := false
@@ -23,12 +23,12 @@ func _ready() -> void:
 	EventBus.player_exited_shop_range.connect(func(): _is_player_in_shop_range = false)
 
 func _unhandled_input(_event: InputEvent) -> void:
-	# Toggle the character sheet panel's visibility
-	if Input.is_action_just_pressed("toggle_character_sheet"): # "C"
-		character_sheet.visible = not character_sheet.visible
-		# Redraw the sheet every time it's opened to ensure it's up to date.
-		if character_sheet.visible:
-			character_sheet.redraw() # redraw it
+	# Toggle player inventory panel's visibility
+	if Input.is_action_just_pressed("toggle_inventory"): # "I"
+		player_inventory.visible = !player_inventory.visible
+		# Redraw the inventory every time it's opened to ensure it's up to date.
+		if player_inventory.visible:
+			player_inventory.redraw() # redraw it
 	
 	# E to interact with shop npc
 	if _is_player_in_shop_range and Input.is_action_just_pressed("interact"):
@@ -76,13 +76,13 @@ func _on_shop_panel_requested() -> void:
 			
 # This new function runs ONLY when the local_player_spawned signal is received.
 func _on_local_player_spawned(player: Node) -> void:
-	 # Ensure UI panels are hidden on spawn
-	character_sheet.hide()
+		# Ensure UI panels are hidden on spawn
+	player_inventory.hide()
 	shop_panel.hide()
 	
-	# Now that we have a guaranteed reference to the player, we connect to their stats.
+		# Now that we have a guaranteed reference to the player, we connect to their stats.
 	var player_stats = player.get_node("StatsComponent")
-	var player_inventory = player.get_node("InventoryComponent")
+	var inventory_component = player.get_node("InventoryComponent")
 	var player_equipment: EquipmentComponent = player.get_node("EquipmentComponent")
 	
 	# Connect our UI update function to the player's signal.
@@ -96,5 +96,5 @@ func _on_local_player_spawned(player: Node) -> void:
 	on_player_xp_changed(player_stats.stats_data.level, player_stats.stats_data.current_xp, player_stats.stats_data.xp_to_next_level)
 	
 	# Initialize both panels with the player's components.
-	character_sheet.initialize(player_inventory, player_equipment, player_stats)
-	shop_panel.initialize(player_inventory, player_stats)
+	player_inventory.initialize(inventory_component, player_equipment, player_stats)
+	shop_panel.initialize(inventory_component, player_stats)

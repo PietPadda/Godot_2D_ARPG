@@ -1,4 +1,4 @@
-# character_sheet.gd
+# scripts/ui/player_inventory.gd
 extends PanelContainer
 
 # scene nodes

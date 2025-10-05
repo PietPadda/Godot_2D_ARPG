@@ -120,8 +120,8 @@ func apply_persistent_data(data: Resource, is_transition: bool) -> void:
 	# Tell the UI to update.
 	stats_component.refresh_stats()
 	var hud = get_tree().get_first_node_in_group("hud")
-	if hud and hud.character_sheet:
-		hud.character_sheet.redraw()
+	if hud and hud.player_inventory:
+		hud.player_inventory.redraw()
 		
 # This is our new, reusable function that does the actual work.
 func _apply_data_dictionary(data: Dictionary):
@@ -168,8 +168,8 @@ func _apply_data_dictionary(data: Dictionary):
 	# Finally, tell the UI to update with all the new data.
 	stats_component.refresh_stats()
 	var hud = get_tree().get_first_node_in_group("hud")
-	if hud and is_instance_valid(hud.character_sheet):
-		hud.character_sheet.redraw()
+	if hud and is_instance_valid(hud.player_inventory):
+		hud.player_inventory.redraw()
 
 # -- Signal Handlers --
 # Called by this player's own StatsComponent when its health reaches zero.
