@@ -34,4 +34,6 @@ texture = ExtResource("2_6dpq1")
 replication_config = SubResource("SceneReplicationConfig_8qepv")
 public_visibility = false
 
+[node name="PickupTimer" type="Timer" parent="."]
+
 [connection signal="body_entered" from="." to="." method="_on_body_entered"]
