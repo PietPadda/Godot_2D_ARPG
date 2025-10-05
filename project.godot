@@ -30,6 +30,10 @@ Scene="*res://scripts/core/scene_manager.gd"
 States="*res://scripts/core/state_manager.gd"
 Tooltip="*res://scenes/core/tooltip_manager.tscn"
 
+[gui]
+
+theme/custom_font="uid://cuuwjw00ffvae"
+
 [input]
 
 move_click={
