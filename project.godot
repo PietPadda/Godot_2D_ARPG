@@ -33,6 +33,10 @@ Tooltip="*res://scenes/core/tooltip_manager.tscn"
 [global_group]
 
 characters="Playable and Non-Playable Characters"
+loot=""
+player=""
+enemies=""
+projectile=""
 
 [gui]
 
