@@ -2,23 +2,23 @@
 
 [ext_resource type="Script" uid="uid://dsidci2l4yr4r" path="res://data/items/item_data.gd" id="1_drt5l"]
 [ext_resource type="Script" uid="uid://cw6u7dqyn8n7w" path="res://data/items/stat_modifier.gd" id="2_6iucp"]
-[ext_resource type="Texture2D" uid="uid://dhumdxaqnh61l" path="res://assets/items/boots/d2_greaves.png" id="3_drt5l"]
+[ext_resource type="Texture2D" uid="uid://d4j6872ku8fon" path="res://assets/items/boots/d2_chain_boots.png" id="3_drt5l"]
 
 [sub_resource type="Resource" id="Resource_6o8e6"]
 script = ExtResource("2_6iucp")
 stat = 2
-value = 250.0
+value = 150.0
 metadata/_custom_type_script = "uid://cw6u7dqyn8n7w"
 
 [sub_resource type="Resource" id="Resource_rrjcu"]
 script = ExtResource("2_6iucp")
 stat = 3
-value = 50.0
+value = 30.0
 metadata/_custom_type_script = "uid://cw6u7dqyn8n7w"
 
 [resource]
 script = ExtResource("1_drt5l")
-item_name = "Greaves"
+item_name = "Chain Boots"
 texture = ExtResource("3_drt5l")
 equipment_slot = 4
 stat_modifiers = Array[ExtResource("2_6iucp")]([SubResource("Resource_6o8e6"), SubResource("Resource_rrjcu")])

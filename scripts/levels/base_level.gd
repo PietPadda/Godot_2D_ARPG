@@ -196,13 +196,14 @@ func _spawn_single_item(item_to_drop: ItemData, position: Vector2, apply_cooldow
 	# NEW: We pass the cooldown flag to the loot instance.
 	loot_instance.apply_pickup_delay = apply_cooldown 
 	
-	var loot_container = get_node_or_null("LootContainer")
-	if not is_instance_valid(loot_container):
-		push_error("Could not find 'LootContainer' node in the current level!")
+	# THE FIX: Get the WorldYSort node, as it's the new container for all spawned items.
+	var y_sort_container = get_node_or_null("WorldYSort")
+	if not is_instance_valid(y_sort_container):
+		push_error("Could not find 'WorldYSort' node in the current level!")
 		loot_instance.queue_free()
 		return
 	
-	loot_container.add_child(loot_instance, true)
+	y_sort_container.add_child(loot_instance, true)
 	make_node_visible_to_all(loot_instance.get_path())
 
 # -- Signal Handlers --

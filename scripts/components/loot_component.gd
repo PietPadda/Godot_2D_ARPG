@@ -28,11 +28,11 @@ func drop_loot(position: Vector2) -> void:
 		if not is_instance_valid(level): 
 			return
 		
-		# Find the LootContainer within the active level.
-		var loot_container = level.get_node_or_null("LootContainer")
+		# THE FIX: Find the WorldYSort node instead of the old LootContainer.
+		var loot_container = level.get_node_or_null("WorldYSort")
 		
 		if not loot_container:
-			push_error("Could not find 'LootContainer' node in the current level!")
+			push_error("Could not find 'WorldYSort' node in the current level!")
 			return
 		
 		# The LootSpawner will see this action and replicate it for all clients.
