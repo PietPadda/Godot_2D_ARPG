@@ -66,9 +66,10 @@ func server_request_cast(target_position: Vector2):
 	if not is_instance_valid(level):
 		return
 	
-	# Find the spawner and container
-	var projectile_container = level.get_node_or_null("ProjectileContainer")
+	# THE FIX: Find the WorldYSort node. The ProjectileSpawner is watching it.
+	var projectile_container = level.get_node_or_null("WorldYSort")
 	if not projectile_container:
+		push_error("Could not find 'WorldYSort' node in the current level! Cannot cast skill.")
 		return
 
 	# Instantiate and configure the  (now invisible) projectile on the server
