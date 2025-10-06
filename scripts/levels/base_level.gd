@@ -65,9 +65,10 @@ func _spawn_player(id: int):
 		return
 	
 	# Guard Clause: Ensure the required container nodes exist in the scene.
-	var container = get_node_or_null("PlayerContainer")
+	# THE FIX: The 'container' is now the WorldYSort node itself.
+	var container = get_node_or_null("WorldYSort")
 	if !is_instance_valid(container):
-		push_error("BaseLevel: PlayerContainer not found! Cannot spawn player.")
+		push_error("BaseLevel: WorldYSort  not found! Cannot spawn player.")
 		return
 
 	# Guard Clause: Prevent spawning the same player twice if they already exist.
@@ -100,7 +101,7 @@ func _spawn_player(id: int):
 	# Set the position on the server's instance.
 	player.global_position = spawn_position
 	
-	# Add the player to the container. The MultiplayerSpawner will now detect this
+	# Add the player to the WorldYSort container. The MultiplayerSpawner will now detect this
 	# and automatically replicate the spawn event to all clients.
 	container.add_child(player)
 	
@@ -113,10 +114,8 @@ func _spawn_player(id: int):
 
 # This is our new, robust handshake function.
 func _perform_global_handshake():
-	var container = get_node_or_null("PlayerContainer")
-	if not is_instance_valid(container): return
-	
-	var players_in_this_scene = container.get_children()
+	# THE FIX: Instead of finding containers, get all nodes in the "player" group.
+	var players_in_this_scene = get_tree().get_nodes_in_group("player")
 	
 	# For every combination of players in THIS scene, make them visible to each other.
 	for player1 in players_in_this_scene:
@@ -130,42 +129,15 @@ func _perform_global_handshake():
 			_rpc_force_visibility_update.rpc(player2.get_path(), p1_id, true)
 			
 	# Enemy-to-Player Handshake
-	var enemy_container = get_node_or_null("EnemyContainer")
-	if is_instance_valid(enemy_container):
-		var enemies_in_this_scene = enemy_container.get_children()
+	# THE FIX: Get all nodes in the "enemies" group.
+	var enemies_in_this_scene = get_tree().get_nodes_in_group("enemies")
 		
-		# For every player who is now in the scene...
-		for player in players_in_this_scene:
-			var player_id = int(player.name)
-			# ...make every enemy visible to them.
-			for enemy in enemies_in_this_scene:
-				_rpc_force_visibility_update.rpc(enemy.get_path(), player_id, true)
-	
-func _perform_handshake_for_player(new_player_id: int) -> void:
-	var container = get_node_or_null("PlayerContainer")
-	if not container: return
-	
-	var new_player = container.get_node_or_null(str(new_player_id))
-	if not is_instance_valid(new_player): return
-
-	# --- COMMAND-BASED VISIBILITY HANDSHAKE ---
-	# Handle Player-to-Player visibility
-	for existing_player in container.get_children():
-		if existing_player == new_player:
-			continue
-		
-		var existing_player_id = int(existing_player.name)
-		# Command everyone to make the existing player visible to the new player
-		_rpc_force_visibility_update.rpc(existing_player.get_path(), new_player_id, true)
-		# Make the new player visible to all existing players
-		_rpc_force_visibility_update.rpc(new_player.get_path(), int(existing_player_id), true)
-
-	# Make the new player visible to themself
-	_rpc_force_visibility_update.rpc(new_player.get_path(), new_player_id, true)
-	
-	# Make all EXISTING enemies visible to the NEW player.
-	for enemy in get_tree().get_nodes_in_group("enemies"):
-		_rpc_force_visibility_update.rpc(enemy.get_path(), new_player_id, true)
+	# For every player who is now in the scene...
+	for player in players_in_this_scene:
+		var player_id = int(player.name)
+		# ...make every enemy visible to them.
+		for enemy in enemies_in_this_scene:
+			_rpc_force_visibility_update.rpc(enemy.get_path(), player_id, true)
 
 # A reusable function to make a specific node visible to all current players.
 # This will be used by projectiles and loot drops.
@@ -192,59 +164,24 @@ func shutdown_network_sync_for_transition():
 	var all_peers = multiplayer.get_peers()
 	all_peers.append(1) # Include the server itself
 
-	var player_container = get_node_or_null("PlayerContainer")
-	if is_instance_valid(player_container):
-		# Hide all players from everyone
-		for player in player_container.get_children():
-			# ...tell every peer (including the server) to stop seeing them.
-			for peer_id in all_peers:
-				_rpc_force_visibility_update.rpc(player.get_path(), peer_id, false)
-				
-			var sync = player.get_node_or_null("MultiplayerSynchronizer")
-			if is_instance_valid(sync):
-				# For the server itself (peer_id 1), update visibility LOCALLY and IMMEDIATELY.
-				# This avoids the host sending an RPC to itself, fixing the race condition.
-				sync.set_visibility_for(1, false)
-
-	# THE FIX: Also hide all enemies from everyone.
-	# This prevents the "ERR_UNAUTHORIZED" spam on despawn.
-	var enemy_container = get_node_or_null("EnemyContainer")
-	if is_instance_valid(enemy_container):
-		for enemy in enemy_container.get_children():
-			for peer_id in all_peers:
-				_rpc_force_visibility_update.rpc(enemy.get_path(), peer_id, false)
-				
-			var sync = enemy.get_node_or_null("MultiplayerSynchronizer")
-			if is_instance_valid(sync):
-				# For the server itself (peer_id 1), update visibility LOCALLY and IMMEDIATELY.
-				# This avoids the host sending an RPC to itself, fixing the race condition.
-				sync.set_visibility_for(1, false)
-				
-	# Hide all projectiles
-	var projectile_container = get_node_or_null("ProjectileContainer")
-	if is_instance_valid(projectile_container):
-		for projectile in projectile_container.get_children():
-			for peer_id in all_peers:
-				_rpc_force_visibility_update.rpc(projectile.get_path(), peer_id, false)
-				
-			var sync = projectile.get_node_or_null("MultiplayerSynchronizer")
-			if is_instance_valid(sync):
-				# For the server itself (peer_id 1), update visibility LOCALLY and IMMEDIATELY.
-				# This avoids the host sending an RPC to itself, fixing the race condition.
-				sync.set_visibility_for(1, false)
-				
-	# Hide all loot
-	var loot_container = get_node_or_null("LootContainer")
-	if is_instance_valid(loot_container):
-		for loot in loot_container.get_children():
-			for peer_id in all_peers:
-				_rpc_force_visibility_update.rpc(loot.get_path(), peer_id, false)
-				
-			var sync = loot.get_node_or_null("MultiplayerSynchronizer")
-			if is_instance_valid(sync):
-				# For the server itself (peer_id 1), update visibility LOCALLY and IMMEDIATELY.
-				# This avoids the host sending an RPC to itself, fixing the race condition.
-				sync.set_visibility_for(1, false)
+	# THE FIX: Get all dynamic nodes by their group instead of searching in containers.
+	var players = get_tree().get_nodes_in_group("player")
+	var enemies = get_tree().get_nodes_in_group("enemies")
+	var loot_drops = get_tree().get_nodes_in_group("loot")
+	var projectiles = get_tree().get_nodes_in_group("projectile")
+	var all_dynamic_nodes = players + enemies + loot_drops + projectiles
+	
+	# Hide all node Synchronisers, do prevent packet errors if still enabled
+	for node in all_dynamic_nodes:
+		# ...tell every peer (including the server) to stop seeing them.
+		for peer_id in all_peers:
+			_rpc_force_visibility_update.rpc(node.get_path(), peer_id, false)
+			
+		var sync = node.get_node_or_null("MultiplayerSynchronizer")
+		if is_instance_valid(sync):
+			# For the server itself (peer_id 1), update visibility LOCALLY and IMMEDIATELY.
+			# This avoids the host sending an RPC to itself, fixing the race condition.
+			sync.set_visibility_for(1, false)
 
 # This is our new, reusable helper function for spawning a specific item.
 func _spawn_single_item(item_to_drop: ItemData, position: Vector2, apply_cooldown: bool):
