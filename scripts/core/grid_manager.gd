@@ -325,38 +325,19 @@ func clear_character_from_grid(character_path: NodePath) -> void:
 @rpc("any_peer", "call_local")
 func server_player_request_tile(character_path: NodePath, requested_tile: Vector2i) -> void:
 	var character = get_node_or_null(character_path)
-	if not is_instance_valid(character): 
-		return
+	if not is_instance_valid(character): return
 
-	# For the host, sender ID is 1. For remote clients, it's their unique ID.
 	var client_id = multiplayer.get_remote_sender_id()
 
 	# Our existing occupy_tile function is already atomic and perfect for this.
 	var success = occupy_tile(character, requested_tile)
 
 	if success:
-		# Check if the request came from the server itself (the host).
-		# This is our previous fix for the "Green Light" case.
-		if client_id == 1:
-			# It's the host. Call the function directly instead of using an RPC.
-			var movement_component = character.get_node_or_null("GridMovementComponent")
-			if is_instance_valid(movement_component):
-				movement_component._execute_approved_move(requested_tile)
-		else:
-			# It's a remote client. Send the RPC as before.
-			# Approved. Tell the client they can proceed.
-			client_confirm_player_move.rpc_id(client_id, character_path, requested_tile)
+		# Approved. Tell the client they can proceed.
+		client_confirm_player_move.rpc_id(client_id, character_path, requested_tile)
 	else:
-		# THE FIX: Apply the same "local path" logic for the "Red Light" case.
-		if client_id == 1:
-			# It's the host. Call the rejection handler directly.
-			var movement_component = character.get_node_or_null("GridMovementComponent")
-			if is_instance_valid(movement_component):
-				movement_component._handle_rejected_move()
-		else:
-			# Denied. Tell the client their path is blocked.
-			# This logic doesn't need to change, as a "Red Light" is always remote.
-			client_reject_player_move.rpc_id(client_id, character_path)
+		# Denied. Tell the client their path is blocked.
+		client_reject_player_move.rpc_id(client_id, character_path)
 
 # NEW RPC: Sent from the server to the client to confirm a move.
 @rpc("authority")

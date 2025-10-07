@@ -7,8 +7,6 @@ extends Node
 signal path_finished
 # This signal will be emitted each time the component reaches a waypoint in its path.
 signal waypoint_reached
-# This signal will trigger that a path is blocked.
-signal path_blocked
 
 # Preload the Player script to make the "Player" type available for our type check.
 const Player = preload("res://scripts/player/player.gd")
@@ -87,9 +85,9 @@ func stop() -> void:
 	owner.velocity = Vector2.ZERO # Ensure physics velocity is also stopped
 	
 # Internal Logic
-# This function creates and starts the Tween for one step of the path.
-# It now requests permission instead of moving directly.
+# This function now creates and starts the Tween for one step of the path.
 func _start_next_move_step() -> bool:
+	# --- THE FIX ---
 	# Movement logic, especially creating tweens, should ONLY run on
 	# the machine that has authority over this character. Puppets should not move themselves.
 	if not owner.is_multiplayer_authority():
@@ -109,15 +107,24 @@ func _start_next_move_step() -> bool:
 	# NOTE: We are assuming the occupation will succeed. The server is the authority.
 	is_moving = true # still moving
 	
-	# THE FIX: Instead of creating a tween, we find the next tile...
-	var next_world_pos = move_path[0]
-	var next_tile = Grid.world_to_map(next_world_pos)
+	# PackedVector2Array doesn't have pop_front().
+	# We get the target at index 0, then remove it.
+	var target_world_pos = move_path[0]
+	move_path.remove_at(0)
 	
-	# ...and send an RPC to the server asking for permission to move there.
-	Grid.server_player_request_tile.rpc_id(1, owner.get_path(), next_tile)
-
-	# We return 'true' to signify a move is in progress, but the actual
-	# tweening will now be started by an RPC call from the server.
+	var move_speed = owner.get_total_stat("move_speed")
+	var distance = owner.global_position.distance_to(target_world_pos)
+	
+	# Prevent division by zero.
+	if move_speed <= 0: 
+		return false 
+	var duration = distance / move_speed
+	
+	# Assign the new tween to our reference variable.
+	_active_tween = create_tween().set_trans(Tween.TRANS_LINEAR)
+	_active_tween.tween_property(owner, "global_position", target_world_pos, duration)
+	# When the tween finishes, call our arrival function.
+	_active_tween.tween_callback(_on_move_step_finished) # Call this function when done.
 	return true # continue moving (bool allows func call)
 
 # This is our new "arrival" function. It's called when the tween is done.
@@ -145,41 +152,3 @@ func _on_move_step_finished():
 # to prevent movement from being interrupted mid-tween.
 func _physics_process(_delta: float) -> void:
 	pass
-	
-# --- RPC Handlers ---
-# These functions are called by GridManager via RPC.
-
-# Called by the server when our requested move is APPROVED ("Green Light").
-func _execute_approved_move(confirmed_tile: Vector2i):
-	# The tweening logic from the old _start_next_move_step now lives here.
-	if move_path.is_empty(): 
-		return
-
-	# PackedVector2Array doesn't have pop_front().
-	# We get the target at index 0, then remove it.
-	# Remove the step we are about to take from our local path.
-	move_path.remove_at(0)
-	
-	var target_world_pos = Grid.map_to_world(confirmed_tile)
-	var move_speed = owner.get_total_stat(Stats.STAT_NAMES[Stats.STAT.MOVE_SPEED])
-	var distance = owner.global_position.distance_to(target_world_pos)
-	
-	# Prevent division by zero.
-	if move_speed <= 0: 
-		return
-	
-	# Tween duration
-	var duration = distance / move_speed
-	
-	# Assign the new tween to our reference variable.
-	# We use simple linear interpolation
-	_active_tween = create_tween().set_trans(Tween.TRANS_LINEAR)
-	_active_tween.tween_property(owner, "global_position", target_world_pos, duration)
-	_active_tween.tween_callback(_on_move_step_finished)
-
-# Called by the server when our requested move is REJECTED ("Red Light").
-func _handle_rejected_move():
-	# Our path is blocked by another character. Stop moving.
-	stop()
-	# Announce that the path is blocked so the state machine can request a new one.
-	emit_signal("path_blocked")
