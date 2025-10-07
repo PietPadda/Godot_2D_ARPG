@@ -335,7 +335,8 @@ func server_player_request_tile(character_path: NodePath, requested_tile: Vector
 	var success = occupy_tile(character, requested_tile)
 
 	if success:
-		# THE FIX: Check if the request came from the server itself (the host).
+		# Check if the request came from the server itself (the host).
+		# This is our previous fix for the "Green Light" case.
 		if client_id == 1:
 			# It's the host. Call the function directly instead of using an RPC.
 			var movement_component = character.get_node_or_null("GridMovementComponent")
@@ -346,9 +347,16 @@ func server_player_request_tile(character_path: NodePath, requested_tile: Vector
 			# Approved. Tell the client they can proceed.
 			client_confirm_player_move.rpc_id(client_id, character_path, requested_tile)
 	else:
-		# Denied. Tell the client their path is blocked.
-		# This logic doesn't need to change, as a "Red Light" is always remote.
-		client_reject_player_move.rpc_id(client_id, character_path)
+		# THE FIX: Apply the same "local path" logic for the "Red Light" case.
+		if client_id == 1:
+			# It's the host. Call the rejection handler directly.
+			var movement_component = character.get_node_or_null("GridMovementComponent")
+			if is_instance_valid(movement_component):
+				movement_component._handle_rejected_move()
+		else:
+			# Denied. Tell the client their path is blocked.
+			# This logic doesn't need to change, as a "Red Light" is always remote.
+			client_reject_player_move.rpc_id(client_id, character_path)
 
 # NEW RPC: Sent from the server to the client to confirm a move.
 @rpc("authority")
