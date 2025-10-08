@@ -132,54 +132,47 @@ func find_path(start_coord: Vector2i, end_coord: Vector2i, pathing_character: No
 		
 	return world_path
 
-# This new function handles the logic for both host and clients.
-# This is the function that is called by the State Machine's _recalculate_path()
+# This function is called by a character's state machine when it needs a path.
 func request_path(start_coord: Vector2i, end_coord: Vector2i, character: Node) -> void:
-	# This function now ONLY runs on the server.
-	# If we're a client, we send the request and do nothing else locally.
+	# --- NEW LOGIC FOR PLAYERS ---
+	if character is Player and character.is_multiplayer_authority():
+		# This code runs for OUR player on our machine (client or host).
+		# First, find a path locally. This will automatically avoid any synchronized enemies.
+		var local_path = find_path(start_coord, end_coord, character)
+		
+		if not local_path.is_empty():
+			# We have a valid local path. Now, send it to the server for the official "ticket".
+			server_request_player_path.rpc_id(1, character.get_path(), local_path)
+		return
+
+	# --- EXISTING LOGIC FOR ENEMIES (SERVER-ONLY) ---
+	# The server will still calculate paths for its enemies directly.
 	if not multiplayer.is_server():
-		_find_path_on_server.rpc_id(1, start_coord, end_coord, character.get_path())
+		# A client should never be trying to pathfind for an enemy.
 		return
 		
-		
-	# --- The below ONLY run on the HOST ---
 	# Generate a potential path.
 	var final_path: PackedVector2Array = [] # This will be the path we actually send.
 	
 	# Generate a potential path.
 	var full_path = find_path(start_coord, end_coord, character)
 	
-	# THE FIX: Differentiate between Player and Enemy pathfinding logic.
-	if character is Player:
-		# PLAYER LOGIC: Return the full path. The GridMovementComponent
-		# already handles stripping the starting point. No tile reservation is needed
-		# as enemies should react to the player's current position.
-		final_path = full_path
-	else:
-		# ENEMY LOGIC: Return a single, reserved step to prevent stacking.
-		final_path = [] # Default to an empty path.
-		if full_path.size() > 1:
-			# The first element (index 0) is our current tile.
-			# The second element (index 1) is the first actual step we need to take.
-			var first_step_world_pos = full_path[1]
-			var next_tile = world_to_map(first_step_world_pos)
-			# We call occupy_tile LOCALLY, not as an RPC.
-			var success = occupy_tile(character, next_tile) 
-			if success:
-				# If we successfully reserved the tile, add that step to our path.
-				final_path.append(first_step_world_pos)
+	# ENEMY LOGIC: Return a single, reserved step to prevent stacking.
+	if full_path.size() > 1:
+		# The first element (index 0) is our current tile.
+		# The second element (index 1) is the first actual step we need to take.
+		var first_step_world_pos = full_path[1]
+		var next_tile = world_to_map(first_step_world_pos)
+		# We call occupy_tile LOCALLY, not as an RPC.
+		var success = occupy_tile(character, next_tile) 
+		if success:
+			# If we successfully reserved the tile, add that step to our path.
+			final_path.append(first_step_world_pos)
 	
-	# Deliver the appropriate path (full or single-step) to the character.
-	if character.is_multiplayer_authority(): # Is it the host's character?
-		# If the character is controlled by me (the host's player or an enemy), apply the path directly.
-		var movement_component = character.get_node_or_null("GridMovementComponent")
-		if movement_component:
-			movement_component.move_along_path(final_path)
-	else: # It's a client's character.
-		# If the character is controlled by a client, find their ID...
-		var client_id = character.get_multiplayer_authority()
-		# ...and send the path back to them via RPC.
-		_receive_path_from_server.rpc_id(client_id, final_path, character.get_path())
+	# Give the final path (just one step) to the enemy.
+	var movement_component = character.get_node_or_null("GridMovementComponent")
+	if movement_component:
+		movement_component.move_along_path(final_path)
 	
 # Returns an array of the four cardinal tiles adjacent to the given tile.
 # Using 4 directions is more stable for grid pathfinding than 8.
@@ -277,35 +270,11 @@ func update_character_position(character_path: NodePath, new_position: Vector2i)
 	# On spawn, just occupy the tile directly.
 	occupy_tile(character, new_position)
 	
-# This function ONLY runs on the server, as requested by a client.
-# We change the annotation to allow calls from ANY client.
-@rpc("any_peer", "call_local")
-func _find_path_on_server(start_coord: Vector2i, end_coord: Vector2i, character_path: NodePath) -> void:
-	# Get the peer ID of the client who made the request.
-	var client_id = multiplayer.get_remote_sender_id()
-	
-	var character = get_node_or_null(character_path)
-	if not is_instance_valid(character):
-		return
+# We can now REMOVE the old RPC functions for pathfinding, as our new
+# "Ticket to Ride" RPCs have replaced them.
 
-	# Calculate the path using the server's authoritative data.
-	var path = find_path(start_coord, end_coord, character)
-
-	# THE FIX: We send the character_path BACK along with the path.
-	# This tells the client who this path is for.
-	_receive_path_from_server.rpc_id(client_id, path, character_path)
-
-# This function ONLY runs on a client, as a response from the server.
-# It receives the final path from the server.
-@rpc("authority")
-func _receive_path_from_server(path: PackedVector2Array, character_path: NodePath) -> void:
-	# THE FIX: We no longer just print. We find the character and give it the path.
-	var character = get_node_or_null(character_path)
-	if is_instance_valid(character):
-		var movement_component = character.get_node_or_null("GridMovementComponent")
-		if is_instance_valid(movement_component):
-			# This is the final step. We tell the client's character to start moving.
-			movement_component.move_along_path(path)
+# DELETE the function _find_path_on_server
+# DELETE the function _receive_path_from_server
 			
 # This RPC completely removes a character from all grid tracking systems.
 @rpc("any_peer", "call_local")
@@ -373,7 +342,15 @@ func server_request_player_path(character_path: NodePath, path_points: PackedVec
 	# For now, we'll keep the validation simple. The main goal is preventing
 	# players from stacking on the same destination tile.
 	var final_path = path_points
-	var destination_tile = world_to_map(final_path.back())
+	
+	# If the client sends us an empty path, we just send it back. No validation needed.
+	if final_path.is_empty():
+		client_receive_approved_path.rpc_id(client_id, character_path, final_path)
+		return
+
+	# Get the last element using the correct index: array.size() - 1
+	var destination_world_pos = final_path[final_path.size() - 1]
+	var destination_tile = world_to_map(destination_world_pos)
 	
 	# We check if the destination is occupied by someone OTHER than the character requesting the move.
 	if _occupied_cells.has(destination_tile) and _occupied_cells[destination_tile] != character:
@@ -385,8 +362,16 @@ func server_request_player_path(character_path: NodePath, path_points: PackedVec
 		occupy_tile(character, destination_tile)
 
 	# Send the approved (or empty) path back to the requesting client.
-	client_receive_approved_path.rpc_id(client_id, character_path, final_path)
-
+	# Check if the request came from the server itself (the host, ID 1).
+	if client_id == 1:
+		# It's the host. Call the movement function directly instead of via RPC.
+		var movement_component = character.get_node_or_null("GridMovementComponent")
+		if movement_component:
+			# The logic from our 'client_receive_approved_path' RPC is now called directly.
+			movement_component.move_along_path(final_path)
+	else:
+		# It's a remote client. Send the RPC as we were before.
+		client_receive_approved_path.rpc_id(client_id, character_path, final_path)
 
 # RPC for the server to send the validated path back to the client.
 @rpc("authority")
