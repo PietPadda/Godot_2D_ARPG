@@ -360,3 +360,50 @@ func client_reject_player_move(character_path: NodePath) -> void:
 		if movement_component:
 			# We'll create this function in the next step.
 			movement_component._handle_rejected_move()
+
+# RPC for a client to request validation for a complete path.
+@rpc("any_peer", "call_local")
+func server_request_player_path(character_path: NodePath, path_points: PackedVector2Array) -> void:
+	var character = get_node_or_null(character_path)
+	if not is_instance_valid(character): 
+		return
+
+	var client_id = multiplayer.get_remote_sender_id()
+	
+	# For now, we'll keep the validation simple. The main goal is preventing
+	# players from stacking on the same destination tile.
+	var final_path = path_points
+	var destination_tile = world_to_map(final_path.back())
+	
+	# We check if the destination is occupied by someone OTHER than the character requesting the move.
+	if _occupied_cells.has(destination_tile) and _occupied_cells[destination_tile] != character:
+		# If the destination is occupied, for now we'll just deny the move by returning an empty path.
+		final_path.clear()
+	else:
+		# The destination is clear, so we "reserve" it by occupying it immediately.
+		# This prevents a race condition where two players request the same destination.
+		occupy_tile(character, destination_tile)
+
+	# Send the approved (or empty) path back to the requesting client.
+	client_receive_approved_path.rpc_id(client_id, character_path, final_path)
+
+
+# RPC for the server to send the validated path back to the client.
+@rpc("authority")
+func client_receive_approved_path(character_path: NodePath, approved_path: PackedVector2Array) -> void:
+	var character = get_node_or_null(character_path)
+	if is_instance_valid(character) and character.is_multiplayer_authority():
+		var movement_component = character.get_node_or_null("GridMovementComponent")
+		if movement_component:
+			# This will kick off the smooth tween on the client. We'll implement the details next.
+			movement_component.move_along_path(approved_path)
+
+
+# RPC for the client to inform the server of its new tile position mid-path.
+# This is "unreliable" - it's a fire-and-forget update.
+@rpc("any_peer", "call_local", "unreliable")
+func server_update_player_tile(character_path: NodePath, new_tile: Vector2i) -> void:
+	var character = get_node_or_null(character_path)
+	if is_instance_valid(character):
+		# This is the core of our authority. The server updates its grid based on client info.
+		occupy_tile(character, new_tile)
