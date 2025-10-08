@@ -109,14 +109,27 @@ func find_path(start_coord: Vector2i, end_coord: Vector2i, pathing_character: No
 	# Temporarily mark occupied cells as solid for this calculation.
 	var temporarily_solid_points: Array[Vector2i] = []
 	
-	# Mark OCCUPIED cells as temporary obstacles
-	for cell in _occupied_cells:
-		var character = _occupied_cells[cell]
-		# Make sure we don't mark the pathing character's own tile as an obstacle.
-		if character != pathing_character:
-			if not astar_grid.is_point_solid(cell) and cell != end_coord:
-				astar_grid.set_point_solid(cell, true)
-				temporarily_solid_points.append(cell)
+	# We now use different logic for the server vs. the client.
+	if multiplayer.is_server():
+		# SERVER LOGIC: The server is the authority and MUST use its internal
+		# state (_occupied_cells) for all pathfinding. This is the source of truth.
+		# Mark OCCUPIED cells as temporary obstacles
+		for cell in _occupied_cells:
+			var character = _occupied_cells[cell]
+			# Make sure we don't mark the pathing character's own tile as an obstacle.
+			if character != pathing_character:
+				if not astar_grid.is_point_solid(cell) and cell != end_coord:
+					astar_grid.set_point_solid(cell, true)
+					temporarily_solid_points.append(cell)
+	else:
+		# CLIENT LOGIC: The client should pathfind around what it SEES.
+		# It iterates through synchronized nodes for the most up-to-date visuals.
+		for character in get_tree().get_nodes_in_group("characters"):
+			if character != pathing_character:
+				var cell = world_to_map(character.global_position)
+				if not astar_grid.is_point_solid(cell) and cell != end_coord:
+					astar_grid.set_point_solid(cell, true)
+					temporarily_solid_points.append(cell)
 	
 	# AStarGrid2D returns an array of map coordinates directly.
 	var map_path: PackedVector2Array = astar_grid.get_point_path(start_coord, end_coord)
