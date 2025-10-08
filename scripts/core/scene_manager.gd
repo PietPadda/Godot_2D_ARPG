@@ -3,6 +3,9 @@
 class_name SceneManager
 extends Node
 
+# This will hold a reference to all currently instanced level nodes.
+var active_levels: Dictionary = {} # Format: { scene_path: level_node }
+
 # This will hold a reference to the currently instanced level node.
 var current_level: Node = null
 
@@ -38,8 +41,28 @@ func request_scene_transition(scene_path: String, player_id: int, player_data: D
 	# This is a guard clause. If a non-server peer somehow tries to run this, stop.
 	if not multiplayer.is_server():
 		return
+	
+	# If the requested scene isn't loaded yet, load it everywhere.
+	if not active_levels.has(scene_path):
+		# Load it for the server first.
+		var new_level_scene = load(scene_path)
+		if new_level_scene:
+			var level_instance = new_level_scene.instantiate()
+			active_levels[scene_path] = level_instance
+			var container = get_tree().get_first_node_in_group("level_container")
+			container.add_child(level_instance)
+			
+			# Now tell all clients to do the same.
+			client_load_level.rpc(scene_path)
+		else:
+			push_error("Server failed to load scene for transition: %s" % scene_path)
+			return
+
+	# --- WE WILL STOP HERE FOR NOW ---
+	# The logic to move the player will be in the next step.
+	
 		
-	# Server Log
+	'''# Server Log
 	print("[SERVER] Received request from player %s to transition to scene: %s" % [player_id, scene_path])
 	
 	# THE FIX: Shut down all network visibility in the current level BEFORE transitioning.
@@ -73,7 +96,7 @@ func request_scene_transition(scene_path: String, player_id: int, player_data: D
 	
 	# Change Scene: Use call_deferred to give the shutdown a frame to complete
 	# before broadcasting the command to load the new scene.
-	transition_to_scene.rpc.call_deferred(scene_path)
+	transition_to_scene.rpc.call_deferred(scene_path)'''
 	
 # This RPC is called BY the server ON all clients to execute the change.
 @rpc("any_peer", "call_local", "reliable")
@@ -97,4 +120,28 @@ func transition_to_scene(scene_path: String) -> void:
 		container.add_child(current_level)
 	else:
 		# This should never happen if the World scene is set up correctly.
+		push_error("SceneManager could not find a 'level_container' node!")
+
+# RPC called BY the server ON all clients to load a new level into the world.
+@rpc("any_peer", "call_local", "reliable")
+func client_load_level(scene_path: String) -> void:
+	# If this level is already loaded on this client, do nothing.
+	if active_levels.has(scene_path):
+		return
+
+	# Find and load the new level to transition to
+	var new_level_scene = load(scene_path)
+	if not new_level_scene:
+		push_error("Failed to load scene: %s" % scene_path)
+		return
+
+	# Create and register the new level
+	var level_instance = new_level_scene.instantiate()
+	active_levels[scene_path] = level_instance
+
+	# Find the world level container and add the newly instantiated level
+	var container = get_tree().get_first_node_in_group("level_container")
+	if container:
+		container.add_child(level_instance)
+	else:
 		push_error("SceneManager could not find a 'level_container' node!")
