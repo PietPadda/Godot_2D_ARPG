@@ -134,18 +134,21 @@ func _on_move_step_finished():
 	_previous_tile = _current_tile
 	# Our "current" tile is now the one we just arrived at.
 	_current_tile = Grid.world_to_map(owner.global_position)
-	
-	# --- THE FINAL STEP ---
-	# Inform the server of our new tile. This is a "fire-and-forget" call.
-	# It keeps the server's grid authoritative and up-to-date for enemy pathfinding.
-	if owner is Player:
-		Grid.server_update_player_tile.rpc_id(1, owner.get_path(), _current_tile)
 
 	emit_signal("waypoint_reached")
 	
+	# Check if there are more steps in our path.
 	if not _start_next_move_step():
-		# If there are no more steps, the path is finished.
+		# Path is finished. Emit the signal.
 		emit_signal("path_finished")
+		# And now, send our RELIABLE update for the final tile.
+		if owner is Player:
+			Grid.server_report_final_player_tile.rpc_id(1, owner.get_path(), _current_tile)
+	else:
+		# Path is NOT finished. We are moving to the next waypoint.
+		# Send the fast, UNRELIABLE update for this intermediate step.
+		if owner is Player:
+			Grid.server_update_player_tile.rpc_id(1, owner.get_path(), _current_tile)
 
 # THE FIX: This function should not contain game logic. A character must
 # always complete its move to a tile's center. We are removing this function

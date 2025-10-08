@@ -405,3 +405,12 @@ func server_update_player_tile(character_path: NodePath, new_tile: Vector2i) -> 
 	if is_instance_valid(character):
 		# This is the core of our authority. The server updates its grid based on client info.
 		occupy_tile(character, new_tile)
+		
+# This is our new, reliable function for the final tile update.
+# It ensures the server ALWAYS receives the character's final position.
+@rpc("any_peer", "call_local", "reliable")
+func server_report_final_player_tile(character_path: NodePath, final_tile: Vector2i) -> void:
+	var character = get_node_or_null(character_path)
+	if is_instance_valid(character):
+		# The logic is the same, but the delivery is guaranteed.
+		occupy_tile(character, final_tile)
