@@ -127,7 +127,7 @@ func _start_next_move_step() -> bool:
 	_active_tween.tween_callback(_on_move_step_finished) # Call this function when done.
 	return true # continue moving (bool allows func call)
 
-# This is our new "arrival" function. It's called when the tween is done.
+# This is our "arrival" function. It's called when the tween is done.
 func _on_move_step_finished():
 	# We only update our logical tiles AFTER the move is complete.
 	# Our "previous" tile is now the tile we were just on.
@@ -135,11 +135,11 @@ func _on_move_step_finished():
 	# Our "current" tile is now the one we just arrived at.
 	_current_tile = Grid.world_to_map(owner.global_position)
 	
-	# THE FIX: Remove this RPC call. The server's `occupy_tile` function
-	# already handles releasing the previous tile atomically. This call is
-	# redundant and dangerous.
-	# if owner.is_multiplayer_authority():
-	# 	Grid.server_release_tile.rpc_id(1, _previous_tile) # <-- DELETE THIS
+	# --- THE FINAL STEP ---
+	# Inform the server of our new tile. This is a "fire-and-forget" call.
+	# It keeps the server's grid authoritative and up-to-date for enemy pathfinding.
+	if owner is Player:
+		Grid.server_update_player_tile.rpc_id(1, owner.get_path(), _current_tile)
 
 	emit_signal("waypoint_reached")
 	
