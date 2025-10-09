@@ -41,7 +41,10 @@ func request_scene_transition(scene_path: String, player_id: int, player_data: D
 	# This is a guard clause. If a non-server peer somehow tries to run this, stop.
 	if not multiplayer.is_server():
 		return
+		
+	print("[SERVER] Transitioning player %s to scene: %s" % [player_id, scene_path])
 	
+	# Ensure the destination level is loaded
 	# If the requested scene isn't loaded yet, load it everywhere.
 	if not active_levels.has(scene_path):
 		# Load it for the server first.
@@ -57,35 +60,27 @@ func request_scene_transition(scene_path: String, player_id: int, player_data: D
 		else:
 			push_error("Server failed to load scene for transition: %s" % scene_path)
 			return
+	
+	# Store the incoming player data for the respawn.
+	GameManager.all_players_transition_data[player_id] = player_data
 
-	# Now, move the player.
-	# Get the player and the destination level nodes.
+	# Despawn the player from their old level.
 	var player_node = GameManager.get_player(player_id)
+	if is_instance_valid(player_node):
+		player_node.queue_free() # This is replicated to all clients automatically by the MultiplayerSpawner.
+	
+	# Update the player's official location in our new tracker.
+	GameManager.player_current_level_path[player_id] = scene_path
+	
+	# Spawn the player in the new level.
 	var destination_level = active_levels.get(scene_path)
+	if is_instance_valid(destination_level) and destination_level.has_method("_spawn_player"):
+		# We MUST wait one frame for queue_free to fully process across the network before respawning.
+		await get_tree().process_frame
+		destination_level._spawn_player(player_id)
+	else:
+		push_error("Destination level '%s' is not valid or has no _spawn_player method." % scene_path)
 
-	if not is_instance_valid(player_node) or not is_instance_valid(destination_level):
-		push_error("Server could not find player or destination level for transition.")
-		return
-	
-	# Find the spawn container within the destination level (usually a YSort node).
-	var new_parent = destination_level.find_child("WorldYSort", true, false)
-	if not is_instance_valid(new_parent):
-		push_error("Destination level '%s' has no 'WorldYSort' node to spawn player in." % scene_path)
-		return
-
-	# Get the target position from the player data sent with the request.
-	var target_position = player_data.get("target_spawn_position", new_parent.global_position)
-
-	# Reparent the player on the server first.
-	player_node.get_parent().remove_child(player_node)
-	new_parent.add_child(player_node)
-	player_node.global_position = target_position
-	
-	# Tell all clients to perform the exact same reparenting action.
-	client_reparent_node.rpc(player_node.get_path(), new_parent.get_path(), target_position)
-
-	
-		
 	'''# Server Log
 	print("[SERVER] Received request from player %s to transition to scene: %s" % [player_id, scene_path])
 	
@@ -170,21 +165,7 @@ func client_load_level(scene_path: String) -> void:
 	else:
 		push_error("SceneManager could not find a 'level_container' node!")
 
-# RPC called BY the server ON all clients to move a node to a new parent.
-@rpc("any_peer", "call_local", "reliable")
-func client_reparent_node(node_path: NodePath, new_parent_path: NodePath, new_global_position: Vector2) -> void:
-	var node_to_move = get_node_or_null(node_path)
-	var new_parent = get_node_or_null(new_parent_path)
-
-	if not node_to_move or not new_parent:
-		push_error("SceneManager: Failed to find nodes for reparenting. Node: %s, Parent: %s" % [node_path, new_parent_path])
-		return
-
-	# Reparent the node by removing it from its old parent and adding it to the new one.
-	node_to_move.get_parent().remove_child(node_to_move)
-	new_parent.add_child(node_to_move)
-	
-	# After reparenting, set its new global position.
-	# We must check if it's a Node2D (or derived) type before setting position.
-	if node_to_move is Node2D:
-		node_to_move.global_position = new_global_position
+# --- Also, DELETE the client_reparent_node RPC function entirely, as it is no longer used. ---
+# @rpc("any_peer", "call_local", "reliable")
+# func client_reparent_node(...) -> void:
+#	...
