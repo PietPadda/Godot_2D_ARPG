@@ -11,5 +11,11 @@ func _ready() -> void:
 	# The server is the only one who should decide this.
 	if multiplayer.is_server():
 		if not starting_level.is_empty():
-			# We use our existing SceneManager to handle the logic.
-			Scene.transition_to_scene.call_deferred(starting_level)
+			# We now use our new additive loading system to add the first level.
+			var new_level_scene = load(starting_level)
+			if new_level_scene:
+				var level_instance = new_level_scene.instantiate()
+				var container = get_tree().get_first_node_in_group("level_container")
+				container.add_child(level_instance)
+				# Add it to the SceneManager's tracking dictionary.
+				Scene.active_levels[starting_level] = level_instance

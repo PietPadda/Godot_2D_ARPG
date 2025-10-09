@@ -58,8 +58,32 @@ func request_scene_transition(scene_path: String, player_id: int, player_data: D
 			push_error("Server failed to load scene for transition: %s" % scene_path)
 			return
 
-	# --- WE WILL STOP HERE FOR NOW ---
-	# The logic to move the player will be in the next step.
+	# Now, move the player.
+	# Get the player and the destination level nodes.
+	var player_node = GameManager.get_player(player_id)
+	var destination_level = active_levels.get(scene_path)
+
+	if not is_instance_valid(player_node) or not is_instance_valid(destination_level):
+		push_error("Server could not find player or destination level for transition.")
+		return
+	
+	# Find the spawn container within the destination level (usually a YSort node).
+	var new_parent = destination_level.find_child("WorldYSort", true, false)
+	if not is_instance_valid(new_parent):
+		push_error("Destination level '%s' has no 'WorldYSort' node to spawn player in." % scene_path)
+		return
+
+	# Get the target position from the player data sent with the request.
+	var target_position = player_data.get("target_spawn_position", new_parent.global_position)
+
+	# Reparent the player on the server first.
+	player_node.get_parent().remove_child(player_node)
+	new_parent.add_child(player_node)
+	player_node.global_position = target_position
+	
+	# Tell all clients to perform the exact same reparenting action.
+	client_reparent_node.rpc(player_node.get_path(), new_parent.get_path(), target_position)
+
 	
 		
 	'''# Server Log
@@ -145,3 +169,22 @@ func client_load_level(scene_path: String) -> void:
 		container.add_child(level_instance)
 	else:
 		push_error("SceneManager could not find a 'level_container' node!")
+
+# RPC called BY the server ON all clients to move a node to a new parent.
+@rpc("any_peer", "call_local", "reliable")
+func client_reparent_node(node_path: NodePath, new_parent_path: NodePath, new_global_position: Vector2) -> void:
+	var node_to_move = get_node_or_null(node_path)
+	var new_parent = get_node_or_null(new_parent_path)
+
+	if not node_to_move or not new_parent:
+		push_error("SceneManager: Failed to find nodes for reparenting. Node: %s, Parent: %s" % [node_path, new_parent_path])
+		return
+
+	# Reparent the node by removing it from its old parent and adding it to the new one.
+	node_to_move.get_parent().remove_child(node_to_move)
+	new_parent.add_child(node_to_move)
+	
+	# After reparenting, set its new global position.
+	# We must check if it's a Node2D (or derived) type before setting position.
+	if node_to_move is Node2D:
+		node_to_move.global_position = new_global_position
