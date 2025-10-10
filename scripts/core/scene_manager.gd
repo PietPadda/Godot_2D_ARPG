@@ -3,8 +3,11 @@
 class_name SceneManager
 extends Node
 
-# This will hold a reference to the currently instanced level node.
-var current_level: Node = null
+# This will hold references to all currently instanced level nodes.
+var active_levels: Dictionary = {} # Format: { scene_path: level_node }
+
+# REMOVE the old variable:
+# var current_level: Node = null
 
 # ---Public API---
 # Changes the active scene to the one at the given path.
@@ -38,7 +41,18 @@ func request_scene_transition(scene_path: String, player_id: int, player_data: D
 	# This is a guard clause. If a non-server peer somehow tries to run this, stop.
 	if not multiplayer.is_server():
 		return
-		
+	
+	# If the requested scene isn't loaded yet, the server will load it and
+	# tell all clients to do the same.
+	if not active_levels.has(scene_path):
+		# Tell all clients (and run locally on the server) to load the new scene.
+		transition_to_scene.rpc(scene_path)
+		# We must wait a frame for the scene to be loaded and registered everywhere.
+		await get_tree().process_frame
+
+	# --- For now, we stop here. The logic to move the player will go here in the next step. ---
+	
+	'''
 	# Server Log
 	print("[SERVER] Received request from player %s to transition to scene: %s" % [player_id, scene_path])
 	
@@ -73,14 +87,14 @@ func request_scene_transition(scene_path: String, player_id: int, player_data: D
 	
 	# Change Scene: Use call_deferred to give the shutdown a frame to complete
 	# before broadcasting the command to load the new scene.
-	transition_to_scene.rpc.call_deferred(scene_path)
+	transition_to_scene.rpc.call_deferred(scene_path)'''
 	
 # This RPC is called BY the server ON all clients to execute the change.
 @rpc("any_peer", "call_local", "reliable")
 func transition_to_scene(scene_path: String) -> void:
-	# If there's an old level instance, free it.
-	if is_instance_valid(current_level):
-		current_level.queue_free()
+	# Additive Load: If the level is already loaded on this client, do nothing.
+	if active_levels.has(scene_path):
+		return
 
 	# Load the new level scene resource from the provided path.
 	var new_level_scene = load(scene_path)
@@ -89,12 +103,14 @@ func transition_to_scene(scene_path: String) -> void:
 		return
 
 	# Create an instance of the new level.
-	current_level = new_level_scene.instantiate()
+	var level_instance = new_level_scene.instantiate()
 
 	# Find our persistent container and add the new level there.
 	var container = get_tree().get_first_node_in_group("level_container")
 	if container:
-		container.add_child(current_level)
+		# The level's own _ready() function will handle registering
+		# itself with LevelManager, which updates Scene.active_levels
+		container.add_child(level_instance)
 	else:
 		# This should never happen if the World scene is set up correctly.
 		push_error("SceneManager could not find a 'level_container' node!")

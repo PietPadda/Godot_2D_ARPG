@@ -25,8 +25,8 @@ func _on_body_entered(body: Node2D) -> void:
 	_is_processing_impact = true # otherwise, we are handling an impact
 
 	# Instead of dealing damage, we report the hit to the server.
-	# Instead of a hardcoded path, we get the active level from the SceneManager.
-	var level = Scene.current_level
+	# Get the level by traversing up from our parent (the WorldYSort node).
+	var level = get_parent().get_owner()
 	if is_instance_valid(level) and level.has_method("server_process_projectile_hit"):
 		level.server_process_projectile_hit.rpc_id(1, get_path(), body.get_path())
 		
@@ -65,6 +65,6 @@ func initialize(skill_data_path: String, _owner_id: int, start_pos: Vector2, tar
 	# After all setup, if we are the server, we are responsible for telling
 	# the level to make this newly spawned node visible to everyone's synchronizer.
 	if multiplayer.is_server():
-		var level = LevelManager.get_current_level()
+		var level = get_parent().get_owner()
 		if is_instance_valid(level):
 			level.make_node_visible_to_all(get_path())

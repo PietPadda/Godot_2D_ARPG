@@ -144,6 +144,9 @@ func _on_item_drop_requested(item_data: ItemData) -> void:
 	inventory_component.remove_item(item_data)
 	
 	# Send the request to the server to perform the authoritative drop.
-	var level = LevelManager.get_current_level()
-	if is_instance_valid(level):
-		level.server_request_player_drop.rpc_id(1, item_data.resource_path, player_node.global_position)
+	# We get the level directly from the player node's scene tree parent.
+	var player_parent = player_node.get_parent()
+	if is_instance_valid(player_parent):
+		var level = player_parent.get_owner()
+		if is_instance_valid(level):
+			level.server_request_player_drop.rpc_id(1, item_data.resource_path, player_node.global_position)
