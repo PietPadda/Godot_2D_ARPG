@@ -183,6 +183,17 @@ func shutdown_network_sync_for_transition():
 			# This avoids the host sending an RPC to itself, fixing the race condition.
 			sync.set_visibility_for(1, false)
 
+# This is our new, targeted function to hide a single node from all peers.
+func hide_node_for_transition(node_path: NodePath):
+	if not multiplayer.is_server(): 
+		return
+
+	var all_peers = multiplayer.get_peers()
+	all_peers.append(1) # Include the server itself
+
+	for peer_id in all_peers:
+		_rpc_force_visibility_update.rpc(node_path, peer_id, false)
+
 # This is our new, reusable helper function for spawning a specific item.
 func _spawn_single_item(item_to_drop: ItemData, position: Vector2, apply_cooldown: bool):
 	if not is_instance_valid(item_to_drop) or item_to_drop.resource_path.is_empty():
