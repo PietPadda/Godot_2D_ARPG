@@ -32,6 +32,15 @@ func cast(skill_data: SkillData, target_position: Vector2) -> bool:
 	server_request_cast.rpc_id(1, target_position)
 	return true
 
+# This is a new helper function to robustly find the level this component is in.
+func get_parent_level() -> Node:
+	var current_node = self
+	while is_instance_valid(current_node):
+		if current_node.has_method("is_level"):
+			return current_node
+		current_node = current_node.get_parent()
+	return null
+
 # -- Signal Handlers --
 # This function will be called when the timer ends.
 func on_timer_timeout():
@@ -61,9 +70,10 @@ func server_request_cast(target_position: Vector2):
 		push_error("SkillData is missing a projectile scene!")
 		return # do not cast
 	
-	# Get the current level from our reliable LevelManager service.
-	var level = LevelManager.get_current_level()
+	# Get the current level by finding our parent BaseLevel.
+	var level = get_parent_level()
 	if not is_instance_valid(level):
+		push_error("SkillCasterComponent could not find parent level!")
 		return
 	
 	# THE FIX: Find the WorldYSort node. The ProjectileSpawner is watching it.

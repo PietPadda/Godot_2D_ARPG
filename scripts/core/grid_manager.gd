@@ -13,10 +13,11 @@ var floor_tilemap: TileMapLayer
 var wall_tilemap: TileMapLayer
 
 # The level will call this to provide its tilemaps and trigger the graph build.
-func register_level_tilemaps(new_floor_map: TileMapLayer, new_wall_map: TileMapLayer) -> void:
+# We now accept the level node itself for context.
+func register_level_tilemaps(new_floor_map: TileMapLayer, new_wall_map: TileMapLayer, level_node: Node) -> void:
 	floor_tilemap = new_floor_map
 	wall_tilemap = new_wall_map
-	build_level_graph()
+	build_level_graph(level_node) # Pass the level node along.
 
 # We can remove the old single tile_map_layer variable and its setter.
 # var tile_map_layer: TileMapLayer: # <-- DELETE THIS ENTIRE BLOCK
@@ -31,7 +32,8 @@ var _occupied_cells := {} # { tile_coordinate: character_instance }
 var _character_locations := {} # { character_instance: tile_coordinate }
 
 # Builds the A* pathfinding graph from the floor and wall tilemaps.
-func build_level_graph():
+# build_level_graph now accepts the level node for debug spawning.
+func build_level_graph(level_node: Node):
 	if not is_instance_valid(floor_tilemap) or not is_instance_valid(wall_tilemap):
 		push_error("GridManager: Tilemap references are not valid.")
 		return
@@ -86,11 +88,9 @@ func build_level_graph():
 				
 	# Update the debug visualization to use the floor_tilemap.
 	if debug_tile_scene:
-		# --- THE FIX ---
-		# Get the actual active level from our SceneManager.
-		var level = Scene.current_level
-		if not is_instance_valid(level):
-			push_error("GridManager: Cannot spawn debug tiles, Scene.current_level is invalid.")
+		# Guard clause
+		if not is_instance_valid(level_node):
+			push_error("GridManager: Cannot spawn debug tiles, provided level_node is invalid.")
 			return
 			
 		for x in range(map_rect.position.x, map_rect.end.x):
@@ -98,7 +98,7 @@ func build_level_graph():
 				var cell = Vector2i(x, y)
 				if not astar_grid.is_point_solid(cell):
 					var tile_instance = debug_tile_scene.instantiate()
-					level.add_child(tile_instance)
+					level_node.add_child(tile_instance) # Use the passed-in level_node
 					# Use the floor_tilemap for coordinate conversion.
 					var tile_size = floor_tilemap.tile_set.tile_size
 					tile_instance.global_position = map_to_world(cell) - (Vector2(tile_size) / 2)

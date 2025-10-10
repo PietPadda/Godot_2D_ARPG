@@ -31,8 +31,8 @@ func _ready() -> void:
 		get_tree().quit() 
 		return
 	
-	# When the level loads, tell the GridManager about our tilemaps.
-	Grid.register_level_tilemaps(floor_tilemap, wall_tilemap)
+	# When the level loads, tell the GridManager about our tilemaps and pass ourselves.
+	Grid.register_level_tilemaps(floor_tilemap, wall_tilemap, self)
 	
 	# Get all the spawn point children into an array when the level loads.
 	player_spawn_points = player_spawn_points_container.get_children()
@@ -215,6 +215,10 @@ func _on_loot_drop_requested(loot_table: LootTableData, position: Vector2) -> vo
 	var item_to_drop = loot_table.get_drop()
 	# Enemy drops do NOT apply the pickup cooldown.
 	_spawn_single_item(item_to_drop, position, false)
+
+# Add this function to the BaseLevel class
+func is_level() -> bool:
+	return true
 
 # We no longer need _on_item_drop_requested_by_player, it's replaced by the RPC.
 # And we can remove the EventBus connection in _ready().

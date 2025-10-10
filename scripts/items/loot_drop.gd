@@ -75,7 +75,8 @@ func _setup_loot() -> void:
 	# If we are the server, we are responsible for telling all clients
 	# that this node's synchronizer is now ready to be seen.
 	if multiplayer.is_server():
-		var level = LevelManager.get_current_level()
+		# Get the level this loot drop was spawned into.
+		var level = get_parent().get_owner()
 		if is_instance_valid(level):
 			level.make_node_visible_to_all(get_path())
 
