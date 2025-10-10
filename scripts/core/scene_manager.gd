@@ -46,7 +46,8 @@ func request_scene_transition(scene_path: String, player_id: int, player_data: D
 	if not active_levels.has(scene_path):
 		# Tell all clients (and run locally on the server) to load the new scene.
 		transition_to_scene.rpc(scene_path)
-		# We must wait a frame for the scene to be loaded and registered everywhere.
+		# We still need to wait for the scene to physically load before we can act on it.
+		# This is the only 'await' needed, to wait for the local scene tree.
 		await get_tree().process_frame
 
 	# Store Data & Despawn Player ---
@@ -58,17 +59,20 @@ func request_scene_transition(scene_path: String, player_id: int, player_data: D
 	
 	# Get the player's OLD level path from our authoritative tracker.
 	var old_level_path = GameManager.player_locations.get(player_id)
-	if old_level_path:
+	if old_level_path and active_levels.has(old_level_path):
 		var old_level = active_levels.get(old_level_path)
 		var player_node = old_level.get_node_or_null("WorldYSort/" + str(player_id))
+		
 		if is_instance_valid(player_node):
+			# SHUTDOWN SYNC for the specific player.
+			old_level.hide_node_for_transition(player_node.get_path())
+			# Wait one frame to ensure visibility RPCs are sent before despawning.
+			await get_tree().process_frame
+			
 			# This is replicated to all clients automatically by the MultiplayerSpawner.
 			player_node.queue_free()
-	# We MUST wait for the despawn to propagate before we respawn.
-	await get_tree().create_timer(0.1).timeout # A short, reliable network buffer.
-	
-	# Update Location & Respawn Player
-	# Update the player's official location in our tracker.
+			
+	# Authoritatively update the player's location.
 	GameManager.player_locations[player_id] = scene_path
 	GameManager.client_update_player_locations.rpc(GameManager.player_locations)
 
@@ -78,7 +82,11 @@ func request_scene_transition(scene_path: String, player_id: int, player_data: D
 		destination_level._spawn_player(player_id)
 	else:
 		push_error("Destination level '%s' is not valid or has no _spawn_player method." % scene_path)
-	
+
+	# The newly spawned player's _ready() function will automatically
+	# call server_peer_ready, which triggers our existing multi-scene aware
+	# _perform_global_handshake to re-enable visibility. The handshake is now complete.
+		
 # This RPC is called BY the server ON all clients to execute the change.
 @rpc("any_peer", "call_local", "reliable")
 func transition_to_scene(scene_path: String) -> void:
