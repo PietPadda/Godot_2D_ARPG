@@ -249,6 +249,12 @@ func server_peer_ready(id: int):
 	if not multiplayer.is_server(): 
 		return
 	
+	# The server authoritatively updates the location for the player (id)
+	# who is now ready in THIS level (self).
+	GameManager.player_locations[id] = self.scene_file_path
+	# Broadcast the newly updated dictionary to all clients.
+	GameManager.client_update_player_locations.rpc(GameManager.player_locations)
+	
 	# Spawn the player as soon as they report ready.
 	_spawn_player(id)
 		

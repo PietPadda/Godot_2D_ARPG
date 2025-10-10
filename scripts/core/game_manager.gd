@@ -27,7 +27,22 @@ var target_spawn_position: Vector2 = Vector2.INF
 # This will be our central, authoritative list of all players in the game.
 var active_players: Dictionary = {} # Format: { player_id: player_node }
 
+# An authoritative dictionary tracking the scene path for each active player.
+# The server is the single source of truth for this data.
+# Format: { player_id: "res://path/to/level.tscn" }
+var player_locations: Dictionary = {}
+
 func _ready() -> void:
+	# Add this connection at the top of the function.
+	multiplayer.peer_disconnected.connect(func(id):
+		# This logic will only run on the server.
+		if multiplayer.is_server():
+			if player_locations.has(id):
+				player_locations.erase(id)
+				# Sync the change with all remaining clients.
+				client_update_player_locations.rpc(player_locations)
+	)
+	
 	# Listen for when the player we control has spawned into a scene.
 	EventBus.local_player_spawned.connect(_on_local_player_spawned)
 	#Listen for when a player disconnects from the server.
@@ -237,3 +252,11 @@ func _on_player_disconnected(player_id: int) -> void:
 	if is_instance_valid(player_node):
 		# Now, unregister them from the central list.
 		unregister_player(player_node)
+
+# --- RPCs ---
+# This RPC is called BY the server ON all clients to distribute the location data.
+@rpc("any_peer", "call_local", "reliable")
+func client_update_player_locations(new_locations: Dictionary) -> void:
+	# This function simply overwrites the local dictionary with the
+	# server's authoritative version.
+	player_locations = new_locations
