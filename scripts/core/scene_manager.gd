@@ -42,52 +42,42 @@ func request_scene_transition(scene_path: String, player_id: int, player_data: D
 	if not multiplayer.is_server():
 		return
 	
-	# If the requested scene isn't loaded yet, the server will load it and
-	# tell all clients to do the same.
+	# Ensure Destination is Loaded
 	if not active_levels.has(scene_path):
 		# Tell all clients (and run locally on the server) to load the new scene.
 		transition_to_scene.rpc(scene_path)
 		# We must wait a frame for the scene to be loaded and registered everywhere.
 		await get_tree().process_frame
 
-	# --- For now, we stop here. The logic to move the player will go here in the next step. ---
-	
-	'''
-	# Server Log
-	print("[SERVER] Received request from player %s to transition to scene: %s" % [player_id, scene_path])
-	
-	# THE FIX: Shut down all network visibility in the current level BEFORE transitioning.
-	if is_instance_valid(current_level) and current_level.has_method("shutdown_network_sync_for_transition"):
-		current_level.shutdown_network_sync_for_transition()
-	
+	# Store Data & Despawn Player ---
 	# Clear any old data from a previous transition.
 	GameManager.all_players_transition_data.clear()
 	
 	# Store the CORRECT data that the client just sent us.
 	GameManager.all_players_transition_data[player_id] = player_data
 	
-	# For all OTHER players, REQUEST their data.
-	for p_id in GameManager.active_players:
-		# Skip the player who already sent their data.
-		if p_id == player_id:
-			continue
-		
-		var other_player_node = GameManager.get_player(p_id)
-		if is_instance_valid(other_player_node):
-			# Send an RPC asking this player to send their data back.
-			other_player_node.client_gather_and_send_data.rpc_id(p_id)
+	# Get the player's OLD level path from our authoritative tracker.
+	var old_level_path = GameManager.player_locations.get(player_id)
+	if old_level_path:
+		var old_level = active_levels.get(old_level_path)
+		var player_node = old_level.get_node_or_null("WorldYSort/" + str(player_id))
+		if is_instance_valid(player_node):
+			# This is replicated to all clients automatically by the MultiplayerSpawner.
+			player_node.queue_free()
+	# We MUST wait for the despawn to propagate before we respawn.
+	await get_tree().create_timer(0.1).timeout # A short, reliable network buffer.
 	
-	# THE FIX: Halt the transition until all player data is received.
-	var wait_time = 3.0 # Wait a maximum of 3 seconds as a failsafe.
-	while GameManager.all_players_transition_data.size() < GameManager.active_players.size() and wait_time > 0:
-		await get_tree().create_timer(0.1).timeout
-		wait_time -= 0.1
-	
-	print("[SERVER] All data gathered. Initiating transition for all players...")
-	
-	# Change Scene: Use call_deferred to give the shutdown a frame to complete
-	# before broadcasting the command to load the new scene.
-	transition_to_scene.rpc.call_deferred(scene_path)'''
+	# Update Location & Respawn Player
+	# Update the player's official location in our tracker.
+	GameManager.player_locations[player_id] = scene_path
+	GameManager.client_update_player_locations.rpc(GameManager.player_locations)
+
+	# Spawn the player in the new level.
+	var destination_level = active_levels.get(scene_path)
+	if is_instance_valid(destination_level) and destination_level.has_method("_spawn_player"):
+		destination_level._spawn_player(player_id)
+	else:
+		push_error("Destination level '%s' is not valid or has no _spawn_player method." % scene_path)
 	
 # This RPC is called BY the server ON all clients to execute the change.
 @rpc("any_peer", "call_local", "reliable")
