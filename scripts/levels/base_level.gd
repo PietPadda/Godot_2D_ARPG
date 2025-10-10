@@ -47,8 +47,14 @@ func _ready() -> void:
 	# --- Network Readiness ---
 	# Both host and client will report to the server when they are ready.
 	if multiplayer.is_server():
-		server_peer_ready(1) # The host is always ready for itself.
+		# THE FIX: The host only declares itself ready if its authoritative
+		# location matches this specific level. This prevents it from spawning
+		# in levels that were loaded for other players.
+		var my_location = GameManager.player_locations.get(1, "")
+		if my_location == self.scene_file_path:
+			server_peer_ready(1)
 	else:
+		# Clients always report ready for the scene they just loaded.
 		server_peer_ready.rpc_id(1, multiplayer.get_unique_id()) # Clients send an RPC.
 		
 	# The server listens for loot drop requests from dying enemies and now from players.

@@ -76,12 +76,9 @@ func request_scene_transition(scene_path: String, player_id: int, player_data: D
 	GameManager.player_locations[player_id] = scene_path
 	GameManager.client_update_player_locations.rpc(GameManager.player_locations)
 
-	# Spawn the player in the new level.
-	var destination_level = active_levels.get(scene_path)
-	if is_instance_valid(destination_level) and destination_level.has_method("_spawn_player"):
-		destination_level._spawn_player(player_id)
-	else:
-		push_error("Destination level '%s' is not valid or has no _spawn_player method." % scene_path)
+	# NOTE: We no longer call _spawn_player here. The newly spawned player's client
+	# will load the level, and its _ready() function will call server_peer_ready,
+	# which will then correctly spawn the player via the handshake.
 
 	# The newly spawned player's _ready() function will automatically
 	# call server_peer_ready, which triggers our existing multi-scene aware
