@@ -27,10 +27,6 @@ var target_spawn_position: Vector2 = Vector2.INF
 # This will be our central, authoritative list of all players in the game.
 var active_players: Dictionary = {} # Format: { player_id: player_node }
 
-# A dictionary to track the scene path for each active player.
-# Format: { player_id: "res://path/to/level.tscn" }
-var player_current_level_path: Dictionary = {}
-
 func _ready() -> void:
 	# Listen for when the player we control has spawned into a scene.
 	EventBus.local_player_spawned.connect(_on_local_player_spawned)
