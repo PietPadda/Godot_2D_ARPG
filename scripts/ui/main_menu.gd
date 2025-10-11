@@ -15,9 +15,12 @@ func _ready():
 func _on_host_button_pressed():
 	NetworkManager.host_game()
 	
-	# Instead of destructively changing the scene, we ask our SceneManager to handle it.
-	# This keeps our persistent World node alive.
-	Scene.transition_to_scene("res://scenes/levels/town.tscn")
+	# THE FIX: Authoritatively set the host's location BEFORE loading the level.
+	var start_scene_path = "res://scenes/levels/town.tscn"
+	GameManager.player_locations[1] = start_scene_path
+	
+	# Now, transition to that scene.
+	Scene.transition_to_scene(start_scene_path)
 	
 	# The main menu's job is done, so we can safely remove it.
 	self.queue_free()
