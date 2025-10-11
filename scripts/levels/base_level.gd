@@ -283,11 +283,25 @@ func server_peer_ready(id: int):
 	if not id in _peers_ready_in_level:
 		_peers_ready_in_level.append(id)
 	
-	print("[SERVER] Peers ready in this level: ", _peers_ready_in_level)
+	# REPLACE the old handshake check with this new logic
+	# Build a list of players expected to be in THIS level.
+	var expected_peers_in_level = []
+	for peer_id in GameManager.player_locations:
+		if GameManager.player_locations[peer_id] == self.scene_file_path:
+			expected_peers_in_level.append(peer_id)
 	
-	# Check if everyone has arrived.
-	if _peers_ready_in_level.size() == multiplayer.get_peers().size() + 1: # +1 for the server
-		print("[SERVER] All peers have loaded the level. Performing global handshake.")
+	# Check if our list of ready peers contains all expected peers.
+	var all_expected_are_ready = true
+	for peer_id in expected_peers_in_level:
+		if not peer_id in _peers_ready_in_level:
+			all_expected_are_ready = false
+			break
+			
+	# If everyone expected has arrived, perform the handshake for this level.
+	if all_expected_are_ready and !expected_peers_in_level.is_empty():
+		print("[SERVER] All peers for '%s' have loaded. Performing handshake." % scene_file_path)
+		# We clear the list for this level to prevent the handshake from running again.
+		_peers_ready_in_level.clear() 
 		# Use call_deferred to ensure the last player has a frame to fully spawn.
 		call_deferred("_perform_global_handshake")
 	
