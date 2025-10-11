@@ -41,9 +41,11 @@ func request_scene_transition(scene_path: String, player_id: int, player_data: D
 	# This is a guard clause. If a non-server peer somehow tries to run this, stop.
 	if not multiplayer.is_server():
 		return
-	
+	print("[SERVER] SceneManager: Received transition request from player %s for scene '%s'." % [player_id, scene_path])
+
 	# Ensure Destination is Loaded
 	if not active_levels.has(scene_path):
+		print("[SERVER] SceneManager: Scene not loaded. Broadcasting 'transition_to_scene' RPC to all peers.")
 		# Tell all clients (and run locally on the server) to load the new scene.
 		transition_to_scene.rpc(scene_path)
 		# We still need to wait for the scene to physically load before we can act on it.
@@ -87,6 +89,9 @@ func request_scene_transition(scene_path: String, player_id: int, player_data: D
 # This RPC is called BY the server ON all clients to execute the change.
 @rpc("any_peer", "call_local", "reliable")
 func transition_to_scene(scene_path: String) -> void:
+	var my_id = multiplayer.get_unique_id()
+	print("[%s] SceneManager: ==> EXECUTING transition_to_scene for '%s'." % [my_id, scene_path])
+	
 	# Additive Load: If the level is already loaded on this client, do nothing.
 	if active_levels.has(scene_path):
 		return

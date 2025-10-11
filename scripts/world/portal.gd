@@ -24,10 +24,9 @@ func _on_body_entered(body: Node2D) -> void:
 		
 # This new function contains our original RPC call.
 func _request_transition(player: Node) -> void:
-	print("Player entered portal. Requesting transition to: ", target_scene_path)
-	
 	# This client will now gather its own data and send it with the request.
 	var my_id = multiplayer.get_unique_id()
+	print("[%s] Portal: Requesting transition to '%s'." % [my_id, target_scene_path])
 	
 	# Ask GameManager to package up the data for us.
 	var data_dictionary = GameManager.get_player_data_as_dictionary(player)

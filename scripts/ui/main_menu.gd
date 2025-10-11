@@ -13,6 +13,7 @@ func _ready():
 # --- Signal Handlers ---
 # When the "Host" button is pressed, create a server and transition to the main level.
 func _on_host_button_pressed():
+	print("[HOST BOOTSTRAP] MainMenu: Host button pressed. Initiating first transition.")
 	NetworkManager.host_game()
 	
 	# THE FIX: Authoritatively set the host's location BEFORE loading the level.
