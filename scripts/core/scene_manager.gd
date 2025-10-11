@@ -43,11 +43,23 @@ func request_scene_transition(scene_path: String, player_id: int, player_data: D
 		return
 	print("[SERVER] SceneManager: Received transition request from player %s for scene '%s'." % [player_id, scene_path])
 
+	# --- THE FIX: Correctly resolve the scene path ---
+	var full_scene_path = scene_path
+	if scene_path.begins_with("uid://"):
+		# If we got a UID, load the resource and get its true path.
+		# This is the correct and robust way to resolve a UID.
+		var scene_resource = load(scene_path)
+		if scene_resource:
+			full_scene_path = scene_resource.resource_path
+		else:
+			push_error("SceneManager: Failed to load scene from UID: %s" % scene_path)
+			return # Stop if the path is invalid.
+
 	# Ensure Destination is Loaded
-	if not active_levels.has(scene_path):
+	if not active_levels.has(full_scene_path):
 		print("[SERVER] SceneManager: Scene not loaded. Broadcasting 'transition_to_scene' RPC to all peers.")
 		# Tell all clients (and run locally on the server) to load the new scene.
-		transition_to_scene.rpc(scene_path)
+		transition_to_scene.rpc(full_scene_path)
 		# We still need to wait for the scene to physically load before we can act on it.
 		# This is the only 'await' needed, to wait for the local scene tree.
 		await get_tree().process_frame
@@ -78,7 +90,7 @@ func request_scene_transition(scene_path: String, player_id: int, player_data: D
 			player_node.queue_free() # Now, safely schedule it for deletion.
 			
 	# Authoritatively update the player's location.
-	GameManager.player_locations[player_id] = scene_path
+	GameManager.player_locations[player_id] = full_scene_path
 	GameManager.client_update_player_locations.rpc(GameManager.player_locations)
 
 	# NOTE: We no longer call _spawn_player here. The newly spawned player's client
