@@ -68,11 +68,14 @@ func request_scene_transition(scene_path: String, player_id: int, player_data: D
 		if is_instance_valid(player_node):
 			# SHUTDOWN SYNC for the specific player.
 			old_level.hide_node_for_transition(player_node.get_path())
-			# Wait one frame to ensure visibility RPCs are sent before despawning.
-			await get_tree().process_frame
 			
-			# This is replicated to all clients automatically by the MultiplayerSpawner.
-			player_node.queue_free()
+			# --- THE FIX: We now immediately remove the child before freeing it. ---
+			# This is a more synchronous removal that prevents the node from processing another physics frame.
+			var parent = player_node.get_parent()
+			if is_instance_valid(parent):
+				parent.remove_child(player_node) # Immediately detach it from the scene tree.
+
+			player_node.queue_free() # Now, safely schedule it for deletion.
 			
 	# Authoritatively update the player's location.
 	GameManager.player_locations[player_id] = scene_path

@@ -20,8 +20,10 @@ func _on_host_button_pressed():
 	var start_scene_path = "res://scenes/levels/town.tscn"
 	GameManager.player_locations[1] = start_scene_path
 	
-	# Now, transition to that scene.
-	Scene.transition_to_scene(start_scene_path)
+	print("[HOST BOOTSTRAP] MainMenu: Calling Scene.transition_to_scene for initial load.")
+	# THE FIX: We are now calling the server's own RPC to load the first scene.
+	# This ensures the host's game follows the exact same logic as a client joining.
+	Scene.transition_to_scene.rpc(start_scene_path)
 	
 	# The main menu's job is done, so we can safely remove it.
 	self.queue_free()
